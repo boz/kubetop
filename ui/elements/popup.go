@@ -1,11 +1,11 @@
-package ui
+package elements
 
 import (
 	"github.com/gdamore/tcell"
 	"github.com/gdamore/tcell/views"
 )
 
-type popup struct {
+type Popup struct {
 	view views.View
 
 	content views.Widget
@@ -22,8 +22,8 @@ type popup struct {
 	views.WidgetWatchers
 }
 
-func newPopup(width int, height int, style tcell.Style) *popup {
-	return &popup{
+func NewPopup(width int, height int, style tcell.Style) *Popup {
+	return &Popup{
 		width:  width,
 		height: height,
 		style:  style,
@@ -31,7 +31,29 @@ func newPopup(width int, height int, style tcell.Style) *popup {
 	}
 }
 
-func (p *popup) Draw() {
+func (p *Popup) SetView(view views.View) {
+	p.view = view
+	p.cview.SetView(p.view)
+	p.Resize()
+}
+
+func (p *Popup) SetContent(w views.Widget) {
+	p.content = w
+	w.SetView(p.cview)
+}
+
+func (p *Popup) HandleEvent(ev tcell.Event) bool {
+	if p.content != nil {
+		return p.content.HandleEvent(ev)
+	}
+	return false
+}
+
+func (p *Popup) Size() (int, int) {
+	return p.width, p.height
+}
+
+func (p *Popup) Draw() {
 
 	// top
 	for x, y := 0, 0; x < p.width; x++ {
@@ -58,7 +80,7 @@ func (p *popup) Draw() {
 	}
 }
 
-func (p *popup) Resize() {
+func (p *Popup) Resize() {
 	if p.view == nil {
 		return
 	}
@@ -80,23 +102,4 @@ func (p *popup) Resize() {
 	if p.content != nil {
 		p.content.Resize()
 	}
-}
-
-func (p *popup) HandleEvent(ev tcell.Event) bool {
-	return false
-}
-
-func (p *popup) SetView(view views.View) {
-	p.view = view
-	p.cview.SetView(p.view)
-	p.Resize()
-}
-
-func (p *popup) Size() (int, int) {
-	return p.width, p.height
-}
-
-func (p *popup) SetContent(w views.Widget) {
-	p.content = w
-	w.SetView(p.cview)
 }

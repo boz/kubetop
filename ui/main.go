@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"github.com/boz/kubetop/ui/elements"
 	"github.com/gdamore/tcell"
 	"github.com/gdamore/tcell/views"
 )
@@ -18,8 +19,7 @@ type mainWidget struct {
 	stopch chan<- bool
 	panel  *views.Panel
 
-	view  views.View
-	popup *popup
+	popupper *elements.Popupper
 }
 
 func newMainTitle() views.Widget {
@@ -39,26 +39,31 @@ func newMainWidget(stopch chan<- bool) *mainWidget {
 	panel := views.NewPanel()
 	panel.SetTitle(newMainTitle())
 	return &mainWidget{
-		stopch: stopch,
-		panel:  panel,
+		stopch:   stopch,
+		panel:    panel,
+		popupper: elements.NewPopupper(),
 	}
 }
 
 func (w *mainWidget) Draw() {
 	w.panel.Draw()
-	if w.popup != nil {
-		w.popup.Draw()
-	}
+	w.popupper.Draw()
 }
 
 func (w *mainWidget) Resize() {
 	w.panel.Resize()
-	if w.popup != nil {
-		w.popup.Resize()
-	}
+	w.popupper.Resize()
 }
 
 func (w *mainWidget) HandleEvent(ev tcell.Event) bool {
+	if w.popupper.HandleEvent(ev) {
+		return true
+	}
+
+	if w.panel.HandleEvent(ev) {
+		return true
+	}
+
 	switch ev := ev.(type) {
 	case *tcell.EventKey:
 		switch ev.Key() {
@@ -68,28 +73,18 @@ func (w *mainWidget) HandleEvent(ev tcell.Event) bool {
 				w.stopch <- true
 				return true
 			case 'P', 'p':
-				w.popup = newPopup(10, 10, tcell.StyleDefault)
-				if w.view != nil {
-					w.popup.SetView(w.view)
-				}
-				return true
-			}
-		case tcell.KeyEsc:
-			if w.popup != nil {
-				w.popup = nil
+				w.popupper.Push(elements.NewPopup(10, 10, tcell.StyleDefault))
 				return true
 			}
 		}
 	}
-	return w.panel.HandleEvent(ev)
+
+	return false
 }
 
 func (w *mainWidget) SetView(view views.View) {
-	w.view = view
 	w.panel.SetView(view)
-	if w.popup != nil {
-		w.popup.SetView(view)
-	}
+	w.popupper.SetView(view)
 }
 func (w *mainWidget) Size() (int, int) {
 	return w.panel.Size()
