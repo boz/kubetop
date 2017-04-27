@@ -1,10 +1,13 @@
 package main
 
 import (
-	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
+
+	"github.com/boz/kubetop/ui"
 
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/pkg/api/v1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 )
@@ -23,22 +26,42 @@ func getConfig() (*rest.Config, error) {
 	return config, err
 }
 
-func main() {
-
+func getClient() (*kubernetes.Clientset, *rest.Config, error) {
 	config, err := getConfig()
 	if err != nil {
-		panic(err)
+		return nil, nil, err
 	}
-
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		panic(err)
+		return nil, nil, err
 	}
+	return clientset, config, nil
+}
 
-	pods, err := clientset.CoreV1().Pods("").List(v1.ListOptions{})
+func main() {
+
+	_, _, err := getClient()
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Printf("%v pods\n", len(pods.Items))
+	app := ui.NewApp()
+
+	donech := make(chan bool)
+	go watchSignals(app, donech)
+
+	if err := app.Run(); err != nil {
+		panic(err)
+	}
+}
+
+func watchSignals(app *ui.App, donech chan bool) {
+	sigch := make(chan os.Signal, 1)
+	signal.Notify(sigch, syscall.SIGINT, syscall.SIGQUIT)
+	select {
+	case <-donech:
+	case <-sigch:
+		app.Stop()
+		<-donech
+	}
 }
