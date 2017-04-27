@@ -40,10 +40,12 @@ func getClient() (*kubernetes.Clientset, *rest.Config, error) {
 
 func main() {
 
-	_, _, err := getClient()
-	if err != nil {
-		panic(err)
-	}
+	/*
+		_, _, err := getClient()
+		if err != nil {
+			panic(err)
+		}
+	*/
 
 	app := ui.NewApp()
 
