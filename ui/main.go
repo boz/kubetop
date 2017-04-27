@@ -1,6 +1,9 @@
 package ui
 
 import (
+	"strconv"
+	"strings"
+
 	"github.com/boz/kubetop/ui/elements"
 	"github.com/gdamore/tcell"
 	"github.com/gdamore/tcell/views"
@@ -56,6 +59,7 @@ func (w *mainWidget) Resize() {
 }
 
 func (w *mainWidget) HandleEvent(ev tcell.Event) bool {
+
 	if w.popupper.HandleEvent(ev) {
 		return true
 	}
@@ -73,13 +77,30 @@ func (w *mainWidget) HandleEvent(ev tcell.Event) bool {
 				w.stopch <- true
 				return true
 			case 'P', 'p':
-				w.popupper.Push(elements.NewPopup(10, 10, tcell.StyleDefault))
+				popup := elements.NewPopup(10, 10, tcell.StyleDefault)
+				popup.SetContent(textArea())
+				w.popupper.Push(popup)
 				return true
 			}
 		}
 	}
 
 	return false
+}
+
+func textArea() views.Widget {
+	text := ""
+
+	for i := 0; i < 9; i++ {
+		text = text + strconv.Itoa(i) + " " + strings.Repeat("123456789", 2) + "\n"
+	}
+
+	text = text + text
+
+	w := views.NewTextArea()
+	w.SetContent(text)
+	w.EnableCursor(true)
+	return w
 }
 
 func (w *mainWidget) SetView(view views.View) {
