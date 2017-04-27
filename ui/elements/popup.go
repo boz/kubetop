@@ -27,7 +27,7 @@ func NewPopup(width int, height int, style tcell.Style) *Popup {
 		width:  width,
 		height: height,
 		style:  style,
-		cview:  views.NewViewPort(nil, 1, 1, width-2, height-2),
+		cview:  views.NewViewPort(nil, 0, 0, 0, 0),
 	}
 }
 
@@ -97,7 +97,7 @@ func (p *Popup) Resize() {
 		p.yoff = ydelta / 2
 	}
 
-	p.cview.Resize(p.xoff, p.yoff, p.width, p.height)
+	p.cview.Resize(p.xoff+1, p.yoff+1, p.width-2, p.height-2)
 
 	if p.content != nil {
 		p.content.Resize()
