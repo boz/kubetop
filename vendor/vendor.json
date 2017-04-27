@@ -143,6 +143,24 @@
 			"revision": ""
 		},
 		{
+			"checksumSHA1": "WuPOA1T+6qG/al2wgOzeJnAMkhE=",
+			"path": "github.com/gdamore/encoding",
+			"revision": "b23993cbb6353f0e6aa98d0ee318a34728f628b9",
+			"revisionTime": "2015-12-15T21:28:35Z"
+		},
+		{
+			"checksumSHA1": "/YSim9+8m3Zulor162s5zW8/+xY=",
+			"path": "github.com/gdamore/tcell",
+			"revision": "44772c121bb7838819d3ba4a7e84c0c2d617328e",
+			"revisionTime": "2016-12-05T23:37:37Z"
+		},
+		{
+			"checksumSHA1": "p6NyUv4NfXmMOnUQLJEzGT9HfDo=",
+			"path": "github.com/gdamore/tcell/views",
+			"revision": "44772c121bb7838819d3ba4a7e84c0c2d617328e",
+			"revisionTime": "2016-12-05T23:37:37Z"
+		},
+		{
 			"checksumSHA1": "ImX1uv6O09ggFeBPUJJ2nu7MPSA=",
 			"path": "github.com/ghodss/yaml",
 			"revision": "0ca9ea5df5451ffdf184b4428c902747c2c11cd7",
@@ -245,6 +263,12 @@
 			"revisionTime": "2017-03-14T01:17:55Z"
 		},
 		{
+			"checksumSHA1": "qQ/69O0QaXw/YCajx/sj+rgFzWw=",
+			"path": "github.com/lucasb-eyer/go-colorful",
+			"revision": "c900de9dbbc73129068f5af6a823068fc5f2308c",
+			"revisionTime": "2017-02-23T22:10:28Z"
+		},
+		{
 			"checksumSHA1": "T8soMJArSZrYnhmdpAnq1bVxQ6Q=",
 			"path": "github.com/mailru/easyjson/buffer",
 			"revision": "3f09c2282fc5ad74b3d04a485311f3173c2431d3",
@@ -261,6 +285,12 @@
 			"path": "github.com/mailru/easyjson/jwriter",
 			"revision": "3f09c2282fc5ad74b3d04a485311f3173c2431d3",
 			"revisionTime": "2017-04-26T07:38:02Z"
+		},
+		{
+			"checksumSHA1": "MNkKJyk2TazKMJYbal5wFHybpyA=",
+			"path": "github.com/mattn/go-runewidth",
+			"revision": "14207d285c6c197daabb5c9793d63e7af9ab2d50",
+			"revisionTime": "2017-02-01T02:35:40Z"
 		},
 		{
 			"checksumSHA1": "qj7IAU2RRq99oaIEGH0eLfX/UcM=",
@@ -385,6 +415,18 @@
 		{
 			"checksumSHA1": "DoQpPb6ZhqN2gP7rNXfxHaTUgEs=",
 			"path": "golang.org/x/text/cases",
+			"revision": "a9a820217f98f7c8a207ec1e45a874e1fe12c478",
+			"revisionTime": "2017-04-20T13:36:16Z"
+		},
+		{
+			"checksumSHA1": "Mr4ur60bgQJnQFfJY0dGtwWwMPE=",
+			"path": "golang.org/x/text/encoding",
+			"revision": "a9a820217f98f7c8a207ec1e45a874e1fe12c478",
+			"revisionTime": "2017-04-20T13:36:16Z"
+		},
+		{
+			"checksumSHA1": "9cg4nSGfKTIWKb6bWV7U4lnuFKA=",
+			"path": "golang.org/x/text/encoding/internal/identifier",
 			"revision": "a9a820217f98f7c8a207ec1e45a874e1fe12c478",
 			"revisionTime": "2017-04-20T13:36:16Z"
 		},
