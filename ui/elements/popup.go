@@ -13,6 +13,8 @@ type Popup struct {
 
 	style tcell.Style
 
+	closer PopupCloser
+
 	xoff int
 	yoff int
 
@@ -24,6 +26,7 @@ type Popup struct {
 
 func NewPopup(width int, height int, style tcell.Style) *Popup {
 	return &Popup{
+		closer: KeyEscPopupCloser(),
 		width:  width,
 		height: height,
 		style:  style,
@@ -42,7 +45,25 @@ func (p *Popup) SetContent(w views.Widget) {
 	w.SetView(p.cview)
 }
 
+func (p *Popup) SetCloser(closer PopupCloser) {
+	p.closer = closer
+}
+
 func (p *Popup) HandleEvent(ev tcell.Event) bool {
+
+	switch ev := ev.(type) {
+	case *EventPopupClose:
+		if ev.Widget() == nil {
+			p.Close()
+			return true
+		}
+	}
+
+	if p.closer != nil && p.closer.HandleEvent(ev) {
+		p.Close()
+		return true
+	}
+
 	if p.content != nil {
 		return p.content.HandleEvent(ev)
 	}
@@ -102,4 +123,40 @@ func (p *Popup) Resize() {
 	if p.content != nil {
 		p.content.Resize()
 	}
+}
+
+func (p *Popup) Close() {
+	ev := &EventPopupClose{}
+	ev.SetWidget(p)
+	ev.SetEventNow()
+	p.PostEvent(ev)
+}
+
+type EventPopupClose views.EventWidgetMove
+
+type PopupCloser tcell.EventHandler
+
+func NewPopupCloser(handler func(tcell.Event) bool) PopupCloser {
+	return popupCloser{handler}
+}
+
+func KeyEscPopupCloser() PopupCloser {
+	return NewPopupCloser(func(ev tcell.Event) bool {
+		switch ev := ev.(type) {
+		case *tcell.EventKey:
+			switch ev.Key() {
+			case tcell.KeyEsc:
+				return true
+			}
+		}
+		return false
+	})
+}
+
+type popupCloser struct {
+	handler func(ev tcell.Event) bool
+}
+
+func (pc popupCloser) HandleEvent(ev tcell.Event) bool {
+	return pc.handler(ev)
 }

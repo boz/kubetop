@@ -18,14 +18,22 @@ func NewPopupper() *Popupper {
 // todo: stack
 
 func (p *Popupper) Push(w views.Widget) {
+	if w == nil {
+		return
+	}
+	p.Pop()
+	w.Watch(p)
+	w.SetView(p.view)
 	p.current = w
-	p.current.SetView(p.view)
 }
 
 func (p *Popupper) Pop() views.Widget {
-	current := p.current
-	p.current = nil
-	return current
+	prev := p.current
+	if prev != nil {
+		prev.Unwatch(p)
+		p.current = nil
+	}
+	return prev
 }
 
 func (p *Popupper) Draw() {
@@ -52,17 +60,19 @@ func (p *Popupper) SetView(view views.View) {
 }
 
 func (p *Popupper) HandleEvent(ev tcell.Event) bool {
-	if p.current != nil && p.current.HandleEvent(ev) {
-		return true
+
+	if p.current == nil {
+		return false
 	}
 
 	switch ev := ev.(type) {
-	case *tcell.EventKey:
-		switch ev.Key() {
-		case tcell.KeyEsc:
+	case *EventPopupClose:
+		if ev.Widget() == p.current {
 			p.Pop()
 			return true
 		}
 	}
-	return false
+
+	return p.current.HandleEvent(ev)
+
 }
