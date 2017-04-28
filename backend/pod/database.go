@@ -64,3 +64,17 @@ func (db *_database) Filter(filters Filters) Datasource {
 func (db *_database) Stop() {
 	db.db.Stop()
 }
+
+type datasource struct {
+	db database.Database
+}
+
+type pod struct {
+	obj *v1.Pod
+}
+
+func (p *pod) ObjectMeta() types.ObjectMeta {
+}
+
+func (ds *datasource) List() ([]Pod, error) {
+}
