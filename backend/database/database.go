@@ -1,6 +1,7 @@
 package database
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/boz/kubetop/util"
@@ -10,7 +11,12 @@ import (
 )
 
 const (
-	DefaultResyncPeriod = time.Second
+	DefaultResyncPeriod     = time.Second
+	syncPerformedPollPeriod = time.Second / 10
+)
+
+var (
+	ErrNotFound = fmt.Errorf("Not found")
 )
 
 func BaseIndexers() cache.Indexers {
@@ -20,8 +26,11 @@ func BaseIndexers() cache.Indexers {
 }
 
 type Database interface {
+	Indexer() cache.Indexer
 	Subscribe() Subscription
 	Stop()
+
+	Ready() <-chan struct{}
 }
 
 type Event interface {
@@ -46,14 +55,29 @@ type database struct {
 
 	subscribers map[*subscription]struct{}
 
+	// incoming events
 	events chan Event
 
-	subch   chan chan<- Subscription
+	// create new subscription
+	subch chan chan<- Subscription
+
+	// unsubscribe
 	unsubch chan *subscription
 
-	stopch  chan struct{}
+	// closed when controller has synced
+	readych chan struct{}
+
+	// initiate stop
+	stopch chan struct{}
+
+	// closed when stopping
+	stoppingch chan struct{}
+
+	// closed when controller done
 	cdonech chan struct{}
-	donech  chan struct{}
+
+	// closed when completely shutdown
+	donech chan struct{}
 
 	env util.Env
 }
@@ -70,25 +94,15 @@ func NewDatabase(
 
 	db := &database{
 		subscribers: make(map[*subscription]struct{}),
-
-		events: make(chan Event),
-
-		// create new subscription
-		subch: make(chan chan<- Subscription),
-
-		// unsubscribe
-		unsubch: make(chan *subscription),
-
-		// start shutdown
-		stopch: make(chan struct{}),
-
-		// controller done
-		cdonech: make(chan struct{}),
-
-		// completely shut down
-		donech: make(chan struct{}),
-
-		env: env,
+		events:      make(chan Event),
+		subch:       make(chan chan<- Subscription),
+		unsubch:     make(chan *subscription),
+		readych:     make(chan struct{}),
+		stopch:      make(chan struct{}),
+		stoppingch:  make(chan struct{}),
+		cdonech:     make(chan struct{}),
+		donech:      make(chan struct{}),
+		env:         env,
 	}
 
 	handlers := cache.ResourceEventHandlerFuncs{
@@ -99,12 +113,35 @@ func NewDatabase(
 
 	db.indexer, db.controller = cache.NewIndexerInformer(lw, obj, period, handlers, indexers)
 
-	go func() {
-		db.controller.Run(db.stopch)
-		db.cdonech <- struct{}{}
-	}()
+	go db.run()
+	go db.pollReady()
+	go db.runController()
 
 	return db, nil
+}
+
+// close readych when controller has synced.
+func (db *database) pollReady() {
+	for {
+		if db.controller.HasSynced() {
+			close(db.readych)
+			return
+		}
+		select {
+		case <-db.stoppingch:
+			// shut down before ready
+			return
+		case <-time.After(syncPerformedPollPeriod):
+			// retry
+		}
+	}
+}
+
+// run controler. write to cdonech on controller exit
+// XXX: controller.Run() never returns
+func (db *database) runController() {
+	db.controller.Run(db.stoppingch)
+	db.cdonech <- struct{}{}
 }
 
 func (db *database) run() {
@@ -116,14 +153,24 @@ func (db *database) run() {
 	for {
 		select {
 		case <-stopch:
+			// begin shutdown
+
+			close(db.stoppingch)
+
 			stopch = nil
 			subch = nil
+
 			db.subscribers = make(map[*subscription]struct{})
+
+			// XXX: return here as cdonech is never closed.
+			return
+
 		case <-db.cdonech:
+			// controller is done; exit
+
 			return
 
 		case ch := <-subch:
-
 			// make new subscription and send it back
 
 			if sub := db.subscribe(ch); sub != nil {
@@ -131,6 +178,8 @@ func (db *database) run() {
 			}
 
 		case ev := <-db.events:
+			// forward incoming events
+
 			for s, _ := range db.subscribers {
 				s.postEvent(ev)
 			}
@@ -140,21 +189,21 @@ func (db *database) run() {
 
 func (db *database) onResourceAdd(obj interface{}) {
 	select {
-	case <-db.donech:
+	case <-db.stoppingch:
 	case db.events <- EventCreate{event{obj}}:
 	}
 }
 
 func (db *database) onResourceUpdate(prev, cur interface{}) {
 	select {
-	case <-db.donech:
+	case <-db.stoppingch:
 	case db.events <- EventUpdate{event{cur}}:
 	}
 }
 
 func (db *database) onResourceDelete(obj interface{}) {
 	select {
-	case <-db.donech:
+	case <-db.stoppingch:
 	case db.events <- EventDelete{event{obj}}:
 	}
 }
@@ -162,7 +211,8 @@ func (db *database) onResourceDelete(obj interface{}) {
 func (db *database) subscribe(ch chan<- Subscription) *subscription {
 	s := newSubscriptionForDB(db.env, db)
 	select {
-	case <-db.donech:
+	case <-db.stoppingch:
+		close(ch)
 		return nil
 	case ch <- s:
 		return s
@@ -171,7 +221,7 @@ func (db *database) subscribe(ch chan<- Subscription) *subscription {
 
 func (db *database) unsubscribe(s *subscription) {
 	select {
-	case <-db.donech:
+	case <-db.stoppingch:
 	case db.unsubch <- s:
 	}
 }
@@ -181,7 +231,7 @@ func (db *database) Subscribe() Subscription {
 	subch := db.subch
 	for {
 		select {
-		case <-db.donech:
+		case <-db.stoppingch:
 			return stoppedSubscription(db)
 		case subch <- ch:
 			subch = nil
@@ -194,6 +244,10 @@ func (db *database) Subscribe() Subscription {
 	}
 }
 
+func (db *database) Ready() <-chan struct{} {
+	return db.readych
+}
+
 func (db *database) Stop() {
 	for {
 		select {
@@ -202,4 +256,8 @@ func (db *database) Stop() {
 		case db.stopch <- struct{}{}:
 		}
 	}
+}
+
+func (db *database) Indexer() cache.Indexer {
+	return db.indexer
 }

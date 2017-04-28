@@ -31,6 +31,9 @@ func NewBackend(env util.Env, clientset kubernetes.Interface) Backend {
 
 func (b *backend) Stop() {
 	var wg sync.WaitGroup
+
+	b.env.Log().Debug("stopping...")
+
 	b.doStop(&wg, b.pods)
 
 	wg.Wait()
