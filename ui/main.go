@@ -82,6 +82,8 @@ func (w *mainWidget) HandleEvent(ev tcell.Event) bool {
 				w.stopch <- true
 				return true
 			case 'P', 'p':
+				w.panel.SetContent(newPodIndexWidget(w.wbase))
+			case 'X', 'x':
 				popup := elements.NewPopup(w.env, 10, 10, tcell.StyleDefault)
 				popup.SetContent(w.textArea())
 				w.popupper.Push(popup)
