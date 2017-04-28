@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"github.com/boz/kubetop/backend"
 	"github.com/gdamore/tcell/views"
 )
 
@@ -9,11 +10,13 @@ type App struct {
 
 	main *mainWidget
 
+	backend backend.Backend
+
 	stopch chan bool
 	donech chan bool
 }
 
-func NewApp() *App {
+func NewApp(backend backend.Backend) *App {
 	stopch := make(chan bool, 1)
 
 	tapp := &views.Application{}
