@@ -3,6 +3,8 @@ package database
 import (
 	"time"
 
+	"github.com/boz/kubetop/util"
+
 	"k8s.io/client-go/pkg/runtime"
 	"k8s.io/client-go/tools/cache"
 )
@@ -52,14 +54,19 @@ type database struct {
 	stopch  chan struct{}
 	cdonech chan struct{}
 	donech  chan struct{}
+
+	env util.Env
 }
 
 func NewDatabase(
+	env util.Env,
 	lw cache.ListerWatcher,
 	obj runtime.Object,
 	period time.Duration,
 	indexers cache.Indexers,
 ) (Database, error) {
+
+	env = env.ForComponent("backend/database/database")
 
 	db := &database{
 		subscribers: make(map[*subscription]struct{}),
@@ -80,6 +87,8 @@ func NewDatabase(
 
 		// completely shut down
 		donech: make(chan struct{}),
+
+		env: env,
 	}
 
 	handlers := cache.ResourceEventHandlerFuncs{
@@ -151,7 +160,7 @@ func (db *database) onResourceDelete(obj interface{}) {
 }
 
 func (db *database) subscribe(ch chan<- Subscription) *subscription {
-	s := newSubscriptionForDB(db)
+	s := newSubscriptionForDB(db.env, db)
 	select {
 	case <-db.donech:
 		return nil

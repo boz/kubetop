@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/boz/kubetop/ui/elements"
+	"github.com/boz/kubetop/util"
 	"github.com/gdamore/tcell"
 	"github.com/gdamore/tcell/views"
 )
@@ -23,6 +24,8 @@ type mainWidget struct {
 	panel  *views.Panel
 
 	popupper *elements.Popupper
+
+	env util.Env
 }
 
 func newMainTitle() views.Widget {
@@ -38,13 +41,16 @@ func newMainTitle() views.Widget {
 	return title
 }
 
-func newMainWidget(stopch chan<- bool) *mainWidget {
+func newMainWidget(env util.Env, stopch chan<- bool) *mainWidget {
+	env = env.ForComponent("ui/main")
+
 	panel := views.NewPanel()
 	panel.SetTitle(newMainTitle())
 	return &mainWidget{
 		stopch:   stopch,
 		panel:    panel,
-		popupper: elements.NewPopupper(),
+		popupper: elements.NewPopupper(env),
+		env:      env,
 	}
 }
 
@@ -77,7 +83,7 @@ func (w *mainWidget) HandleEvent(ev tcell.Event) bool {
 				w.stopch <- true
 				return true
 			case 'P', 'p':
-				popup := elements.NewPopup(10, 10, tcell.StyleDefault)
+				popup := elements.NewPopup(w.env, 10, 10, tcell.StyleDefault)
 				popup.SetContent(textArea())
 				w.popupper.Push(popup)
 				return true
