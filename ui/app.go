@@ -11,12 +11,10 @@ type App struct {
 
 	main *mainWidget
 
-	backend backend.Backend
-
 	stopch chan bool
 	donech chan bool
 
-	env util.Env
+	wbase
 }
 
 func NewApp(env util.Env, backend backend.Backend) *App {
@@ -26,7 +24,9 @@ func NewApp(env util.Env, backend backend.Backend) *App {
 
 	tapp := &views.Application{}
 
-	main := newMainWidget(env, stopch)
+	base := wbase{backend, env}
+
+	main := newMainWidget(base, stopch)
 
 	tapp.SetRootWidget(main)
 
@@ -35,7 +35,7 @@ func NewApp(env util.Env, backend backend.Backend) *App {
 		main:   main,
 		stopch: stopch,
 		donech: make(chan bool),
-		env:    env,
+		wbase:  base,
 	}
 }
 

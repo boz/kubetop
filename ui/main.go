@@ -1,11 +1,10 @@
 package ui
 
 import (
-	"strconv"
-	"strings"
+	"fmt"
 
+	"github.com/boz/kubetop/backend/pod"
 	"github.com/boz/kubetop/ui/elements"
-	"github.com/boz/kubetop/util"
 	"github.com/gdamore/tcell"
 	"github.com/gdamore/tcell/views"
 )
@@ -25,7 +24,7 @@ type mainWidget struct {
 
 	popupper *elements.Popupper
 
-	env util.Env
+	wbase
 }
 
 func newMainTitle() views.Widget {
@@ -41,8 +40,8 @@ func newMainTitle() views.Widget {
 	return title
 }
 
-func newMainWidget(env util.Env, stopch chan<- bool) *mainWidget {
-	env = env.ForComponent("ui/main")
+func newMainWidget(base wbase, stopch chan<- bool) *mainWidget {
+	env := base.env.ForComponent("ui/main")
 
 	panel := views.NewPanel()
 	panel.SetTitle(newMainTitle())
@@ -50,7 +49,7 @@ func newMainWidget(env util.Env, stopch chan<- bool) *mainWidget {
 		stopch:   stopch,
 		panel:    panel,
 		popupper: elements.NewPopupper(env),
-		env:      env,
+		wbase:    wbase{base.backend, env},
 	}
 }
 
@@ -84,7 +83,7 @@ func (w *mainWidget) HandleEvent(ev tcell.Event) bool {
 				return true
 			case 'P', 'p':
 				popup := elements.NewPopup(w.env, 10, 10, tcell.StyleDefault)
-				popup.SetContent(textArea())
+				popup.SetContent(w.textArea())
 				w.popupper.Push(popup)
 				return true
 			}
@@ -94,25 +93,51 @@ func (w *mainWidget) HandleEvent(ev tcell.Event) bool {
 	return false
 }
 
-func textArea() views.Widget {
-	text := ""
+func (w *mainWidget) textArea() views.Widget {
+	var pods []pod.Pod
+	var err error
+	var text string
 
-	for i := 0; i < 9; i++ {
-		text = text + strconv.Itoa(i) + " " + strings.Repeat("123456789", 2) + "\n"
+	src, err := w.backend.Pods(nil)
+	if err != nil {
+		w.env.LogErr(err, "getting datasource")
+		text += fmt.Sprint("ERROR", err)
+		goto done
 	}
 
-	text = text + text
+	pods, err = src.List()
+	if err != nil {
+		w.env.LogErr(err, "getting list")
+		text += fmt.Sprint("ERROR", err)
+		goto done
+	}
 
-	w := views.NewTextArea()
-	w.SetContent(text)
-	w.EnableCursor(true)
-	return w
+	for _, pod := range pods {
+		text += pod.Resource().ObjectMeta.GetName() + "\n"
+	}
+
+	/*
+		for i := 0; i < 9; i++ {
+			text = text + strconv.Itoa(i) + " " + strings.Repeat("123456789", 2) + "\n"
+		}
+
+		text = text + text
+	*/
+
+done:
+
+	txt := views.NewTextArea()
+	txt.SetContent(text)
+	txt.EnableCursor(true)
+	return txt
+
 }
 
 func (w *mainWidget) SetView(view views.View) {
 	w.panel.SetView(view)
 	w.popupper.SetView(view)
 }
+
 func (w *mainWidget) Size() (int, int) {
 	return w.panel.Size()
 }

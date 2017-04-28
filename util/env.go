@@ -1,6 +1,7 @@
 package util
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"sync/atomic"
@@ -23,9 +24,12 @@ type Env interface {
 	WithID() Env
 
 	LogErr(err error, fmt string, args ...interface{})
+
+	FDebugf(fmt string, args ...interface{})
+	Flush()
 }
 
-func NewEnv(f *os.File, level string) (Env, error) {
+func NewEnv(out *os.File, level string) (Env, error) {
 
 	lvl, err := logrus.ParseLevel(level)
 	if err != nil {
@@ -34,13 +38,14 @@ func NewEnv(f *os.File, level string) (Env, error) {
 
 	log := logrus.New()
 	log.Level = lvl
-	log.Out = f
+	log.Out = out
 
-	return &env{log}, nil
+	return &env{log, out}, nil
 }
 
 type env struct {
 	log logrus.FieldLogger
+	out *os.File
 }
 
 func (e *env) Log() logrus.FieldLogger {
@@ -56,7 +61,7 @@ func (e *env) WithFields(kvs ...string) Env {
 	for i := 1; i < len(kvs); i += 2 {
 		log = log.WithField(kvs[i-1], kvs[i])
 	}
-	return &env{log}
+	return &env{log, e.out}
 }
 
 func (e *env) WithID() Env {
@@ -66,4 +71,13 @@ func (e *env) WithID() Env {
 
 func (e *env) LogErr(err error, fmt string, args ...interface{}) {
 	e.log.WithError(err).Errorf(fmt, args...)
+}
+
+func (e *env) FDebugf(fmt string, args ...interface{}) {
+	e.Log().Debugf(fmt, args...)
+	e.Flush()
+}
+
+func (e *env) Flush() {
+	bufio.NewWriter(e.out).Flush()
 }
