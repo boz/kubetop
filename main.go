@@ -5,32 +5,53 @@ import (
 	"os/signal"
 	"syscall"
 
+	kingpin "gopkg.in/alecthomas/kingpin.v2"
+
 	"github.com/boz/kubetop/backend"
 	"github.com/boz/kubetop/backend/client"
 	"github.com/boz/kubetop/ui"
+	"github.com/boz/kubetop/util"
+)
+
+var (
+	logFile = kingpin.Flag("--log-file", "log file output").
+		Short('l').
+		Default("kubetop.log").
+		OpenFile(os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
+
+	logLevel = kingpin.Flag("--log-level", "log level").
+			Short('v').
+			Default("debug").
+			Enum("debug", "info", "warn", "error")
 )
 
 func main() {
-	client, err := client.NewClient()
-	if err != nil {
-		panic(err)
-	}
+	kingpin.Parse()
 
-	backend := backend.NewBackend(client.Clientset())
+	env, err := util.NewEnv(*logFile, *logLevel)
+	kingpin.FatalIfError(err, "opening logs")
 
-	app := ui.NewApp(backend)
+	env = env.ForComponent("main")
+
+	client, err := client.NewClient(env)
+	kingpin.FatalIfError(err, "creating client")
+
+	backend := backend.NewBackend(env, client.Clientset())
+
+	app := ui.NewApp(env, backend)
 
 	donech := make(chan bool)
-	go watchSignals(app, donech)
+	go watchSignals(env, app, donech)
 
 	if err := app.Run(); err != nil {
-		panic(err)
+		env.Log().WithError(err).
+			Fatal("error running app")
 	}
 
 	backend.Stop()
 }
 
-func watchSignals(app *ui.App, donech chan bool) {
+func watchSignals(env util.Env, app *ui.App, donech chan bool) {
 	sigch := make(chan os.Signal, 1)
 	signal.Notify(sigch, syscall.SIGINT, syscall.SIGQUIT)
 

@@ -1,6 +1,7 @@
 package elements
 
 import (
+	"github.com/boz/kubetop/util"
 	"github.com/gdamore/tcell"
 	"github.com/gdamore/tcell/views"
 )
@@ -9,10 +10,13 @@ type Popupper struct {
 	view    views.View
 	current views.Widget
 	views.WidgetWatchers
+
+	env util.Env
 }
 
-func NewPopupper() *Popupper {
-	return &Popupper{}
+func NewPopupper(env util.Env) *Popupper {
+	env = env.ForComponent("ui/elements/popupper")
+	return &Popupper{env: env}
 }
 
 // todo: stack

@@ -2,6 +2,7 @@ package pod
 
 import (
 	"github.com/boz/kubetop/backend/database"
+	"github.com/boz/kubetop/util"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/pkg/api"
 	"k8s.io/client-go/pkg/api/v1"
@@ -40,21 +41,26 @@ type Filter interface {
 
 type Filters []Filter
 
-func NewDatabase(clientset kubernetes.Interface) (Database, error) {
+func NewDatabase(env util.Env, clientset kubernetes.Interface) (Database, error) {
+	env = env.ForComponent("backend/pod/database")
+	env = env.WithFields("model", "pod")
+
 	lw := cache.NewListWatchFromClient(
 		clientset.CoreV1().RESTClient(), "pods", api.NamespaceAll, fields.Everything())
 
 	db, err := database.NewDatabase(
-		lw, &v1.Pod{}, database.DefaultResyncPeriod, database.BaseIndexers())
+		env, lw, &v1.Pod{}, database.DefaultResyncPeriod, database.BaseIndexers())
 
 	if err != nil {
 		return nil, err
 	}
-	return &_database{db}, nil
+	return &_database{db, env}, nil
 }
 
 type _database struct {
 	db database.Database
+
+	env util.Env
 }
 
 func (db *_database) Filter(filters Filters) Datasource {
@@ -63,18 +69,4 @@ func (db *_database) Filter(filters Filters) Datasource {
 
 func (db *_database) Stop() {
 	db.db.Stop()
-}
-
-type datasource struct {
-	db database.Database
-}
-
-type pod struct {
-	obj *v1.Pod
-}
-
-func (p *pod) ObjectMeta() types.ObjectMeta {
-}
-
-func (ds *datasource) List() ([]Pod, error) {
 }

@@ -1,6 +1,9 @@
 package database
 
-import "k8s.io/client-go/tools/cache"
+import (
+	"github.com/boz/kubetop/util"
+	"k8s.io/client-go/tools/cache"
+)
 
 type Subscription interface {
 	Indexer() cache.Indexer
@@ -21,15 +24,18 @@ type subscription struct {
 
 	stopch chan struct{}
 	donech chan struct{}
+
+	env util.Env
 }
 
-func newSubscriptionForDB(db *database) *subscription {
+func newSubscriptionForDB(env util.Env, db *database) *subscription {
 	s := &subscription{
 		db:     db,
 		inch:   make(chan Event),
 		outch:  make(chan Event),
 		stopch: make(chan struct{}),
 		donech: make(chan struct{}),
+		env:    env.WithID(),
 	}
 	go s.run()
 	return s

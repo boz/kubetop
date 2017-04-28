@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/boz/kubetop/backend/pod"
+	"github.com/boz/kubetop/util"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -17,11 +18,14 @@ type backend struct {
 	clientset kubernetes.Interface
 
 	pods pod.Database
+
+	env util.Env
 }
 
-func NewBackend(clientset kubernetes.Interface) Backend {
+func NewBackend(env util.Env, clientset kubernetes.Interface) Backend {
 	return &backend{
 		clientset: clientset,
+		env:       env.ForComponent("backend/backend"),
 	}
 }
 
@@ -34,7 +38,7 @@ func (b *backend) Stop() {
 
 func (b *backend) Pods(filters pod.Filters) (pod.Datasource, error) {
 	if b.pods == nil {
-		pods, err := pod.NewDatabase(b.clientset)
+		pods, err := pod.NewDatabase(b.env, b.clientset)
 		if err != nil {
 			return nil, err
 		}

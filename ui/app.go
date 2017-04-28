@@ -2,6 +2,7 @@ package ui
 
 import (
 	"github.com/boz/kubetop/backend"
+	"github.com/boz/kubetop/util"
 	"github.com/gdamore/tcell/views"
 )
 
@@ -14,14 +15,18 @@ type App struct {
 
 	stopch chan bool
 	donech chan bool
+
+	env util.Env
 }
 
-func NewApp(backend backend.Backend) *App {
+func NewApp(env util.Env, backend backend.Backend) *App {
+	env = env.ForComponent("ui/app")
+
 	stopch := make(chan bool, 1)
 
 	tapp := &views.Application{}
 
-	main := newMainWidget(stopch)
+	main := newMainWidget(env, stopch)
 
 	tapp.SetRootWidget(main)
 
@@ -30,6 +35,7 @@ func NewApp(backend backend.Backend) *App {
 		main:   main,
 		stopch: stopch,
 		donech: make(chan bool),
+		env:    env,
 	}
 }
 
