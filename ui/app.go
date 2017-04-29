@@ -2,6 +2,7 @@ package ui
 
 import (
 	"github.com/boz/kubetop/backend"
+	"github.com/boz/kubetop/ui/elements"
 	"github.com/boz/kubetop/util"
 	"github.com/gdamore/tcell/views"
 )
@@ -9,24 +10,22 @@ import (
 type App struct {
 	tapp *views.Application
 
-	main *mainWidget
+	main views.Widget
 
 	stopch chan bool
 	donech chan bool
 
-	wbase
+	presenter elements.Presenter
 }
 
 func NewApp(env util.Env, backend backend.Backend) *App {
 	env = env.ForComponent("ui/app")
 
 	stopch := make(chan bool, 1)
-
 	tapp := &views.Application{}
 
-	base := wbase{backend, env}
-
-	main := newMainWidget(base, stopch)
+	presenter := elements.NewPresenter(env, backend, tapp, views.NewSpacer())
+	main := newMainWidget(presenter, stopch)
 
 	tapp.SetRootWidget(main)
 
@@ -35,7 +34,6 @@ func NewApp(env util.Env, backend backend.Backend) *App {
 		main:   main,
 		stopch: stopch,
 		donech: make(chan bool),
-		wbase:  base,
 	}
 }
 

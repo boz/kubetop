@@ -22,9 +22,11 @@ type mainWidget struct {
 	stopch chan<- bool
 	panel  *views.Panel
 
+	content views.Widget
+
 	popupper *elements.Popupper
 
-	wbase
+	elements.Presentable
 }
 
 func newMainTitle() views.Widget {
@@ -40,17 +42,18 @@ func newMainTitle() views.Widget {
 	return title
 }
 
-func newMainWidget(base wbase, stopch chan<- bool) *mainWidget {
-	env := base.env.ForComponent("ui/main")
+func newMainWidget(p elements.Presenter, stopch chan<- bool) views.Widget {
 
 	panel := views.NewPanel()
 	panel.SetTitle(newMainTitle())
-	return &mainWidget{
+
+	widget := &mainWidget{
 		stopch:   stopch,
 		panel:    panel,
-		popupper: elements.NewPopupper(env),
-		wbase:    wbase{base.backend, env},
+		popupper: elements.NewPopupper(p),
 	}
+
+	return p.New("ui/main", widget)
 }
 
 func (w *mainWidget) Draw() {
@@ -82,9 +85,9 @@ func (w *mainWidget) HandleEvent(ev tcell.Event) bool {
 				w.stopch <- true
 				return true
 			case 'P', 'p':
-				w.panel.SetContent(newPodIndexWidget(w.wbase))
+				w.setContent(newPodIndexWidget(w.Presenter()))
 			case 'X', 'x':
-				popup := elements.NewPopup(w.env, 10, 10, tcell.StyleDefault)
+				popup := elements.NewPopup(w.Presenter(), 10, 10, tcell.StyleDefault)
 				popup.SetContent(w.textArea())
 				w.popupper.Push(popup)
 				return true
@@ -95,21 +98,30 @@ func (w *mainWidget) HandleEvent(ev tcell.Event) bool {
 	return false
 }
 
+func (w *mainWidget) setContent(child views.Widget) {
+	if cur := w.content; cur != nil {
+		elements.ClosePresenter(cur)
+	}
+	w.content = child
+	w.panel.SetContent(child)
+}
+
 func (w *mainWidget) textArea() views.Widget {
 	var pods []pod.Pod
 	var err error
 	var text string
 
-	src, err := w.backend.Pods(nil)
+	src, err := w.Presenter().Backend().Pods(nil)
+
 	if err != nil {
-		w.env.LogErr(err, "getting datasource")
+		w.Env().LogErr(err, "getting datasource")
 		text += fmt.Sprint("ERROR", err)
 		goto done
 	}
 
 	pods, err = src.List()
 	if err != nil {
-		w.env.LogErr(err, "getting list")
+		w.Env().LogErr(err, "getting list")
 		text += fmt.Sprint("ERROR", err)
 		goto done
 	}
@@ -122,7 +134,6 @@ func (w *mainWidget) textArea() views.Widget {
 		for i := 0; i < 9; i++ {
 			text = text + strconv.Itoa(i) + " " + strings.Repeat("123456789", 2) + "\n"
 		}
-
 		text = text + text
 	*/
 
@@ -132,7 +143,6 @@ done:
 	txt.SetContent(text)
 	txt.EnableCursor(true)
 	return txt
-
 }
 
 func (w *mainWidget) SetView(view views.View) {

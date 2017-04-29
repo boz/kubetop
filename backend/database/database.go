@@ -33,22 +33,6 @@ type Database interface {
 	Ready() <-chan struct{}
 }
 
-type Event interface {
-	Resource() interface{}
-}
-
-type EventUpdate struct{ event }
-type EventCreate struct{ event }
-type EventDelete struct{ event }
-
-type event struct {
-	resource interface{}
-}
-
-func (e event) Resource() interface{} {
-	return e.resource
-}
-
 type database struct {
 	controller *cache.Controller
 	indexer    cache.Indexer
@@ -177,9 +161,11 @@ func (db *database) run() {
 				db.subscribers[sub] = struct{}{}
 			}
 
+		case sub := <-db.unsubch:
+			delete(db.subscribers, sub)
+
 		case ev := <-db.events:
 			// forward incoming events
-
 			for s, _ := range db.subscribers {
 				s.postEvent(ev)
 			}
@@ -190,21 +176,21 @@ func (db *database) run() {
 func (db *database) onResourceAdd(obj interface{}) {
 	select {
 	case <-db.stoppingch:
-	case db.events <- EventCreate{event{obj}}:
+	case db.events <- NewEventCreate(obj):
 	}
 }
 
 func (db *database) onResourceUpdate(prev, cur interface{}) {
 	select {
 	case <-db.stoppingch:
-	case db.events <- EventUpdate{event{cur}}:
+	case db.events <- NewEventUpdate(cur):
 	}
 }
 
 func (db *database) onResourceDelete(obj interface{}) {
 	select {
 	case <-db.stoppingch:
-	case db.events <- EventDelete{event{obj}}:
+	case db.events <- NewEventDelete(obj):
 	}
 }
 
