@@ -30,6 +30,7 @@ type subscription struct {
 }
 
 func newSubscriptionForDB(env util.Env, db *database) *subscription {
+	env = env.ForComponent("backend/database/subscription")
 	s := &subscription{
 		db:         db,
 		inch:       make(chan Event),
@@ -45,6 +46,7 @@ func newSubscriptionForDB(env util.Env, db *database) *subscription {
 
 func (s *subscription) run() {
 	defer close(s.donech)
+	defer close(s.outch)
 
 	for {
 		var outch chan Event

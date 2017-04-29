@@ -1,8 +1,6 @@
 package pod
 
 import (
-	"fmt"
-
 	"github.com/boz/kubetop/backend/database"
 	"github.com/boz/kubetop/util"
 	"k8s.io/client-go/kubernetes"
@@ -12,22 +10,9 @@ import (
 	"k8s.io/client-go/tools/cache"
 )
 
-type Adapter interface {
-	FromResource(interface{}) (Pod, error)
-	ToResource(Pod) (*v1.Pod, error)
-}
-
 type Database interface {
 	Filter(Filters) Datasource
 	Stop()
-}
-
-type Pod interface {
-	Resource() *v1.Pod
-}
-
-type Event interface {
-	Resource() Pod
 }
 
 type Datasource interface {
@@ -109,54 +94,63 @@ func (ds *datasource) Get(p Pod) (Pod, error) {
 
 func (ds *datasource) List() ([]Pod, error) {
 	objs := ds.db.Indexer().List()
-
-	pods := make([]Pod, 0, len(objs))
-
-	for _, obj := range objs {
-		pod, err := ds.adapter.FromResource(obj)
-		if err != nil {
-			return nil, err
-		}
-		pods = append(pods, pod)
-	}
-
-	return pods, nil
+	return ds.adapter.FromResourceList(objs)
 }
 
 func (ds *datasource) Subscribe() Subscription {
-	return nil
+	parent := ds.db.Subscribe()
+	return newSubscription(ds.env, ds, parent)
 }
 
-type adapter struct {
-	env util.Env
+type subscription struct {
+	env     util.Env
+	ds      Datasource
+	adapter Adapter
+	parent  database.Subscription
+	outch   chan Event
 }
 
-func newAdapter(env util.Env) *adapter {
-	return &adapter{env}
-}
-
-func (a adapter) ToResource(p Pod) (*v1.Pod, error) {
-	return p.Resource(), nil
-}
-
-func (a adapter) FromResource(obj interface{}) (Pod, error) {
-	switch obj := obj.(type) {
-	case *v1.Pod:
-		return newPod(a.env, obj), nil
-	default:
-		return nil, fmt.Errorf("invalid type: %T", obj)
+func newSubscription(env util.Env, ds Datasource, parent database.Subscription) *subscription {
+	env = env.ForComponent("backend/pod/subcription").WithID()
+	s := &subscription{
+		env:     env,
+		ds:      ds,
+		adapter: newAdapter(env),
+		parent:  parent,
+		outch:   make(chan Event),
 	}
+	go s.translateEvents()
+	return s
 }
 
-type pod struct {
-	resource *v1.Pod
-	env      util.Env
+func (s *subscription) Close() {
+	s.parent.Close()
 }
 
-func newPod(env util.Env, resource *v1.Pod) *pod {
-	return &pod{resource, env}
+func (s *subscription) Closed() <-chan struct{} {
+	return s.parent.Closed()
 }
 
-func (p *pod) Resource() *v1.Pod {
-	return p.resource
+func (s *subscription) Get(p Pod) (Pod, error) {
+	return s.ds.Get(p)
+}
+
+func (s *subscription) List() ([]Pod, error) {
+	return s.ds.List()
+}
+
+func (s *subscription) Events() <-chan Event {
+	return s.outch
+}
+
+func (s *subscription) translateEvents() {
+	defer close(s.outch)
+	for ev := range s.parent.Events() {
+		pod, err := s.adapter.FromResource(ev.Resource())
+		if err != nil {
+			s.env.LogErr(err, "adapt event")
+			continue
+		}
+		s.outch <- newEvent(ev.Type(), pod)
+	}
 }

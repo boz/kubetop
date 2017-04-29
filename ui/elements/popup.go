@@ -1,7 +1,6 @@
 package elements
 
 import (
-	"github.com/boz/kubetop/util"
 	"github.com/gdamore/tcell"
 	"github.com/gdamore/tcell/views"
 )
@@ -22,21 +21,21 @@ type Popup struct {
 	width  int
 	height int
 
-	env util.Env
+	Presentable
 
 	views.WidgetWatchers
 }
 
-func NewPopup(env util.Env, width int, height int, style tcell.Style) *Popup {
-	env = env.ForComponent("ui/elements/popup").WithID()
-	return &Popup{
+func NewPopup(p Presenter, width int, height int, style tcell.Style) *Popup {
+	w := &Popup{
 		closer: KeyEscPopupCloser(),
 		width:  width,
 		height: height,
 		style:  style,
 		cview:  views.NewViewPort(nil, 0, 0, 0, 0),
-		env:    env,
 	}
+	p.NewWithID("ui/elements/popup", w)
+	return w
 }
 
 func (p *Popup) SetView(view views.View) {
