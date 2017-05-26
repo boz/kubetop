@@ -14,12 +14,12 @@ import (
 )
 
 var (
-	logFile = kingpin.Flag("--log-file", "log file output").
+	logFile = kingpin.Flag("log-file", "log file output").
 		Short('l').
 		Default("kubetop.log").
 		OpenFile(os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
 
-	logLevel = kingpin.Flag("--log-level", "log level").
+	logLevel = kingpin.Flag("log-level", "log level").
 			Short('v').
 			Default("debug").
 			Enum("debug", "info", "warn", "error")
