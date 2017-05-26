@@ -111,7 +111,7 @@ func (w *mainWidget) textArea() views.Widget {
 	var err error
 	var text string
 
-	src, err := w.Presenter().Backend().Pods(nil)
+	src, err := w.Presenter().Backend().Pods()
 
 	if err != nil {
 		w.Env().LogErr(err, "getting datasource")
@@ -127,7 +127,7 @@ func (w *mainWidget) textArea() views.Widget {
 	}
 
 	for _, pod := range pods {
-		text += pod.Resource().ObjectMeta.GetName() + "\n"
+		text += pod.Resource().GetName() + "\n"
 	}
 
 	/*

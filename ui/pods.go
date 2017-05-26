@@ -25,7 +25,7 @@ func newPodIndexWidget(p elements.Presenter) views.Widget {
 func (w *podIndexWidget) run() {
 	p := w.Presenter()
 
-	ds, err := p.Backend().Pods(nil)
+	ds, err := p.Backend().Pods()
 
 	if err != nil {
 		w.handleError(err, "datasource")
