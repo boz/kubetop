@@ -9,7 +9,7 @@ import (
 )
 
 type Backend interface {
-	Pods(pod.Filters) (pod.Datasource, error)
+	Pods() (pod.BaseDatasource, error)
 
 	Stop()
 }
@@ -17,7 +17,7 @@ type Backend interface {
 type backend struct {
 	clientset kubernetes.Interface
 
-	pods pod.Database
+	pods pod.Datasource
 
 	env util.Env
 }
@@ -39,22 +39,22 @@ func (b *backend) Stop() {
 	wg.Wait()
 }
 
-func (b *backend) Pods(filters pod.Filters) (pod.Datasource, error) {
+func (b *backend) Pods() (pod.BaseDatasource, error) {
 	if b.pods == nil {
-		pods, err := pod.NewDatabase(b.env, b.clientset)
+		pods, err := pod.NewBase(b.env, b.clientset)
 		if err != nil {
 			return nil, err
 		}
 		b.pods = pods
 	}
-	return b.pods.Filter(filters), nil
+	return b.pods, nil
 }
 
-type stopper interface {
-	Stop()
+type closeable interface {
+	Close()
 }
 
-func (b *backend) doStop(wg *sync.WaitGroup, db stopper) {
+func (b *backend) doStop(wg *sync.WaitGroup, db closeable) {
 	if db == nil {
 		return
 	}
@@ -62,6 +62,6 @@ func (b *backend) doStop(wg *sync.WaitGroup, db stopper) {
 
 	go func() {
 		defer wg.Done()
-		db.Stop()
+		db.Close()
 	}()
 }

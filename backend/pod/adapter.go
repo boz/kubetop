@@ -4,12 +4,13 @@ import (
 	"fmt"
 
 	"github.com/boz/kubetop/util"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/pkg/api/v1"
 )
 
 type Adapter interface {
-	FromResource(interface{}) (Pod, error)
-	FromResourceList([]interface{}) ([]Pod, error)
+	FromResource(metav1.Object) (Pod, error)
+	FromResourceList([]metav1.Object) ([]Pod, error)
 	ToResource(Pod) (*v1.Pod, error)
 }
 
@@ -25,7 +26,7 @@ func (a adapter) ToResource(p Pod) (*v1.Pod, error) {
 	return p.Resource(), nil
 }
 
-func (a adapter) FromResource(obj interface{}) (Pod, error) {
+func (a adapter) FromResource(obj metav1.Object) (Pod, error) {
 	switch obj := obj.(type) {
 	case *v1.Pod:
 		return newPod(a.env, obj), nil
@@ -34,7 +35,7 @@ func (a adapter) FromResource(obj interface{}) (Pod, error) {
 	}
 }
 
-func (a adapter) FromResourceList(objs []interface{}) ([]Pod, error) {
+func (a adapter) FromResourceList(objs []metav1.Object) ([]Pod, error) {
 	pods := make([]Pod, 0, len(objs))
 	for _, obj := range objs {
 		pod, err := a.FromResource(obj)
