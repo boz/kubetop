@@ -32,24 +32,27 @@ func (w *podIndexWidget) run() {
 		return
 	}
 
-	pods, err := ds.List()
-	if err != nil {
-		w.handleError(err, "list")
-		return
-	}
-
-	p.PostFunc(func() {
-		w.initialize(pods)
-	})
-
 	sub := ds.Subscribe()
 	defer sub.Close()
 
+	select {
+	case <-sub.Closed():
+		w.Env().Log().Debug("sub closed")
+		return
+	case <-sub.Ready():
+		w.Env().Log().Debug("sub ready")
+		pods, err := sub.List()
+		if err != nil {
+			w.handleError(err, "list")
+			return
+		}
+		p.PostFunc(func() {
+			w.initialize(pods)
+		})
+	}
+
 	for {
 		select {
-		case <-p.Closed():
-			w.Env().Log().Debug("presenter closed")
-			return
 		case <-sub.Closed():
 			w.Env().Log().Debug("sub closed")
 			return

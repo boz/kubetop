@@ -24,5 +24,5 @@ func (p *pod) Resource() *v1.Pod {
 }
 
 func (p *pod) Name() string {
-	return p.resource.ObjectMeta.Name
+	return p.resource.GetName()
 }

@@ -13,6 +13,7 @@ import (
 )
 
 type BaseDatasource interface {
+	Ready() <-chan struct{}
 	Get(Pod) (Pod, error)
 	List() ([]Pod, error)
 	Subscribe() Subscription
@@ -25,6 +26,7 @@ type Datasource interface {
 }
 
 type Subscription interface {
+	Ready() <-chan struct{}
 	Get(Pod) (Pod, error)
 	List() ([]Pod, error)
 	Events() <-chan Event
@@ -66,6 +68,10 @@ func (db *_datasource) Filter(filters Filters) Datasource {
 	return &_datasource{controller, db.adapter, env}
 }
 
+func (db *_datasource) Ready() <-chan struct{} {
+	return db.controller.Ready()
+}
+
 func (db *_datasource) Stop() {
 	db.controller.Close()
 }
@@ -104,6 +110,10 @@ func newSubscription(env util.Env, ds Datasource, parent kcache.Subscription) *s
 	}
 	go s.translateEvents()
 	return s
+}
+
+func (s *subscription) Ready() <-chan struct{} {
+	return s.parent.Ready()
 }
 
 func (s *subscription) Close() {
