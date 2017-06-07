@@ -39,6 +39,7 @@ type Presentable struct {
 func ClosePresenter(w views.Widget) {
 	if w, ok := w.(isPresentable); ok {
 		w.Presenter().Close()
+		return
 	}
 }
 

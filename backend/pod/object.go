@@ -6,6 +6,7 @@ import (
 )
 
 type Pod interface {
+	ID() string
 	Resource() *v1.Pod
 	Name() string
 }
@@ -17,6 +18,10 @@ type pod struct {
 
 func newPod(env util.Env, resource *v1.Pod) *pod {
 	return &pod{resource, env}
+}
+
+func (p *pod) ID() string {
+	return p.resource.Namespace + "/" + p.resource.Name
 }
 
 func (p *pod) Resource() *v1.Pod {
