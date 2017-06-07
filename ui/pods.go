@@ -1,32 +1,104 @@
 package ui
 
 import (
-	"fmt"
-
+	"github.com/boz/kcache"
 	"github.com/boz/kubetop/backend/pod"
 	"github.com/boz/kubetop/ui/elements"
+	"github.com/gdamore/tcell"
 	"github.com/gdamore/tcell/views"
 )
 
+/*
+
+namespace name containers owner ctime phase condition message
+
+- Labels
+- Annotations
+- CreationTimestamp
+- OwnerReferences
+- ResourceVersion
+- ClusterName
+
+- PodPhase
+- Conditions
+- Message
+- Reason
+- HostIP
+- PodIP
+- StartTime
+- ContainerStatuses
+
+- Volumes
+- Containers
+- RestartPolicy
+- TerminationGracePeriodSeconds
+- ActiveDeadlineSeconds
+- DNSPolicy
+- NodeSelector
+*/
+
 type podIndexWidget struct {
-	views.BoxLayout
+	content *elements.TableWidget
+	model   elements.Table
 	elements.Presentable
 }
 
 func newPodIndexWidget(p elements.Presenter) views.Widget {
+
+	header := elements.NewTableHeader([]elements.TableColumn{
+		elements.NewTableColumn("ns", "Namespace", tcell.StyleDefault, 2),
+		elements.NewTableColumn("name", "Name", tcell.StyleDefault, 2),
+		elements.NewTableColumn("version", "Version", tcell.StyleDefault, 2),
+		elements.NewTableColumn("phase", "Phase", tcell.StyleDefault, 2),
+		elements.NewTableColumn("message", "Message", tcell.StyleDefault, 2),
+	})
+
+	rows := []elements.TableRow{}
+
+	model := elements.NewTable(header, rows)
+
 	w := &podIndexWidget{
-		BoxLayout: *views.NewBoxLayout(views.Vertical),
+		model:   model,
+		content: elements.NewTableWidget(model),
 	}
+
 	p.New("pods/index", w)
 	go w.run()
 	return w
+}
+
+func (w *podIndexWidget) Draw() {
+	w.content.Draw()
+}
+
+func (w *podIndexWidget) Resize() {
+	w.content.Resize()
+}
+
+func (w *podIndexWidget) HandleEvent(ev tcell.Event) bool {
+	return w.content.HandleEvent(ev)
+}
+
+func (w *podIndexWidget) SetView(view views.View) {
+	w.content.SetView(view)
+}
+
+func (w *podIndexWidget) Size() (int, int) {
+	return w.content.Size()
+}
+
+func (w *podIndexWidget) Watch(handler tcell.EventHandler) {
+	w.content.Watch(handler)
+}
+
+func (w *podIndexWidget) Unwatch(handler tcell.EventHandler) {
+	w.content.Unwatch(handler)
 }
 
 func (w *podIndexWidget) run() {
 	p := w.Presenter()
 
 	ds, err := p.Backend().Pods()
-
 	if err != nil {
 		w.handleError(err, "datasource")
 		return
@@ -36,6 +108,9 @@ func (w *podIndexWidget) run() {
 	defer sub.Close()
 
 	select {
+	case <-p.Closed():
+		w.Env().Log().Debug("presenter closed")
+		return
 	case <-sub.Closed():
 		w.Env().Log().Debug("sub closed")
 		return
@@ -53,6 +128,9 @@ func (w *podIndexWidget) run() {
 
 	for {
 		select {
+		case <-p.Closed():
+			w.Env().Log().Debug("presenter closed")
+			return
 		case <-sub.Closed():
 			w.Env().Log().Debug("sub closed")
 			return
@@ -73,27 +151,39 @@ func (w *podIndexWidget) run() {
 
 func (w *podIndexWidget) initialize(pods []pod.Pod) {
 	for _, pod := range pods {
-		txt := views.NewText()
-		txt.SetText(pod.Name())
-		w.InsertWidget(0, txt, 0.0)
-		w.Resize()
+		w.model.AddRow(w.rowForPod(pod))
 	}
+	w.Resize()
+}
+
+func (w *podIndexWidget) rowForPod(pod pod.Pod) elements.TableRow {
+
+	stat := pod.Resource().Status
+
+	phase := string(stat.Phase)
+	message := stat.Message
+
+	pad := 3
+	cols := []elements.TableColumn{
+		elements.NewTableColumn("ns", pod.Resource().GetNamespace(), tcell.StyleDefault, pad),
+		elements.NewTableColumn("name", pod.Resource().GetName(), tcell.StyleDefault, pad),
+		elements.NewTableColumn("version", pod.Resource().GetResourceVersion(), tcell.StyleDefault, pad),
+		elements.NewTableColumn("phase", phase, tcell.StyleDefault, pad),
+		elements.NewTableColumn("message", message, tcell.StyleDefault, pad),
+	}
+	return elements.NewTableRow(pod.ID(), cols)
 }
 
 func (w *podIndexWidget) handleError(err error, msg string) {
 	w.Env().LogErr(err, "pods")
-	w.Presenter().PostFunc(func() {
-		// show status error
-		txt := views.NewText()
-		txt.SetText(fmt.Sprint("ERROR: ", err))
-		w.InsertWidget(0, txt, 0.0)
-		w.Resize()
-	})
 }
 
 func (w *podIndexWidget) handleDSEvent(ev pod.Event) {
-	txt := views.NewText()
-	txt.SetText(fmt.Sprintf("EVENT: %v %v", ev.Type(), ev.Resource()))
-	w.InsertWidget(0, txt, 0.0)
-	w.Resize()
+	switch ev.Type() {
+	case kcache.EventTypeDelete:
+		w.model.RemoveRow(ev.Resource().ID())
+	case kcache.EventTypeCreate:
+	case kcache.EventTypeUpdate:
+		w.model.AddRow(w.rowForPod(ev.Resource()))
+	}
 }
