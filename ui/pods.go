@@ -1,6 +1,8 @@
 package ui
 
 import (
+	"strings"
+
 	"github.com/boz/kcache"
 	"github.com/boz/kubetop/backend/pod"
 	"github.com/boz/kubetop/ui/elements"
@@ -164,6 +166,8 @@ func (w *podIndexWidget) rowForPod(pod pod.Pod) elements.TableRow {
 
 	phase := string(stat.Phase)
 	message := stat.Message
+
+	message += strings.Repeat("x", 50)
 
 	cols := []elements.TableColumn{
 		elements.NewTableColumn("ns", pod.Resource().GetNamespace(), tcell.StyleDefault),
