@@ -183,8 +183,10 @@ func (w *podIndexWidget) handleDSEvent(ev pod.Event) {
 	switch ev.Type() {
 	case kcache.EventTypeDelete:
 		w.model.RemoveRow(ev.Resource().ID())
+		w.content.Resize()
 	case kcache.EventTypeCreate:
 	case kcache.EventTypeUpdate:
 		w.model.AddRow(w.rowForPod(ev.Resource()))
+		w.content.Resize()
 	}
 }
