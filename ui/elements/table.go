@@ -18,15 +18,16 @@ type CellView interface {
 }
 
 type cellView struct {
-	view   views.View
-	xoff   int
-	yoff   int
-	width  int
-	height int
+	view     views.View
+	xoff     int
+	yoff     int
+	width    int
+	height   int
+	selected bool
 }
 
-func NewCellView(view views.View, xoff, yoff, width, height int) CellView {
-	return &cellView{view, xoff, yoff, width, height}
+func NewCellView(view views.View, xoff, yoff, width, height int, selected bool) CellView {
+	return &cellView{view, xoff, yoff, width, height, selected}
 }
 
 func (v *cellView) Size() (int, int) {
@@ -34,7 +35,7 @@ func (v *cellView) Size() (int, int) {
 }
 
 func (v *cellView) SetContent(x, y int, ch rune, comb []rune, s tcell.Style) {
-	v.view.SetContent(x+v.xoff, y+v.yoff, ch, comb, s)
+	v.view.SetContent(x+v.xoff, y+v.yoff, ch, comb, s.Reverse(v.selected))
 }
 
 func (v *cellView) SetText(text string, s tcell.Style) {
@@ -71,6 +72,8 @@ type TableWidget struct {
 	colsz []int
 	port  *views.ViewPort
 	views.WidgetWatchers
+
+	curRow string
 }
 
 func NewTableWidget(model Table) *TableWidget {
@@ -82,9 +85,9 @@ func NewTableWidget(model Table) *TableWidget {
 
 func (tw *TableWidget) Draw() {
 	tw.view.Fill(' ', tcell.StyleDefault)
-	tw.drawRow(tw.view, 0, tw.model.Header().Columns())
+	tw.drawHeader()
 	for roff, row := range tw.model.Rows() {
-		tw.drawRow(tw.port, roff, row.Columns())
+		tw.drawRow(roff, row)
 	}
 }
 
@@ -106,15 +109,42 @@ func (tw *TableWidget) resizeContent() {
 	for _, col := range colsz {
 		width += col
 	}
-	length := len(tw.model.Rows())
+	height := len(tw.model.Rows())
 
-	tw.port.SetContentSize(width, length, false)
-	tw.port.Resize(0, 1, width, length)
+	tw.port.Resize(0, 1, width, height)
 
 	tw.colsz = colsz
 }
 
 func (tw *TableWidget) HandleEvent(ev tcell.Event) bool {
+	switch ev := ev.(type) {
+	case *tcell.EventKey:
+		switch ev.Key() {
+
+		case tcell.KeyUp, tcell.KeyCtrlP:
+			return tw.keyUp()
+		case tcell.KeyDown, tcell.KeyCtrlN:
+			return tw.keyDown()
+		case tcell.KeyLeft, tcell.KeyCtrlB:
+			return tw.keyLeft()
+		case tcell.KeyRight, tcell.KeyCtrlF:
+			return tw.keyRight()
+		case tcell.KeyEscape:
+			return tw.keyEscape()
+
+		case tcell.KeyRune:
+			switch ev.Rune() {
+			case 'k':
+				return tw.keyUp()
+			case 'j':
+				return tw.keyDown()
+			case 'h':
+				return tw.keyLeft()
+			case 'l':
+				return tw.keyRight()
+			}
+		}
+	}
 	return false
 }
 
@@ -138,14 +168,85 @@ func (tw *TableWidget) adjustColSizesForRow(widths []int, cols []TableColumn) {
 	}
 }
 
-func (tw *TableWidget) drawRow(view views.View, yoff int, cols []TableColumn) {
+func (tw *TableWidget) drawHeader() {
 	xoff := 0
+	yoff := 0
+	cols := tw.model.Header().Columns()
+	view := tw.view
 	for i, col := range cols {
 		width := tw.colsz[i]
-		cview := NewCellView(view, xoff, yoff, width, 1)
+		cview := NewCellView(view, xoff, yoff, width, 1, false)
 		col.Draw(cview)
 		xoff += width
 	}
+}
+
+func (tw *TableWidget) drawRow(yoff int, row TableRow) {
+	xoff := 0
+	cols := row.Columns()
+	view := tw.port
+	selected := tw.curRow == row.ID()
+	for i, col := range cols {
+		width := tw.colsz[i]
+		cview := NewCellView(view, xoff, yoff, width, 1, selected)
+		col.Draw(cview)
+		xoff += width
+	}
+}
+
+func (tw *TableWidget) keyUp() bool {
+	curidx, ok := tw.currentRowIndex()
+	if !ok {
+		return false
+	}
+	curidx -= 1
+	if curidx < 0 {
+		return true
+	}
+	rows := tw.model.Rows()
+	tw.curRow = rows[curidx].ID()
+	tw.port.MakeVisible(-1, curidx)
+	return true
+}
+
+func (tw *TableWidget) keyDown() bool {
+	curidx, ok := tw.currentRowIndex()
+	if !ok {
+		curidx = -1
+	}
+	curidx += 1
+	rows := tw.model.Rows()
+
+	if curidx >= len(rows) {
+		return true
+	}
+
+	tw.curRow = rows[curidx].ID()
+	tw.port.MakeVisible(-1, curidx)
+	return true
+}
+func (tw *TableWidget) keyLeft() bool {
+	tw.port.ScrollLeft(1)
+	return true
+}
+func (tw *TableWidget) keyRight() bool {
+	tw.port.ScrollRight(1)
+	return true
+}
+func (tw *TableWidget) keyEscape() bool {
+	return true
+}
+
+func (tw *TableWidget) currentRowIndex() (int, bool) {
+	if tw.curRow == "" {
+		return 0, false
+	}
+	for i, row := range tw.model.Rows() {
+		if row.ID() == tw.curRow {
+			return i, true
+		}
+	}
+	return 0, false
 }
 
 type tableModel struct {
