@@ -5,6 +5,12 @@ import (
 	"github.com/gdamore/tcell/views"
 )
 
+var (
+	styleTableTH = tcell.StyleDefault.Bold(true)
+
+	tableColPad = 2
+)
+
 type CellView interface {
 	Size() (int, int)
 	SetText(string, tcell.Style)
@@ -109,8 +115,8 @@ func (tw *TableWidget) Size() (int, int) {
 func (tw *TableWidget) adjustColSizesForRow(widths []int, cols []TableColumn) {
 	for i, col := range cols {
 		w, _ := col.Size()
-		if w > widths[i] {
-			widths[i] = w
+		if w+tableColPad > widths[i] {
+			widths[i] = w + tableColPad
 		}
 	}
 }
@@ -178,11 +184,10 @@ type tableColumn struct {
 	id    string
 	text  string
 	style tcell.Style
-	pad   int
 }
 
-func NewTableColumn(id string, text string, style tcell.Style, pad int) TableColumn {
-	return &tableColumn{id, text, style, pad}
+func NewTableColumn(id string, text string, style tcell.Style) TableColumn {
+	return &tableColumn{id, text, style}
 }
 
 func (col *tableColumn) ID() string {
@@ -190,7 +195,7 @@ func (col *tableColumn) ID() string {
 }
 
 func (col *tableColumn) Size() (int, int) {
-	return len(col.text) + col.pad, 1
+	return len(col.text), 1
 }
 
 func (col *tableColumn) Draw(view CellView) {
@@ -200,6 +205,10 @@ func (col *tableColumn) Draw(view CellView) {
 type tableRow struct {
 	id   string
 	cols []TableColumn
+}
+
+func NewTableTH(id string, text string) TableColumn {
+	return NewTableColumn(id, text, styleTableTH)
 }
 
 func NewTableRow(id string, cols []TableColumn) TableRow {

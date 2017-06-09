@@ -43,19 +43,21 @@ type podIndexWidget struct {
 	elements.Presentable
 }
 
+func newPodTable() elements.Table {
+	header := elements.NewTableHeader([]elements.TableColumn{
+		elements.NewTableTH("ns", "Namespace"),
+		elements.NewTableTH("name", "Name"),
+		elements.NewTableTH("version", "Version"),
+		elements.NewTableTH("phase", "Phase"),
+		elements.NewTableTH("message", "Message"),
+	})
+	rows := []elements.TableRow{}
+	return elements.NewTable(header, rows)
+}
+
 func newPodIndexWidget(p elements.Presenter) views.Widget {
 
-	header := elements.NewTableHeader([]elements.TableColumn{
-		elements.NewTableColumn("ns", "Namespace", tcell.StyleDefault, 2),
-		elements.NewTableColumn("name", "Name", tcell.StyleDefault, 2),
-		elements.NewTableColumn("version", "Version", tcell.StyleDefault, 2),
-		elements.NewTableColumn("phase", "Phase", tcell.StyleDefault, 2),
-		elements.NewTableColumn("message", "Message", tcell.StyleDefault, 2),
-	})
-
-	rows := []elements.TableRow{}
-
-	model := elements.NewTable(header, rows)
+	model := newPodTable()
 
 	w := &podIndexWidget{
 		model:   model,
@@ -163,13 +165,12 @@ func (w *podIndexWidget) rowForPod(pod pod.Pod) elements.TableRow {
 	phase := string(stat.Phase)
 	message := stat.Message
 
-	pad := 3
 	cols := []elements.TableColumn{
-		elements.NewTableColumn("ns", pod.Resource().GetNamespace(), tcell.StyleDefault, pad),
-		elements.NewTableColumn("name", pod.Resource().GetName(), tcell.StyleDefault, pad),
-		elements.NewTableColumn("version", pod.Resource().GetResourceVersion(), tcell.StyleDefault, pad),
-		elements.NewTableColumn("phase", phase, tcell.StyleDefault, pad),
-		elements.NewTableColumn("message", message, tcell.StyleDefault, pad),
+		elements.NewTableColumn("ns", pod.Resource().GetNamespace(), tcell.StyleDefault),
+		elements.NewTableColumn("name", pod.Resource().GetName(), tcell.StyleDefault),
+		elements.NewTableColumn("version", pod.Resource().GetResourceVersion(), tcell.StyleDefault),
+		elements.NewTableColumn("phase", phase, tcell.StyleDefault),
+		elements.NewTableColumn("message", message, tcell.StyleDefault),
 	}
 	return elements.NewTableRow(pod.ID(), cols)
 }
