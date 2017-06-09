@@ -155,7 +155,7 @@ func (w *podIndexWidget) run() {
 
 func (w *podIndexWidget) initialize(pods []pod.Pod) {
 	for _, pod := range pods {
-		w.model.AddRow(w.rowForPod(pod))
+		w.content.AddRow(w.rowForPod(pod))
 	}
 	w.Resize()
 }
@@ -186,11 +186,11 @@ func (w *podIndexWidget) handleError(err error, msg string) {
 func (w *podIndexWidget) handleDSEvent(ev pod.Event) {
 	switch ev.Type() {
 	case kcache.EventTypeDelete:
-		w.model.RemoveRow(ev.Resource().ID())
+		w.content.RemoveRow(ev.Resource().ID())
 		w.content.Resize()
 	case kcache.EventTypeCreate:
 	case kcache.EventTypeUpdate:
-		w.model.AddRow(w.rowForPod(ev.Resource()))
+		w.content.AddRow(w.rowForPod(ev.Resource()))
 		w.content.Resize()
 	}
 }

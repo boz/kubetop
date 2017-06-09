@@ -42,6 +42,9 @@ func (v *cellView) SetText(text string, s tcell.Style) {
 	for i, ch := range text {
 		v.SetContent(i, 0, ch, nil, s)
 	}
+	for i := len(text); i < v.width; i++ {
+		v.SetContent(i, 0, ' ', nil, s)
+	}
 }
 
 type Table interface {
@@ -73,7 +76,16 @@ type TableWidget struct {
 	port  *views.ViewPort
 	views.WidgetWatchers
 
-	curRow string
+	ss selectedState
+}
+
+type selectedState struct {
+	id  string
+	idx int
+}
+
+func (ss selectedState) active() bool {
+	return ss.id != ""
 }
 
 func NewTableWidget(model Table) *TableWidget {
@@ -185,7 +197,8 @@ func (tw *TableWidget) drawRow(yoff int, row TableRow) {
 	xoff := 0
 	cols := row.Columns()
 	view := tw.port
-	selected := tw.curRow == row.ID()
+	selected := tw.ss.id == row.ID()
+
 	for i, col := range cols {
 		width := tw.colsz[i]
 		cview := NewCellView(view, xoff, yoff, width, 1, selected)
@@ -195,33 +208,35 @@ func (tw *TableWidget) drawRow(yoff int, row TableRow) {
 }
 
 func (tw *TableWidget) keyUp() bool {
-	curidx, ok := tw.currentRowIndex()
-	if !ok {
+	if !tw.ss.active() {
 		return false
 	}
-	curidx -= 1
-	if curidx < 0 {
+
+	if tw.ss.idx <= 0 {
 		return true
 	}
+
 	rows := tw.model.Rows()
-	tw.curRow = rows[curidx].ID()
-	tw.port.MakeVisible(-1, curidx)
+	tw.ss.idx -= 1
+	tw.ss.id = rows[tw.ss.idx].ID()
+	tw.port.MakeVisible(-1, tw.ss.idx)
 	return true
 }
 
 func (tw *TableWidget) keyDown() bool {
-	curidx, ok := tw.currentRowIndex()
-	if !ok {
-		curidx = -1
+	curidx := -1
+	if tw.ss.active() {
+		curidx = tw.ss.idx
 	}
 	curidx += 1
-	rows := tw.model.Rows()
 
+	rows := tw.model.Rows()
 	if curidx >= len(rows) {
 		return true
 	}
 
-	tw.curRow = rows[curidx].ID()
+	tw.ss.idx = curidx
+	tw.ss.id = rows[curidx].ID()
 	tw.port.MakeVisible(-1, curidx)
 	return true
 }
@@ -234,19 +249,34 @@ func (tw *TableWidget) keyRight() bool {
 	return true
 }
 func (tw *TableWidget) keyEscape() bool {
+	if !tw.ss.active() {
+		return false
+	}
+	tw.ss.id = ""
 	return true
 }
 
-func (tw *TableWidget) currentRowIndex() (int, bool) {
-	if tw.curRow == "" {
-		return 0, false
+func (tw *TableWidget) AddRow(row TableRow) {
+	tw.model.AddRow(row)
+	tw.recalculateSS()
+}
+
+func (tw *TableWidget) RemoveRow(id string) {
+	tw.model.RemoveRow(id)
+	tw.recalculateSS()
+}
+
+func (tw *TableWidget) recalculateSS() {
+	if !tw.ss.active() {
+		return
 	}
-	for i, row := range tw.model.Rows() {
-		if row.ID() == tw.curRow {
-			return i, true
+	for idx, row := range tw.model.Rows() {
+		if row.ID() == tw.ss.id {
+			tw.ss.idx = idx
+			return
 		}
 	}
-	return 0, false
+	tw.ss.id = ""
 }
 
 type tableModel struct {
