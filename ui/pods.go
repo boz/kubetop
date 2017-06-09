@@ -1,7 +1,7 @@
 package ui
 
 import (
-	"strings"
+	"k8s.io/client-go/pkg/api/v1"
 
 	"github.com/boz/kcache"
 	"github.com/boz/kubetop/backend/pod"
@@ -51,6 +51,7 @@ func newPodTable() elements.Table {
 		elements.NewTableTH("name", "Name"),
 		elements.NewTableTH("version", "Version"),
 		elements.NewTableTH("phase", "Phase"),
+		elements.NewTableTH("conditions", "Conditions"),
 		elements.NewTableTH("message", "Message"),
 	})
 	rows := []elements.TableRow{}
@@ -167,13 +168,27 @@ func (w *podIndexWidget) rowForPod(pod pod.Pod) elements.TableRow {
 	phase := string(stat.Phase)
 	message := stat.Message
 
-	message += strings.Repeat("x", 50)
+	conditions := ""
+	for _, c := range stat.Conditions {
+		conditions += string(c.Type)[0:1]
+		switch c.Status {
+		case v1.ConditionTrue:
+			conditions += "+"
+		case v1.ConditionFalse:
+			conditions += "-"
+		case v1.ConditionUnknown:
+			conditions += "?"
+		}
+	}
+
+	//message += strings.Repeat("x", 50)
 
 	cols := []elements.TableColumn{
 		elements.NewTableColumn("ns", pod.Resource().GetNamespace(), tcell.StyleDefault),
 		elements.NewTableColumn("name", pod.Resource().GetName(), tcell.StyleDefault),
 		elements.NewTableColumn("version", pod.Resource().GetResourceVersion(), tcell.StyleDefault),
 		elements.NewTableColumn("phase", phase, tcell.StyleDefault),
+		elements.NewTableColumn("conditions", conditions, tcell.StyleDefault),
 		elements.NewTableColumn("message", message, tcell.StyleDefault),
 	}
 	return elements.NewTableRow(pod.ID(), cols)
