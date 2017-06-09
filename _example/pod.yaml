@@ -9,4 +9,4 @@ spec:
     image: busybox
     args:
     - sleep
-    - "10000"
+    - "10"
