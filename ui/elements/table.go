@@ -68,6 +68,7 @@ type TableColumn interface {
 type TableWidget struct {
 	model Table
 	view  views.View
+	colsz []int
 	port  *views.ViewPort
 	views.WidgetWatchers
 }
@@ -80,23 +81,37 @@ func NewTableWidget(model Table) *TableWidget {
 }
 
 func (tw *TableWidget) Draw() {
-
 	tw.view.Fill(' ', tcell.StyleDefault)
-
-	widths := make([]int, len(tw.model.Header().Columns()))
-
-	tw.adjustColSizesForRow(widths, tw.model.Header().Columns())
-	for _, row := range tw.model.Rows() {
-		tw.adjustColSizesForRow(widths, row.Columns())
-	}
-
-	tw.drawRow(widths, 0, tw.model.Header().Columns())
+	tw.drawRow(tw.view, 0, tw.model.Header().Columns())
 	for roff, row := range tw.model.Rows() {
-		tw.drawRow(widths, roff+1, row.Columns())
+		tw.drawRow(tw.port, roff, row.Columns())
 	}
 }
 
 func (tw *TableWidget) Resize() {
+	if tw.view == nil {
+		return
+	}
+	tw.resizeContent()
+}
+
+func (tw *TableWidget) resizeContent() {
+	colsz := make([]int, len(tw.model.Header().Columns()))
+	tw.adjustColSizesForRow(colsz, tw.model.Header().Columns())
+	for _, row := range tw.model.Rows() {
+		tw.adjustColSizesForRow(colsz, row.Columns())
+	}
+
+	width := 0
+	for _, col := range colsz {
+		width += col
+	}
+	length := len(tw.model.Rows())
+
+	tw.port.SetContentSize(width, length, false)
+	tw.port.Resize(0, 1, width, length)
+
+	tw.colsz = colsz
 }
 
 func (tw *TableWidget) HandleEvent(ev tcell.Event) bool {
@@ -106,10 +121,12 @@ func (tw *TableWidget) HandleEvent(ev tcell.Event) bool {
 func (tw *TableWidget) SetView(view views.View) {
 	tw.view = view
 	tw.port.SetView(view)
+	tw.Resize()
 }
 
 func (tw *TableWidget) Size() (int, int) {
-	return tw.view.Size()
+	x, y := tw.port.Size()
+	return x, y + 1
 }
 
 func (tw *TableWidget) adjustColSizesForRow(widths []int, cols []TableColumn) {
@@ -121,12 +138,12 @@ func (tw *TableWidget) adjustColSizesForRow(widths []int, cols []TableColumn) {
 	}
 }
 
-func (tw *TableWidget) drawRow(widths []int, yoff int, cols []TableColumn) {
+func (tw *TableWidget) drawRow(view views.View, yoff int, cols []TableColumn) {
 	xoff := 0
 	for i, col := range cols {
-		width := widths[i]
-		view := NewCellView(tw.view, xoff, yoff, width, 1)
-		col.Draw(view)
+		width := tw.colsz[i]
+		cview := NewCellView(view, xoff, yoff, width, 1)
+		col.Draw(cview)
 		xoff += width
 	}
 }
