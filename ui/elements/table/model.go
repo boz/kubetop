@@ -39,7 +39,7 @@ func (m *tableModel) reset(rows []TR) {
 	sort.Slice(rows, func(i, j int) bool {
 		return m.compare(rows[i], rows[j]) < 0
 	})
-	m.rows = list.New()
+	m.rows.Init()
 	for _, row := range rows {
 		m.rows.PushBack(row)
 	}

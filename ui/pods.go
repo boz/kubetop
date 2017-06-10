@@ -163,5 +163,4 @@ func (p *podIndexProvider) generateRow(pod pod.Pod) table.TR {
 		table.NewTD("message", message, tcell.StyleDefault),
 	}
 	return table.NewTR(pod.ID(), cols)
-
 }
