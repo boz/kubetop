@@ -6,6 +6,13 @@ import (
 	"github.com/gdamore/tcell/views"
 )
 
+type Display interface {
+	ResetRows(rows []TR)
+	InsertRow(row TR)
+	UpdateRow(row TR)
+	RemoveRow(id string)
+}
+
 type Widget struct {
 	model model
 	colsz []int
@@ -26,22 +33,22 @@ func NewWidget(cols []TH) *Widget {
 
 func (tw *Widget) ResetRows(rows []TR) {
 	tw.model.reset(rows)
-	tw.resizeContent()
+	tw.PostEventWidgetResize(tw)
 }
 
 func (tw *Widget) InsertRow(row TR) {
 	tw.model.insert(row)
-	tw.resizeContent()
+	tw.PostEventWidgetResize(tw)
 }
 
 func (tw *Widget) UpdateRow(row TR) {
 	tw.model.update(row)
-	tw.resizeContent()
+	tw.PostEventWidgetContent(tw)
 }
 
 func (tw *Widget) RemoveRow(id string) {
 	tw.model.remove(id)
-	tw.resizeContent()
+	tw.PostEventWidgetResize(tw)
 }
 
 func (tw *Widget) Draw() {

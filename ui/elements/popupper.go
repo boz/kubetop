@@ -10,12 +10,11 @@ type Popupper struct {
 	current views.Widget
 	views.WidgetWatchers
 
-	Presentable
+	ctx Context
 }
 
-func NewPopupper(p Presenter) *Popupper {
-	w := &Popupper{}
-	p.New("ui/elements/popper", w)
+func NewPopupper(ctx Context) *Popupper {
+	w := &Popupper{ctx: ctx.New("ui/elements/popupper")}
 	return w
 }
 

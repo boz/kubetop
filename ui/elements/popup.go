@@ -21,20 +21,21 @@ type Popup struct {
 	width  int
 	height int
 
-	Presentable
+	ctx Context
 
 	views.WidgetWatchers
 }
 
-func NewPopup(p Presenter, width int, height int, style tcell.Style) *Popup {
+func NewPopup(ctx Context, width int, height int, style tcell.Style) *Popup {
+
 	w := &Popup{
 		closer: KeyEscPopupCloser(),
 		width:  width,
 		height: height,
 		style:  style,
 		cview:  views.NewViewPort(nil, 0, 0, 0, 0),
+		ctx:    ctx.NewWithID("ui/elements/popup"),
 	}
-	p.NewWithID("ui/elements/popup", w)
 	return w
 }
 

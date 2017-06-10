@@ -1,10 +1,11 @@
 package ui
 
 import (
-	"fmt"
+	"strconv"
+	"strings"
 
-	"github.com/boz/kubetop/backend/pod"
 	"github.com/boz/kubetop/ui/elements"
+	"github.com/boz/kubetop/ui/screen"
 	"github.com/boz/kubetop/ui/theme"
 	"github.com/gdamore/tcell"
 	"github.com/gdamore/tcell/views"
@@ -14,11 +15,11 @@ type mainWidget struct {
 	stopch chan<- bool
 	panel  *views.Panel
 
-	content views.Widget
+	content elements.Widget
 
 	popupper *elements.Popupper
 
-	elements.Presentable
+	ctx elements.Context
 }
 
 func newMainTitle() views.Widget {
@@ -34,18 +35,16 @@ func newMainTitle() views.Widget {
 	return title
 }
 
-func newMainWidget(p elements.Presenter, stopch chan<- bool) views.Widget {
-
+func newMainWidget(ctx elements.Context, stopch chan<- bool) views.Widget {
 	panel := views.NewPanel()
 	panel.SetTitle(newMainTitle())
 
-	widget := &mainWidget{
+	return &mainWidget{
 		stopch:   stopch,
 		panel:    panel,
-		popupper: elements.NewPopupper(p),
+		popupper: elements.NewPopupper(ctx),
+		ctx:      ctx.New("ui/main"),
 	}
-
-	return p.New("ui/main", widget)
 }
 
 func (w *mainWidget) Draw() {
@@ -59,7 +58,6 @@ func (w *mainWidget) Resize() {
 }
 
 func (w *mainWidget) HandleEvent(ev tcell.Event) bool {
-
 	if w.popupper.HandleEvent(ev) {
 		return true
 	}
@@ -79,7 +77,7 @@ func (w *mainWidget) HandleEvent(ev tcell.Event) bool {
 			case 'P', 'p':
 				w.showPodIndex()
 			case 'X', 'x':
-				popup := elements.NewPopup(w.Presenter(), 10, 10, theme.Base)
+				popup := elements.NewPopup(w.ctx, 10, 10, theme.Base)
 				popup.SetContent(w.textArea())
 				w.popupper.Push(popup)
 				return true
@@ -91,55 +89,27 @@ func (w *mainWidget) HandleEvent(ev tcell.Event) bool {
 }
 
 func (w *mainWidget) showPodIndex() {
-	ds, err := w.Backend().Pods()
-	if err != nil {
-	}
-	env := w.Env().ForComponent("pods/index")
-	builder := newPodIndexBuilder(env, ds)
-	widget := NewIndexWidget("pods/index", w.Presenter(), builder)
+	ds, _ := w.ctx.Backend().Pods()
+	widget := screen.NewPodIndex(w.ctx, ds)
 	w.setContent(widget)
 }
 
-func (w *mainWidget) setContent(child views.Widget) {
+func (w *mainWidget) setContent(child elements.Widget) {
 	if cur := w.content; cur != nil {
-		elements.ClosePresenter(cur)
+		cur.Close()
 	}
 	w.content = child
 	w.panel.SetContent(child)
+	w.Resize()
 }
 
 func (w *mainWidget) textArea() views.Widget {
-	var pods []pod.Pod
-	var err error
 	var text string
 
-	src, err := w.Presenter().Backend().Pods()
-
-	if err != nil {
-		w.Env().LogErr(err, "getting datasource")
-		text += fmt.Sprint("ERROR", err)
-		goto done
+	for i := 0; i < 9; i++ {
+		text = text + strconv.Itoa(i) + " " + strings.Repeat("123456789", 2) + "\n"
 	}
-
-	pods, err = src.List()
-	if err != nil {
-		w.Env().LogErr(err, "getting list")
-		text += fmt.Sprint("ERROR", err)
-		goto done
-	}
-
-	for _, pod := range pods {
-		text += pod.Resource().GetName() + "\n"
-	}
-
-	/*
-		for i := 0; i < 9; i++ {
-			text = text + strconv.Itoa(i) + " " + strings.Repeat("123456789", 2) + "\n"
-		}
-		text = text + text
-	*/
-
-done:
+	text = text + text
 
 	txt := views.NewTextArea()
 	txt.SetContent(text)
