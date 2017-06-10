@@ -105,8 +105,8 @@ func (tw *Widget) Size() (int, int) {
 }
 
 func (tw *Widget) resizeContent() {
-	colsz := make([]int, len(tw.model.columns()))
 
+	colsz := make([]int, len(tw.model.columns()))
 	update := func(i int, col TD) {
 		width, _ := col.Size()
 		if width+styleColPad > colsz[i] {
@@ -117,12 +117,12 @@ func (tw *Widget) resizeContent() {
 	for i, col := range tw.model.columns() {
 		update(i, col)
 	}
-
 	tw.model.each(func(_ int, row TR) {
 		for i, col := range row.Columns() {
 			update(i, col)
 		}
 	})
+	tw.colsz = colsz
 
 	width := 0
 	for _, col := range colsz {
@@ -132,8 +132,7 @@ func (tw *Widget) resizeContent() {
 
 	tw.hport.Resize(0, 0, width, 1)
 	tw.rport.Resize(0, 1, width, height)
-
-	tw.colsz = colsz
+	tw.scrollToActive()
 }
 
 func (tw *Widget) drawHeader() {
@@ -155,7 +154,7 @@ func (tw *Widget) drawRow(yoff int, row TR) {
 	view := tw.rport
 
 	lth := theme.Table.TD
-	if tw.model.isSelected(row.ID()) {
+	if tw.model.isActive(row.ID()) {
 		lth = theme.Table.TDSelected
 	}
 
@@ -168,21 +167,19 @@ func (tw *Widget) drawRow(yoff int, row TR) {
 }
 
 func (tw *Widget) keyUp() bool {
-	idx, _ := tw.model.selectPrev()
-	if idx < 0 {
-		return false
+	if tw.model.activatePrev() {
+		tw.scrollToActive()
+		return true
 	}
-	tw.rport.MakeVisible(-1, idx)
-	return true
+	return false
 }
 
 func (tw *Widget) keyDown() bool {
-	idx, _ := tw.model.selectNext()
-	if idx < 0 {
-		return false
+	if tw.model.activateNext() {
+		tw.scrollToActive()
+		return true
 	}
-	tw.rport.MakeVisible(-1, idx)
-	return true
+	return false
 }
 
 func (tw *Widget) keyLeft() bool {
@@ -197,5 +194,11 @@ func (tw *Widget) keyRight() bool {
 }
 
 func (tw *Widget) keyEscape() bool {
-	return tw.model.clearSelection()
+	return tw.model.clearActive()
+}
+
+func (tw *Widget) scrollToActive() {
+	if idx, _ := tw.model.getActive(); idx >= 0 {
+		tw.rport.MakeVisible(-1, idx)
+	}
 }
