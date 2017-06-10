@@ -85,7 +85,7 @@ func (w *mainWidget) HandleEvent(ev tcell.Event) bool {
 				w.stopch <- true
 				return true
 			case 'P', 'p':
-				w.setContent(newPodIndexWidget(w.Presenter()))
+				w.showPodIndex()
 			case 'X', 'x':
 				popup := elements.NewPopup(w.Presenter(), 10, 10, tcell.StyleDefault)
 				popup.SetContent(w.textArea())
@@ -96,6 +96,16 @@ func (w *mainWidget) HandleEvent(ev tcell.Event) bool {
 	}
 
 	return false
+}
+
+func (w *mainWidget) showPodIndex() {
+	ds, err := w.Backend().Pods()
+	if err != nil {
+	}
+	env := w.Env().ForComponent("pods/index")
+	builder := newPodIndexBuilder(env, ds)
+	widget := NewIndexWidget("pods/index", w.Presenter(), builder)
+	w.setContent(widget)
 }
 
 func (w *mainWidget) setContent(child views.Widget) {
