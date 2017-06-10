@@ -143,7 +143,7 @@ func (tw *Widget) drawHeader() {
 	view := tw.hport
 	for i, col := range cols {
 		width := tw.colsz[i]
-		cview := NewCellView(view, xoff, yoff, width, 1, theme.Table.TH)
+		cview := newView(view, xoff, yoff, width, 1, theme.Table.TH)
 		col.Draw(cview)
 		xoff += width
 	}
@@ -161,7 +161,7 @@ func (tw *Widget) drawRow(yoff int, row TR) {
 
 	for i, col := range cols {
 		width := tw.colsz[i]
-		cview := NewCellView(view, xoff, yoff, width, 1, lth)
+		cview := newView(view, xoff, yoff, width, 1, lth)
 		col.Draw(cview)
 		xoff += width
 	}

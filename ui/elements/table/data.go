@@ -5,7 +5,7 @@ import "github.com/boz/kubetop/ui/theme"
 type TD interface {
 	ID() string
 	Size() (int, int)
-	Draw(CellView)
+	Draw(View)
 	Key() string
 }
 
@@ -31,6 +31,6 @@ func (col *tableTD) Key() string {
 	return col.text
 }
 
-func (col *tableTD) Draw(view CellView) {
+func (col *tableTD) Draw(view View) {
 	view.SetText(col.text, col.tv)
 }
