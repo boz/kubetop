@@ -5,17 +5,9 @@ import (
 
 	"github.com/boz/kubetop/backend/pod"
 	"github.com/boz/kubetop/ui/elements"
+	"github.com/boz/kubetop/ui/theme"
 	"github.com/gdamore/tcell"
 	"github.com/gdamore/tcell/views"
-)
-
-var (
-	styleHeader = tcell.StyleDefault.
-			Background(tcell.ColorTeal).
-			Foreground(tcell.ColorGray)
-	styleHeaderAction = tcell.StyleDefault.
-				Background(tcell.ColorTeal).
-				Foreground(tcell.ColorRed)
 )
 
 type mainWidget struct {
@@ -31,13 +23,13 @@ type mainWidget struct {
 
 func newMainTitle() views.Widget {
 	title := views.NewSimpleStyledTextBar()
-	title.SetStyle(styleHeader)
+	title.SetStyle(theme.AppHeader.Bar)
 
-	title.RegisterLeftStyle('N', styleHeader)
-	title.RegisterLeftStyle('A', styleHeaderAction)
+	title.RegisterLeftStyle('N', theme.AppHeader.Bar)
+	title.RegisterLeftStyle('A', theme.AppHeader.Action)
 	title.SetLeft("%N[%AQ%N] Quit")
 
-	title.RegisterRightStyle('N', styleHeader)
+	title.RegisterRightStyle('N', theme.AppHeader.Bar)
 	title.SetRight("%Nkubetop")
 	return title
 }
@@ -87,7 +79,7 @@ func (w *mainWidget) HandleEvent(ev tcell.Event) bool {
 			case 'P', 'p':
 				w.showPodIndex()
 			case 'X', 'x':
-				popup := elements.NewPopup(w.Presenter(), 10, 10, tcell.StyleDefault)
+				popup := elements.NewPopup(w.Presenter(), 10, 10, theme.Base)
 				popup.SetContent(w.textArea())
 				w.popupper.Push(popup)
 				return true

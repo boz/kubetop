@@ -1,6 +1,7 @@
 package table
 
 import (
+	"github.com/boz/kubetop/ui/theme"
 	"github.com/gdamore/tcell"
 	"github.com/gdamore/tcell/views"
 )
@@ -44,7 +45,8 @@ func (tw *Widget) RemoveRow(id string) {
 }
 
 func (tw *Widget) Draw() {
-	tw.view.Fill(' ', tcell.StyleDefault)
+	tw.hport.Fill(' ', theme.Base)
+	tw.rport.Fill(' ', theme.Base)
 	tw.drawHeader()
 	tw.model.each(func(roff int, row TR) {
 		tw.drawRow(roff, row)
@@ -141,7 +143,7 @@ func (tw *Widget) drawHeader() {
 	view := tw.hport
 	for i, col := range cols {
 		width := tw.colsz[i]
-		cview := NewCellView(view, xoff, yoff, width, 1, false)
+		cview := NewCellView(view, xoff, yoff, width, 1, theme.Table.TH)
 		col.Draw(cview)
 		xoff += width
 	}
@@ -152,11 +154,14 @@ func (tw *Widget) drawRow(yoff int, row TR) {
 	cols := row.Columns()
 	view := tw.rport
 
-	selected := tw.model.isSelected(row.ID())
+	lth := theme.Table.TD
+	if tw.model.isSelected(row.ID()) {
+		lth = theme.Table.TDSelected
+	}
 
 	for i, col := range cols {
 		width := tw.colsz[i]
-		cview := NewCellView(view, xoff, yoff, width, 1, selected)
+		cview := NewCellView(view, xoff, yoff, width, 1, lth)
 		col.Draw(cview)
 		xoff += width
 	}

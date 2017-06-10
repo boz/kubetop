@@ -1,47 +1,46 @@
 package table
 
 import (
-	"github.com/gdamore/tcell"
+	"github.com/boz/kubetop/ui/theme"
 	"github.com/gdamore/tcell/views"
 )
 
 var (
-	styleTH     = tcell.StyleDefault.Bold(true)
 	styleColPad = 2
 )
 
 type CellView interface {
 	Size() (int, int)
-	SetText(string, tcell.Style)
-	SetContent(x, y int, ch rune, comb []rune, s tcell.Style)
+	SetText(string, theme.LabelVariant)
+	SetContent(x, y int, ch rune, comb []rune, th theme.LabelVariant)
 }
 
 type cellView struct {
-	view     views.View
-	xoff     int
-	yoff     int
-	width    int
-	height   int
-	selected bool
+	view   views.View
+	xoff   int
+	yoff   int
+	width  int
+	height int
+	theme  theme.LabelTheme
 }
 
-func NewCellView(view views.View, xoff, yoff, width, height int, selected bool) CellView {
-	return &cellView{view, xoff, yoff, width, height, selected}
+func NewCellView(view views.View, xoff, yoff, width, height int, theme theme.LabelTheme) CellView {
+	return &cellView{view, xoff, yoff, width, height, theme}
 }
 
 func (v *cellView) Size() (int, int) {
 	return v.width, v.height
 }
 
-func (v *cellView) SetContent(x, y int, ch rune, comb []rune, s tcell.Style) {
-	v.view.SetContent(x+v.xoff, y+v.yoff, ch, comb, s.Reverse(v.selected))
+func (v *cellView) SetContent(x, y int, ch rune, comb []rune, th theme.LabelVariant) {
+	v.view.SetContent(x+v.xoff, y+v.yoff, ch, comb, v.theme.Get(th))
 }
 
-func (v *cellView) SetText(text string, s tcell.Style) {
+func (v *cellView) SetText(text string, th theme.LabelVariant) {
 	for i, ch := range text {
-		v.SetContent(i, 0, ch, nil, s)
+		v.SetContent(i, 0, ch, nil, th)
 	}
 	for i := len(text); i < v.width; i++ {
-		v.SetContent(i, 0, ' ', nil, s)
+		v.SetContent(i, 0, ' ', nil, th)
 	}
 }

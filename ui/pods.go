@@ -6,8 +6,8 @@ import (
 	"github.com/boz/kcache"
 	"github.com/boz/kubetop/backend/pod"
 	"github.com/boz/kubetop/ui/elements/table"
+	"github.com/boz/kubetop/ui/theme"
 	"github.com/boz/kubetop/util"
-	"github.com/gdamore/tcell"
 )
 
 /*
@@ -155,12 +155,12 @@ func (p *podIndexProvider) generateRow(pod pod.Pod) table.TR {
 	//message += strings.Repeat("x", 50)
 
 	cols := []table.TD{
-		table.NewTD("ns", pod.Resource().GetNamespace(), tcell.StyleDefault),
-		table.NewTD("name", pod.Resource().GetName(), tcell.StyleDefault),
-		table.NewTD("version", pod.Resource().GetResourceVersion(), tcell.StyleDefault),
-		table.NewTD("phase", phase, tcell.StyleDefault),
-		table.NewTD("conditions", conditions, tcell.StyleDefault),
-		table.NewTD("message", message, tcell.StyleDefault),
+		table.NewTD("ns", pod.Resource().GetNamespace(), theme.LabelNormal),
+		table.NewTD("name", pod.Resource().GetName(), theme.LabelNormal),
+		table.NewTD("version", pod.Resource().GetResourceVersion(), theme.LabelNormal),
+		table.NewTD("phase", phase, theme.LabelNormal),
+		table.NewTD("conditions", conditions, theme.LabelNormal),
+		table.NewTD("message", message, theme.LabelNormal),
 	}
 	return table.NewTR(pod.ID(), cols)
 }
