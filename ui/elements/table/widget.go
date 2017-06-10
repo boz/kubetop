@@ -7,7 +7,7 @@ import (
 )
 
 type Widget struct {
-	model *tableModel
+	model model
 	colsz []int
 
 	view  views.View
@@ -18,7 +18,7 @@ type Widget struct {
 
 func NewWidget(cols []TH) *Widget {
 	return &Widget{
-		model: newTableModel(cols),
+		model: newModel(cols),
 		hport: views.NewViewPort(nil, 0, 0, 0, 0),
 		rport: views.NewViewPort(nil, 0, 1, 0, 0),
 	}
