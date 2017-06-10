@@ -198,7 +198,10 @@ func (tw *Widget) keyEscape() bool {
 }
 
 func (tw *Widget) scrollToActive() {
-	if idx, _ := tw.model.getActive(); idx >= 0 {
+	if idx, row := tw.model.getActive(); idx >= 0 {
 		tw.rport.MakeVisible(-1, idx)
+		tw.PostEvent(newEventRowActive(tw, row))
+		return
 	}
+	tw.PostEvent(newEventRowInactive(tw))
 }
