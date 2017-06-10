@@ -3,19 +3,23 @@ package table
 import (
 	"container/list"
 	"sort"
+	"strings"
 )
 
 type tableModel struct {
 	cols     []TH
+	sortcols []int
 	rows     *list.List
 	selected *list.Element
 }
 
 func newTableModel(cols []TH) *tableModel {
-	return &tableModel{
+	model := &tableModel{
 		cols: cols,
 		rows: list.New(),
 	}
+	model.sortPrep()
+	return model
 }
 
 func (m *tableModel) columns() []TH {
@@ -144,7 +148,26 @@ func (m *tableModel) find(id string) *list.Element {
 	return nil
 }
 
+func (m *tableModel) sortPrep() {
+	sortcols := make([]int, 0)
+	for idx, col := range m.cols {
+		if sidx := col.SortOrder(); sidx >= 0 && col.Sortable() {
+			sortcols = append(sortcols, idx)
+		}
+	}
+	sort.SliceStable(sortcols, func(i, j int) bool {
+		return m.cols[i].SortOrder() < m.cols[j].SortOrder()
+	})
+	m.sortcols = sortcols
+}
+
 func (m *tableModel) compare(a, b TR) int {
+	acols, bcols := a.Columns(), b.Columns()
+	for _, idx := range m.sortcols {
+		if val := strings.Compare(acols[idx].Key(), bcols[idx].Key()); val != 0 {
+			return val
+		}
+	}
 	return 0
 }
 
