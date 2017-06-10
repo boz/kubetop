@@ -1,6 +1,6 @@
 package table
 
-import "github.com/gdamore/tcell"
+import "github.com/boz/kubetop/ui/theme"
 
 type TD interface {
 	ID() string
@@ -10,13 +10,13 @@ type TD interface {
 }
 
 type tableTD struct {
-	id    string
-	text  string
-	style tcell.Style
+	id   string
+	text string
+	tv   theme.LabelVariant
 }
 
-func NewTD(id string, text string, style tcell.Style) TD {
-	return &tableTD{id, text, style}
+func NewTD(id string, text string, th theme.LabelVariant) TD {
+	return &tableTD{id, text, th}
 }
 
 func (col *tableTD) ID() string {
@@ -32,5 +32,5 @@ func (col *tableTD) Key() string {
 }
 
 func (col *tableTD) Draw(view CellView) {
-	view.SetText(col.text, col.style)
+	view.SetText(col.text, col.tv)
 }

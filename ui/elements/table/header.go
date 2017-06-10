@@ -1,5 +1,7 @@
 package table
 
+import "github.com/boz/kubetop/ui/theme"
+
 type TH interface {
 	TD
 	Sortable() bool
@@ -15,9 +17,9 @@ type tableTH struct {
 func NewTH(id string, text string, sortable bool, sortOrder int) TH {
 	return &tableTH{
 		tableTD: tableTD{
-			id:    id,
-			text:  text,
-			style: styleTH,
+			id:   id,
+			text: text,
+			tv:   theme.LabelNormal,
 		},
 		sortable:  sortable,
 		sortOrder: sortOrder,
