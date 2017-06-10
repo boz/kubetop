@@ -4,12 +4,14 @@ import (
 	"sync"
 
 	"github.com/boz/kubetop/backend/pod"
+	"github.com/boz/kubetop/backend/service"
 	"github.com/boz/kubetop/util"
 	"k8s.io/client-go/kubernetes"
 )
 
 type Backend interface {
 	Pods() (pod.BaseDatasource, error)
+	Services() (service.BaseDatasource, error)
 
 	Stop()
 }
@@ -17,7 +19,8 @@ type Backend interface {
 type backend struct {
 	clientset kubernetes.Interface
 
-	pods pod.Datasource
+	pods     pod.Datasource
+	services service.Datasource
 
 	env util.Env
 }
@@ -48,6 +51,17 @@ func (b *backend) Pods() (pod.BaseDatasource, error) {
 		b.pods = pods
 	}
 	return b.pods, nil
+}
+
+func (b *backend) Services() (service.BaseDatasource, error) {
+	if b.services == nil {
+		services, err := service.NewBase(b.env, b.clientset)
+		if err != nil {
+			return nil, err
+		}
+		b.services = services
+	}
+	return b.services, nil
 }
 
 type closeable interface {

@@ -15,7 +15,7 @@ type App struct {
 	stopch chan bool
 	donech chan bool
 
-	presenter elements.Presenter
+	ctx elements.Context
 }
 
 func NewApp(env util.Env, backend backend.Backend) *App {
@@ -24,8 +24,8 @@ func NewApp(env util.Env, backend backend.Backend) *App {
 	stopch := make(chan bool, 1)
 	tapp := &views.Application{}
 
-	presenter := elements.NewPresenter(env, backend, tapp, views.NewSpacer())
-	main := newMainWidget(presenter, stopch)
+	ctx := elements.NewContext(env, backend, tapp)
+	main := newMainWidget(ctx, stopch)
 
 	tapp.SetRootWidget(main)
 

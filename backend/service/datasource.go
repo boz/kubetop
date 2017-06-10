@@ -1,4 +1,4 @@
-package pod
+package service
 
 import (
 	"context"
@@ -14,7 +14,7 @@ import (
 
 type BaseDatasource interface {
 	Ready() <-chan struct{}
-	List() ([]Pod, error)
+	List() ([]Service, error)
 	Subscribe(kcache.Filter) Subscription
 	Filter(kcache.Filter) Datasource
 }
@@ -27,7 +27,7 @@ type Datasource interface {
 
 type Subscription interface {
 	Ready() <-chan struct{}
-	List() ([]Pod, error)
+	List() ([]Service, error)
 	Events() <-chan Event
 	Refilter(kcache.Filter)
 	Close()
@@ -35,10 +35,10 @@ type Subscription interface {
 }
 
 func NewBase(env util.Env, clientset kubernetes.Interface) (Datasource, error) {
-	env = env.ForComponent("backend/pod/base-datasource")
-	env = env.WithFields("model", "pod")
+	env = env.ForComponent("backend/service/base-datasource")
+	env = env.WithFields("model", "service")
 
-	client := client.ForResource(clientset.CoreV1().RESTClient(), "pods", metav1.NamespaceAll, fields.Everything())
+	client := client.ForResource(clientset.CoreV1().RESTClient(), "services", metav1.NamespaceAll, fields.Everything())
 	ctx := context.Background()
 	log := lr.New(env.Log().WithField("layer", "controller"))
 
@@ -61,7 +61,7 @@ type _filterDatasource struct {
 }
 
 func (db *_datasource) Filter(filter kcache.Filter) Datasource {
-	env := db.env.ForComponent("backend/pod/datasource").WithID()
+	env := db.env.ForComponent("backend/service/datasource").WithID()
 	log := lr.New(env.Log())
 	controller := kcache.CloneWithFilter(log, db.controller, filter)
 	return &_filterDatasource{controller, _datasource{controller, db.adapter, env}}
@@ -75,7 +75,7 @@ func (db *_datasource) Stop() {
 	db.controller.Close()
 }
 
-func (ds *_datasource) List() ([]Pod, error) {
+func (ds *_datasource) List() ([]Service, error) {
 	return doList(ds.adapter, ds.controller.Cache())
 }
 
@@ -103,7 +103,7 @@ type subscription struct {
 }
 
 func newSubscription(env util.Env, ds *_datasource, filter kcache.Filter) *subscription {
-	env = env.ForComponent("backend/pod/subcription").WithID()
+	env = env.ForComponent("backend/service/subcription").WithID()
 	log := lr.New(ds.env.Log())
 	parent := kcache.SubscribeWithFilter(log, ds.controller, filter)
 	s := &subscription{
@@ -128,7 +128,7 @@ func (s *subscription) Closed() <-chan struct{} {
 	return s.parent.Done()
 }
 
-func (s *subscription) List() ([]Pod, error) {
+func (s *subscription) List() ([]Service, error) {
 	return doList(s.adapter, s.parent.Cache())
 }
 
@@ -143,16 +143,16 @@ func (s *subscription) Refilter(filter kcache.Filter) {
 func (s *subscription) translateEvents() {
 	defer close(s.outch)
 	for ev := range s.parent.Events() {
-		pod, err := s.adapter.FromResource(ev.Resource())
+		service, err := s.adapter.FromResource(ev.Resource())
 		if err != nil {
 			s.env.LogErr(err, "adapt event")
 			continue
 		}
-		s.outch <- newEvent(ev.Type(), pod)
+		s.outch <- newEvent(ev.Type(), service)
 	}
 }
 
-func doList(adapter Adapter, cr kcache.CacheReader) ([]Pod, error) {
+func doList(adapter Adapter, cr kcache.CacheReader) ([]Service, error) {
 	objs, err := cr.List()
 	if err != nil {
 		return nil, err
