@@ -24,7 +24,6 @@ func NewTH(id string, text string, sortable bool, sortOrder int) TH {
 		sortable:  sortable,
 		sortOrder: sortOrder,
 	}
-	return nil
 }
 
 func (th *tableTH) Sortable() bool {

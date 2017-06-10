@@ -31,7 +31,7 @@ func (m *tableModel) each(fn func(int, TR)) {
 	for e := m.rows.Front(); e != nil; e = e.Next() {
 		row := e.Value.(TR)
 		fn(i, row)
-		i += 1
+		i++
 	}
 }
 
@@ -175,7 +175,7 @@ func (m *tableModel) elIndex(el *list.Element) int {
 	var e *list.Element
 	var idx int
 	for e = m.rows.Front(); el != nil && e != el && e != nil; e = e.Next() {
-		idx += 1
+		idx++
 	}
 	if e == nil {
 		return -1
