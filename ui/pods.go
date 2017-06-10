@@ -5,7 +5,7 @@ import (
 
 	"github.com/boz/kcache"
 	"github.com/boz/kubetop/backend/pod"
-	"github.com/boz/kubetop/ui/elements"
+	"github.com/boz/kubetop/ui/elements/table"
 	"github.com/boz/kubetop/util"
 	"github.com/gdamore/tcell"
 )
@@ -48,17 +48,16 @@ func newPodIndexBuilder(env util.Env, ds pod.BaseDatasource) IndexBuilder {
 	return &podIndexBuilder{env, ds}
 }
 
-func (b *podIndexBuilder) Model() elements.Table {
-	header := elements.NewTableHeader([]elements.TableColumn{
-		elements.NewTableTH("ns", "Namespace"),
-		elements.NewTableTH("name", "Name"),
-		elements.NewTableTH("version", "Version"),
-		elements.NewTableTH("phase", "Phase"),
-		elements.NewTableTH("conditions", "Conditions"),
-		elements.NewTableTH("message", "Message"),
-	})
-	rows := []elements.TableRow{}
-	return elements.NewTable(header, rows)
+func (b *podIndexBuilder) Model() []table.TH {
+	header := []table.TH{
+		table.NewTH("ns", "Namespace", true, 0),
+		table.NewTH("name", "Name", true, 1),
+		table.NewTH("version", "Version", true, -1),
+		table.NewTH("phase", "Phase", true, -1),
+		table.NewTH("conditions", "Conditions", true, -1),
+		table.NewTH("message", "Message", true, -1),
+	}
+	return header
 }
 
 func (b *podIndexBuilder) Create(w IndexWidget, donech <-chan struct{}) IndexProvider {
@@ -113,7 +112,7 @@ func (p *podIndexProvider) doInitialize() {
 	pods, err := p.sub.List()
 	if err != nil {
 	}
-	rows := make([]elements.TableRow, 0, len(pods))
+	rows := make([]table.TR, 0, len(pods))
 	for _, pod := range pods {
 		rows = append(rows, p.generateRow(pod))
 	}
@@ -127,12 +126,13 @@ func (p *podIndexProvider) handleEvent(ev pod.Event) {
 	case kcache.EventTypeDelete:
 		p.widget.RemoveRow(obj.ID())
 	case kcache.EventTypeCreate:
+		p.widget.InsertRow(p.generateRow(obj))
 	case kcache.EventTypeUpdate:
 		p.widget.UpdateRow(p.generateRow(obj))
 	}
 }
 
-func (p *podIndexProvider) generateRow(pod pod.Pod) elements.TableRow {
+func (p *podIndexProvider) generateRow(pod pod.Pod) table.TR {
 
 	stat := pod.Resource().Status
 
@@ -154,14 +154,14 @@ func (p *podIndexProvider) generateRow(pod pod.Pod) elements.TableRow {
 
 	//message += strings.Repeat("x", 50)
 
-	cols := []elements.TableColumn{
-		elements.NewTableColumn("ns", pod.Resource().GetNamespace(), tcell.StyleDefault),
-		elements.NewTableColumn("name", pod.Resource().GetName(), tcell.StyleDefault),
-		elements.NewTableColumn("version", pod.Resource().GetResourceVersion(), tcell.StyleDefault),
-		elements.NewTableColumn("phase", phase, tcell.StyleDefault),
-		elements.NewTableColumn("conditions", conditions, tcell.StyleDefault),
-		elements.NewTableColumn("message", message, tcell.StyleDefault),
+	cols := []table.TD{
+		table.NewTD("ns", pod.Resource().GetNamespace(), tcell.StyleDefault),
+		table.NewTD("name", pod.Resource().GetName(), tcell.StyleDefault),
+		table.NewTD("version", pod.Resource().GetResourceVersion(), tcell.StyleDefault),
+		table.NewTD("phase", phase, tcell.StyleDefault),
+		table.NewTD("conditions", conditions, tcell.StyleDefault),
+		table.NewTD("message", message, tcell.StyleDefault),
 	}
-	return elements.NewTableRow(pod.ID(), cols)
+	return table.NewTR(pod.ID(), cols)
 
 }

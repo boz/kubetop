@@ -2,14 +2,16 @@ package ui
 
 import (
 	"github.com/boz/kubetop/ui/elements"
+	"github.com/boz/kubetop/ui/elements/table"
 	"github.com/gdamore/tcell"
 	"github.com/gdamore/tcell/views"
 )
 
 type IndexWidget interface {
 	views.Widget
-	ResetRows([]elements.TableRow)
-	UpdateRow(elements.TableRow)
+	ResetRows([]table.TR)
+	InsertRow(table.TR)
+	UpdateRow(table.TR)
 	RemoveRow(string)
 }
 
@@ -18,14 +20,14 @@ type IndexProvider interface {
 }
 
 type IndexBuilder interface {
-	Model() elements.Table
+	Model() []table.TH
 	Create(IndexWidget, <-chan struct{}) IndexProvider
 }
 
 type indexWidget struct {
 	builder  IndexBuilder
 	provider IndexProvider
-	content  *elements.TableWidget
+	content  *table.Widget
 	elements.Presentable
 }
 
@@ -33,7 +35,7 @@ func NewIndexWidget(
 	name string, p elements.Presenter, builder IndexBuilder) views.Widget {
 	index := &indexWidget{
 		builder: builder,
-		content: elements.NewTableWidget(builder.Model()),
+		content: table.NewWidget(builder.Model()),
 	}
 	p.New(name, index)
 	index.provider = builder.Create(index, index.Presenter().Closed())
@@ -68,18 +70,23 @@ func (w *indexWidget) Unwatch(handler tcell.EventHandler) {
 	w.content.Unwatch(handler)
 }
 
-func (w *indexWidget) ResetRows(rows []elements.TableRow) {
+func (w *indexWidget) ResetRows(rows []table.TR) {
 	w.PostFunc(func() {
-		for _, row := range rows {
-			w.content.AddRow(row)
-		}
+		w.content.ResetRows(rows)
 		w.Resize()
 	})
 }
 
-func (w *indexWidget) UpdateRow(row elements.TableRow) {
+func (w *indexWidget) InsertRow(row table.TR) {
 	w.PostFunc(func() {
-		w.content.AddRow(row)
+		w.content.InsertRow(row)
+		w.Resize()
+	})
+}
+
+func (w *indexWidget) UpdateRow(row table.TR) {
+	w.PostFunc(func() {
+		w.content.UpdateRow(row)
 		w.Resize()
 	})
 }
