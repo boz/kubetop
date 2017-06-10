@@ -54,6 +54,4 @@ func getKubeRestConfig() (*rest.Config, error) {
 		clientcmd.NewDefaultClientConfigLoadingRules(),
 		&clientcmd.ConfigOverrides{},
 	).ClientConfig()
-
-	return config, err
 }
