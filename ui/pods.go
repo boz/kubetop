@@ -94,6 +94,7 @@ func (p *podIndexProvider) run() {
 	for {
 		select {
 		case <-p.donech:
+			return
 		case <-p.sub.Closed():
 			return
 		case <-readych:
