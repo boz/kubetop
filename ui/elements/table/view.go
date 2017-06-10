@@ -9,13 +9,13 @@ var (
 	styleColPad = 2
 )
 
-type CellView interface {
+type View interface {
 	Size() (int, int)
 	SetText(string, theme.LabelVariant)
 	SetContent(x, y int, ch rune, comb []rune, th theme.LabelVariant)
 }
 
-type cellView struct {
+type _view struct {
 	view   views.View
 	xoff   int
 	yoff   int
@@ -24,19 +24,19 @@ type cellView struct {
 	theme  theme.LabelTheme
 }
 
-func NewCellView(view views.View, xoff, yoff, width, height int, theme theme.LabelTheme) CellView {
-	return &cellView{view, xoff, yoff, width, height, theme}
+func newView(view views.View, xoff, yoff, width, height int, theme theme.LabelTheme) View {
+	return &_view{view, xoff, yoff, width, height, theme}
 }
 
-func (v *cellView) Size() (int, int) {
+func (v *_view) Size() (int, int) {
 	return v.width, v.height
 }
 
-func (v *cellView) SetContent(x, y int, ch rune, comb []rune, th theme.LabelVariant) {
+func (v *_view) SetContent(x, y int, ch rune, comb []rune, th theme.LabelVariant) {
 	v.view.SetContent(x+v.xoff, y+v.yoff, ch, comb, v.theme.Get(th))
 }
 
-func (v *cellView) SetText(text string, th theme.LabelVariant) {
+func (v *_view) SetText(text string, th theme.LabelVariant) {
 	for i, ch := range text {
 		v.SetContent(i, 0, ch, nil, th)
 	}
