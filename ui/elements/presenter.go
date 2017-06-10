@@ -59,6 +59,10 @@ func (p *Presentable) Backend() backend.Backend {
 	return p.presenter.Backend()
 }
 
+func (p *Presentable) PostFunc(fn func()) {
+	p.presenter.PostFunc(fn)
+}
+
 type presenter struct {
 	content views.Widget
 	poster  funcPoster

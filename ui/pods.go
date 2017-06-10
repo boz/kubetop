@@ -6,8 +6,8 @@ import (
 	"github.com/boz/kcache"
 	"github.com/boz/kubetop/backend/pod"
 	"github.com/boz/kubetop/ui/elements"
+	"github.com/boz/kubetop/util"
 	"github.com/gdamore/tcell"
-	"github.com/gdamore/tcell/views"
 )
 
 /*
@@ -39,13 +39,16 @@ namespace name containers owner ctime phase condition message
 - NodeSelector
 */
 
-type podIndexWidget struct {
-	content *elements.TableWidget
-	model   elements.Table
-	elements.Presentable
+type podIndexBuilder struct {
+	env util.Env
+	ds  pod.BaseDatasource
 }
 
-func newPodTable() elements.Table {
+func newPodIndexBuilder(env util.Env, ds pod.BaseDatasource) IndexBuilder {
+	return &podIndexBuilder{env, ds}
+}
+
+func (b *podIndexBuilder) Model() elements.Table {
 	header := elements.NewTableHeader([]elements.TableColumn{
 		elements.NewTableTH("ns", "Namespace"),
 		elements.NewTableTH("name", "Name"),
@@ -58,110 +61,78 @@ func newPodTable() elements.Table {
 	return elements.NewTable(header, rows)
 }
 
-func newPodIndexWidget(p elements.Presenter) views.Widget {
+func (b *podIndexBuilder) Create(w IndexWidget, donech <-chan struct{}) IndexProvider {
+	return newPodIndexProvider(b.env, b.ds, w, donech)
+}
 
-	model := newPodTable()
+type podIndexProvider struct {
+	widget IndexWidget
+	donech <-chan struct{}
+	env    util.Env
+	sub    pod.Subscription
+}
 
-	w := &podIndexWidget{
-		model:   model,
-		content: elements.NewTableWidget(model),
+func newPodIndexProvider(env util.Env, ds pod.BaseDatasource, w IndexWidget, donech <-chan struct{}) IndexProvider {
+	p := &podIndexProvider{
+		widget: w,
+		donech: donech,
+		env:    env,
+		sub:    ds.Subscribe(),
 	}
-
-	p.New("pods/index", w)
-	go w.run()
-	return w
+	go p.run()
+	return p
 }
 
-func (w *podIndexWidget) Draw() {
-	w.content.Draw()
+func (p *podIndexProvider) Stop() {
+	p.sub.Close()
 }
 
-func (w *podIndexWidget) Resize() {
-	w.content.Resize()
-}
+func (p *podIndexProvider) run() {
+	defer p.sub.Close()
 
-func (w *podIndexWidget) HandleEvent(ev tcell.Event) bool {
-	return w.content.HandleEvent(ev)
-}
-
-func (w *podIndexWidget) SetView(view views.View) {
-	w.content.SetView(view)
-}
-
-func (w *podIndexWidget) Size() (int, int) {
-	return w.content.Size()
-}
-
-func (w *podIndexWidget) Watch(handler tcell.EventHandler) {
-	w.content.Watch(handler)
-}
-
-func (w *podIndexWidget) Unwatch(handler tcell.EventHandler) {
-	w.content.Unwatch(handler)
-}
-
-func (w *podIndexWidget) run() {
-	p := w.Presenter()
-
-	ds, err := p.Backend().Pods()
-	if err != nil {
-		w.handleError(err, "datasource")
-		return
-	}
-
-	sub := ds.Subscribe()
-	defer sub.Close()
-
-	select {
-	case <-p.Closed():
-		w.Env().Log().Debug("presenter closed")
-		return
-	case <-sub.Closed():
-		w.Env().Log().Debug("sub closed")
-		return
-	case <-sub.Ready():
-		w.Env().Log().Debug("sub ready")
-		pods, err := sub.List()
-		if err != nil {
-			w.handleError(err, "list")
-			return
-		}
-		p.PostFunc(func() {
-			w.initialize(pods)
-		})
-	}
+	readych := p.sub.Ready()
 
 	for {
 		select {
-		case <-p.Closed():
-			w.Env().Log().Debug("presenter closed")
+		case <-p.donech:
+		case <-p.sub.Closed():
 			return
-		case <-sub.Closed():
-			w.Env().Log().Debug("sub closed")
-			return
-		case ev, ok := <-sub.Events():
-			w.Env().Log().Debugf("got event %#v", ev)
-
+		case <-readych:
+			readych = nil
+			p.doInitialize()
+		case ev, ok := <-p.sub.Events():
 			if !ok {
-				w.Env().Log().Debug("events closed")
-				// closed
 				return
 			}
-			p.PostFunc(func() {
-				w.handleDSEvent(ev)
-			})
+			p.handleEvent(ev)
 		}
 	}
 }
 
-func (w *podIndexWidget) initialize(pods []pod.Pod) {
-	for _, pod := range pods {
-		w.content.AddRow(w.rowForPod(pod))
+func (p *podIndexProvider) doInitialize() {
+	pods, err := p.sub.List()
+	if err != nil {
 	}
-	w.Resize()
+	rows := make([]elements.TableRow, 0, len(pods))
+	for _, pod := range pods {
+		rows = append(rows, p.generateRow(pod))
+	}
+	p.widget.ResetRows(rows)
 }
 
-func (w *podIndexWidget) rowForPod(pod pod.Pod) elements.TableRow {
+func (p *podIndexProvider) handleEvent(ev pod.Event) {
+	obj := ev.Resource()
+
+	switch ev.Type() {
+	case kcache.EventTypeDelete:
+		p.widget.RemoveRow(obj.ID())
+	case kcache.EventTypeCreate:
+	case kcache.EventTypeUpdate:
+		p.widget.UpdateRow(p.generateRow(obj))
+	}
+}
+
+func (p *podIndexProvider) generateRow(pod pod.Pod) elements.TableRow {
 
 	stat := pod.Resource().Status
 
@@ -192,20 +163,5 @@ func (w *podIndexWidget) rowForPod(pod pod.Pod) elements.TableRow {
 		elements.NewTableColumn("message", message, tcell.StyleDefault),
 	}
 	return elements.NewTableRow(pod.ID(), cols)
-}
 
-func (w *podIndexWidget) handleError(err error, msg string) {
-	w.Env().LogErr(err, "pods")
-}
-
-func (w *podIndexWidget) handleDSEvent(ev pod.Event) {
-	switch ev.Type() {
-	case kcache.EventTypeDelete:
-		w.content.RemoveRow(ev.Resource().ID())
-		w.content.Resize()
-	case kcache.EventTypeCreate:
-	case kcache.EventTypeUpdate:
-		w.content.AddRow(w.rowForPod(ev.Resource()))
-		w.content.Resize()
-	}
 }
