@@ -76,6 +76,8 @@ func (w *mainWidget) HandleEvent(ev tcell.Event) bool {
 				return true
 			case 'P', 'p':
 				w.showPodIndex()
+			case 'S', 's':
+				w.showServiceIndex()
 			case 'X', 'x':
 				popup := elements.NewPopup(w.ctx, 10, 10, theme.Base)
 				popup.SetContent(w.textArea())
@@ -91,6 +93,12 @@ func (w *mainWidget) HandleEvent(ev tcell.Event) bool {
 func (w *mainWidget) showPodIndex() {
 	ds, _ := w.ctx.Backend().Pods()
 	widget := screen.NewPodIndex(w.ctx, ds)
+	w.setContent(widget)
+}
+
+func (w *mainWidget) showServiceIndex() {
+	ds, _ := w.ctx.Backend().Services()
+	widget := screen.NewServiceIndex(w.ctx, ds)
 	w.setContent(widget)
 }
 
