@@ -75,7 +75,7 @@ func (c *serviceController) run() {
 			case kcache.EventTypeCreate:
 				c.handler.OnCreate(ev.Resource())
 			case kcache.EventTypeUpdate:
-				c.handler.OnCreate(ev.Resource())
+				c.handler.OnUpdate(ev.Resource())
 			case kcache.EventTypeDelete:
 				c.handler.OnDelete(ev.Resource())
 			}
