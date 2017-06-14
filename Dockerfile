@@ -1,6 +1,4 @@
-FROM busybox 
-
-# kubectl run -it --image=kubetop --restart=Never --rm kubetop
+FROM alpine
 
 ADD ./kubetop-linux /kubetop
 
