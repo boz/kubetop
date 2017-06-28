@@ -11,7 +11,7 @@ import (
 func NewServiceTable(ctx elements.Context, ds service.BaseDatasource) elements.Widget {
 	content := table.NewWidget(view.ServiceTableColumns())
 	ctx = ctx.New("service/table")
-	handler := controller.NewServicePostHandler(ctx, view.NewServiceTableWriter(content))
+	handler := controller.NewServicesPostHandler(ctx, view.NewServiceTableWriter(content))
 	controller.NewServiceController(ctx, ds, handler)
 	return elements.NewWidget(ctx, content)
 }

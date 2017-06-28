@@ -23,7 +23,7 @@ type podTable struct {
 	content table.Display
 }
 
-func NewPodTableWriter(content table.Display) controller.PodHandler {
+func NewPodTableWriter(content table.Display) controller.PodsHandler {
 	return &podTable{content}
 }
 
