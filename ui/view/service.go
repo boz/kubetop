@@ -20,7 +20,7 @@ type serviceTable struct {
 	content table.Display
 }
 
-func NewServiceTableWriter(content table.Display) controller.ServiceHandler {
+func NewServiceTableWriter(content table.Display) controller.ServicesHandler {
 	return &serviceTable{content}
 }
 

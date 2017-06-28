@@ -11,7 +11,7 @@ import (
 func NewPodTable(ctx elements.Context, ds pod.BaseDatasource) elements.Widget {
 	content := table.NewWidget(view.PodTableColumns())
 	ctx = ctx.New("pod/table")
-	handler := controller.NewPodPostHandler(ctx, view.NewPodTableWriter(content))
-	controller.NewPodController(ctx, ds, handler)
+	handler := controller.NewPodsPostHandler(ctx, view.NewPodTableWriter(content))
+	controller.NewPodsController(ctx, ds, handler)
 	return elements.NewWidget(ctx, content)
 }

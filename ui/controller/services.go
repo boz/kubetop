@@ -6,54 +6,54 @@ import (
 	"github.com/boz/kubetop/ui/elements"
 )
 
-type ServiceHandler interface {
+type ServicesHandler interface {
 	OnInitialize([]service.Service)
 	OnCreate(service.Service)
 	OnUpdate(service.Service)
 	OnDelete(service.Service)
 }
 
-type servicePostHandler struct {
+type servicesPostHandler struct {
 	poster  elements.Poster
-	handler ServiceHandler
+	handler ServicesHandler
 }
 
-func NewServicePostHandler(poster elements.Poster, handler ServiceHandler) ServiceHandler {
-	return &servicePostHandler{poster, handler}
+func NewServicesPostHandler(poster elements.Poster, handler ServicesHandler) ServicesHandler {
+	return &servicesPostHandler{poster, handler}
 }
 
-func (p *servicePostHandler) OnInitialize(objs []service.Service) {
+func (p *servicesPostHandler) OnInitialize(objs []service.Service) {
 	p.poster.PostFunc(func() { p.handler.OnInitialize(objs) })
 }
 
-func (p *servicePostHandler) OnCreate(obj service.Service) {
+func (p *servicesPostHandler) OnCreate(obj service.Service) {
 	p.poster.PostFunc(func() { p.handler.OnCreate(obj) })
 }
 
-func (p *servicePostHandler) OnUpdate(obj service.Service) {
+func (p *servicesPostHandler) OnUpdate(obj service.Service) {
 	p.poster.PostFunc(func() { p.handler.OnUpdate(obj) })
 }
 
-func (p *servicePostHandler) OnDelete(obj service.Service) {
+func (p *servicesPostHandler) OnDelete(obj service.Service) {
 	p.poster.PostFunc(func() { p.handler.OnDelete(obj) })
 }
 
-type ServiceController interface {
+type ServicesController interface {
 }
 
-type serviceController struct {
+type servicesController struct {
 	sub     service.Subscription
-	handler ServiceHandler
+	handler ServicesHandler
 	ctx     elements.Context
 }
 
-func NewServiceController(ctx elements.Context, ds service.BaseDatasource, handler ServiceHandler) ServiceController {
-	controller := &serviceController{ds.Subscribe(kcache.NullFilter()), handler, ctx}
+func NewServiceController(ctx elements.Context, ds service.BaseDatasource, handler ServicesHandler) ServicesController {
+	controller := &servicesController{ds.Subscribe(kcache.NullFilter()), handler, ctx}
 	go controller.run()
 	return controller
 }
 
-func (c *serviceController) run() {
+func (c *servicesController) run() {
 	defer c.sub.Close()
 
 	readych := c.sub.Ready()
