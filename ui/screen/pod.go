@@ -3,57 +3,97 @@ package screen
 import (
 	"github.com/boz/kubetop/backend/pod"
 	"github.com/boz/kubetop/ui/elements"
+	"github.com/boz/kubetop/ui/elements/table"
 	"github.com/boz/kubetop/ui/widget"
 	"github.com/gdamore/tcell"
 	"github.com/gdamore/tcell/views"
 )
 
 type podIndex struct {
-	content elements.Widget
+	layout  *views.BoxLayout
+	table   elements.Widget
+	details elements.Widget
 	ctx     elements.Context
 }
 
 func NewPodIndex(ctx elements.Context, ds pod.BaseDatasource) elements.Widget {
 	ctx = ctx.New("pod/index")
-	content := widget.NewPodTable(ctx, ds)
-	index := &podIndex{content, ctx}
-	content.Watch(index)
+
+	table := widget.NewPodTable(ctx, ds)
+
+	layout := views.NewBoxLayout(views.Vertical)
+	layout.AddWidget(table, 1.0)
+
+	index := &podIndex{
+		layout: layout,
+		table:  table,
+		ctx:    ctx,
+	}
+
+	layout.Watch(index)
+	table.Watch(index)
+
 	return index
 }
 
 func (w *podIndex) Draw() {
-	w.content.Draw()
+	w.layout.Draw()
 }
 
 func (w *podIndex) Resize() {
-	w.content.Resize()
+	w.layout.Resize()
 }
 
 func (w *podIndex) HandleEvent(ev tcell.Event) bool {
-	switch ev.(type) {
-	case *views.EventWidgetResize:
-		w.Resize()
+	w.ctx.Env().Log().Debugf("HandleEvent: %#v", ev)
+	switch ev := ev.(type) {
+	case *views.EventWidgetContent:
+		if ev.Widget() == w.layout {
+			w.Resize()
+			return true
+		}
+	case *table.EventRowActive:
+		w.showDetails(ev.Row().ID())
+		return true
+	case *table.EventRowInactive:
+		w.removeDetails()
 		return true
 	}
-	return w.content.HandleEvent(ev)
+	return w.table.HandleEvent(ev)
 }
 
 func (w *podIndex) SetView(view views.View) {
-	w.content.SetView(view)
+	w.layout.SetView(view)
 }
 
 func (w *podIndex) Size() (int, int) {
-	return w.content.Size()
+	return w.layout.Size()
 }
 
 func (w *podIndex) Watch(handler tcell.EventHandler) {
-	w.content.Watch(handler)
+	w.layout.Watch(handler)
 }
 
 func (w *podIndex) Unwatch(handler tcell.EventHandler) {
-	w.content.Unwatch(handler)
+	w.layout.Unwatch(handler)
 }
 
 func (w *podIndex) Close() {
 	w.ctx.Close()
+}
+
+func (w *podIndex) showDetails(id string) {
+	w.removeDetails()
+	details, _ := widget.NewPodDetails(w.ctx, id)
+	details.Watch(w)
+	w.details = details
+	w.layout.InsertWidget(0, w.details, 1)
+}
+
+func (w *podIndex) removeDetails() {
+	if w.details != nil {
+		w.details.Unwatch(w)
+		w.layout.RemoveWidget(w.details)
+		w.details.Close()
+	}
 }

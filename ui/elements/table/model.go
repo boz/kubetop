@@ -9,6 +9,7 @@ import (
 type model interface {
 	columns() []TH
 	each(func(int, TR))
+	size() int
 
 	reset([]TR)
 	insert(TR)
@@ -40,6 +41,10 @@ func newModel(cols []TH) *_model {
 
 func (m *_model) columns() []TH {
 	return m.cols
+}
+
+func (m *_model) size() int {
+	return m.rows.Len()
 }
 
 func (m *_model) each(fn func(int, TR)) {

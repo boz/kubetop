@@ -31,7 +31,7 @@ func (w *serviceIndex) Resize() {
 
 func (w *serviceIndex) HandleEvent(ev tcell.Event) bool {
 	switch ev.(type) {
-	case *views.EventWidgetResize:
+	case *views.EventWidgetContent:
 		w.Resize()
 		return true
 	}

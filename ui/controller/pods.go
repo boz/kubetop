@@ -4,10 +4,18 @@ import (
 	"github.com/boz/kcache"
 	"github.com/boz/kubetop/backend/pod"
 	"github.com/boz/kubetop/ui/elements"
+	"github.com/boz/kubetop/util"
 )
 
 type PodsHandler interface {
 	OnInitialize([]pod.Pod)
+	OnCreate(pod.Pod)
+	OnUpdate(pod.Pod)
+	OnDelete(pod.Pod)
+}
+
+type PodHandler interface {
+	OnInitialize(pod.Pod)
 	OnCreate(pod.Pod)
 	OnUpdate(pod.Pod)
 	OnDelete(pod.Pod)
@@ -36,6 +44,11 @@ func (p *podsPostHandler) OnUpdate(obj pod.Pod) {
 
 func (p *podsPostHandler) OnDelete(obj pod.Pod) {
 	p.poster.PostFunc(func() { p.handler.OnDelete(obj) })
+}
+
+type podHandler struct {
+	delegate PodHandler
+	env      util.Env
 }
 
 type PodController interface {
@@ -81,4 +94,35 @@ func (c *podsController) run() {
 			}
 		}
 	}
+}
+
+func NewPodHandler(env util.Env, delegate PodHandler) PodsHandler {
+	return &podHandler{delegate, env}
+}
+
+func (p *podHandler) OnInitialize(objs []pod.Pod) {
+
+	if count := len(objs); count > 1 {
+		p.env.Log().Warnf("initialized with invalid count: %v", count)
+		return
+	}
+
+	if count := len(objs); count == 0 {
+		p.env.Log().Debugf("initialized with empty result, ignoring")
+		return
+	}
+
+	p.delegate.OnInitialize(objs[0])
+}
+
+func (p *podHandler) OnCreate(obj pod.Pod) {
+	p.delegate.OnCreate(obj)
+}
+
+func (p *podHandler) OnUpdate(obj pod.Pod) {
+	p.delegate.OnUpdate(obj)
+}
+
+func (p *podHandler) OnDelete(obj pod.Pod) {
+	p.delegate.OnDelete(obj)
 }

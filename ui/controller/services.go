@@ -65,6 +65,7 @@ func (c *servicesController) run() {
 			return
 		case <-readych:
 			objs, _ := c.sub.List()
+			c.ctx.Env().Log().Debugf("%v services", len(objs))
 			c.handler.OnInitialize(objs)
 			readych = nil
 		case ev, ok := <-c.sub.Events():

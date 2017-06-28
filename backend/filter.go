@@ -1,11 +1,13 @@
-package controller
+package backend
 
 import (
 	"reflect"
 
 	"github.com/boz/kcache"
+	"github.com/boz/kubetop/backend/nsname"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/client-go/pkg/api/v1"
 )
 
 type Filter interface {
@@ -35,24 +37,53 @@ func (f *labelsSelector) Equals(other Filter) bool {
 	return false
 }
 
-type nsName struct {
-	ns   string
-	name string
+type serviceSelector struct {
+	target labels.Set
 }
 
-type nsNameSelector map[nsName]bool
+func ServiceSelector(target map[string]string) Filter {
+	return &serviceSelector{labels.Set(target)}
+}
 
-func NSNamesSelector(objs ...metav1.Object) Filter {
-	set := make(map[nsName]bool)
-	for _, obj := range objs {
-		key := nsName{obj.GetNamespace(), obj.GetName()}
-		set[key] = true
+func (f *serviceSelector) Accept(obj metav1.Object) bool {
+	svc, ok := obj.(*v1.Service)
+
+	if !ok {
+		return false
+	}
+
+	if len(svc.Spec.Selector) == 0 {
+		return false
+	}
+
+	for k, v := range svc.Spec.Selector {
+		if f.target.Get(k) != v {
+			return false
+		}
+	}
+
+	return false
+}
+
+func (f *serviceSelector) Equals(other Filter) bool {
+	if other, ok := other.(*serviceSelector); ok {
+		return labels.Equals(f.target, other.target)
+	}
+	return false
+}
+
+type nsNameSelector map[nsname.NSName]bool
+
+func NSNamesSelector(ids ...nsname.NSName) Filter {
+	set := make(map[nsname.NSName]bool)
+	for _, id := range ids {
+		set[id] = true
 	}
 	return nsNameSelector(set)
 }
 
 func (f nsNameSelector) Accept(obj metav1.Object) bool {
-	key := nsName{obj.GetNamespace(), obj.GetName()}
+	key := nsname.ForObject(obj)
 	_, ok := f[key]
 	return ok
 }
