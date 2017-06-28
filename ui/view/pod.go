@@ -5,6 +5,7 @@ import (
 	"github.com/boz/kubetop/ui/controller"
 	"github.com/boz/kubetop/ui/elements/table"
 	"github.com/boz/kubetop/ui/theme"
+	"github.com/gdamore/tcell/views"
 	"k8s.io/client-go/pkg/api/v1"
 )
 
@@ -74,4 +75,43 @@ func (pt *podTable) renderRow(obj pod.Pod) table.TR {
 		table.NewTD("message", message, theme.LabelNormal),
 	}
 	return table.NewTR(obj.ID(), cols)
+}
+
+type PodDetails interface {
+	controller.PodHandler
+	views.Widget
+}
+
+func NewPodDetails() PodDetails {
+	return &podDetails{*views.NewText()}
+}
+
+type podDetails struct {
+	views.Text
+}
+
+func (w *podDetails) OnInitialize(obj pod.Pod) {
+	w.drawObject(obj)
+}
+
+func (w *podDetails) OnCreate(obj pod.Pod) {
+	w.drawObject(obj)
+}
+
+func (w *podDetails) OnUpdate(obj pod.Pod) {
+	w.drawObject(obj)
+}
+
+func (w *podDetails) OnDelete(obj pod.Pod) {
+	w.drawObject(obj)
+}
+
+func (w *podDetails) drawObject(obj pod.Pod) {
+	if obj == nil {
+		return
+	}
+
+	text := "name: " + obj.Name() + "\n"
+
+	w.SetText(text)
 }

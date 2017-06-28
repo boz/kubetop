@@ -2,6 +2,7 @@ package table
 
 import (
 	"github.com/boz/kubetop/ui/theme"
+	"github.com/boz/kubetop/util"
 	"github.com/gdamore/tcell"
 	"github.com/gdamore/tcell/views"
 )
@@ -21,24 +22,27 @@ type Widget struct {
 	hport *views.ViewPort
 	rport *views.ViewPort
 	views.WidgetWatchers
+
+	env util.Env
 }
 
-func NewWidget(cols []TH) *Widget {
+func NewWidget(env util.Env, cols []TH) *Widget {
 	return &Widget{
 		model: newModel(cols),
 		hport: views.NewViewPort(nil, 0, 0, 0, 0),
 		rport: views.NewViewPort(nil, 0, 1, 0, 0),
+		env:   env,
 	}
 }
 
 func (tw *Widget) ResetRows(rows []TR) {
 	tw.model.reset(rows)
-	tw.PostEventWidgetResize(tw)
+	tw.PostEventWidgetContent(tw)
 }
 
 func (tw *Widget) InsertRow(row TR) {
 	tw.model.insert(row)
-	tw.PostEventWidgetResize(tw)
+	tw.PostEventWidgetContent(tw)
 }
 
 func (tw *Widget) UpdateRow(row TR) {
@@ -48,10 +52,11 @@ func (tw *Widget) UpdateRow(row TR) {
 
 func (tw *Widget) RemoveRow(id string) {
 	tw.model.remove(id)
-	tw.PostEventWidgetResize(tw)
+	tw.PostEventWidgetContent(tw)
 }
 
 func (tw *Widget) Draw() {
+	tw._debug("Draw()")
 	tw.hport.Fill(' ', theme.Base)
 	tw.rport.Fill(' ', theme.Base)
 	tw.drawHeader()
@@ -65,6 +70,7 @@ func (tw *Widget) Resize() {
 		return
 	}
 	tw.resizeContent()
+	tw._debug("Resize()")
 }
 
 func (tw *Widget) HandleEvent(ev tcell.Event) bool {
@@ -104,6 +110,7 @@ func (tw *Widget) SetView(view views.View) {
 	tw.hport.SetView(view)
 	tw.rport.SetView(view)
 	tw.Resize()
+	tw._debug("SetView()")
 }
 
 func (tw *Widget) Size() (int, int) {
@@ -135,10 +142,13 @@ func (tw *Widget) resizeContent() {
 	for _, col := range colsz {
 		width += col
 	}
-	height := len(tw.model.columns())
+	height := tw.model.size()
 
 	tw.hport.Resize(0, 0, width, 1)
 	tw.rport.Resize(0, 1, width, height)
+
+	tw.env.Log().Debugf("resizeContent(): width=%v, height=%v", width, height)
+	tw._debug("resizeContent()")
 	tw.scrollToActive()
 }
 
@@ -176,6 +186,7 @@ func (tw *Widget) drawRow(yoff int, row TR) {
 func (tw *Widget) keyUp() bool {
 	if tw.model.activatePrev() {
 		tw.scrollToActive()
+		tw.postActive()
 		return true
 	}
 	return false
@@ -184,6 +195,7 @@ func (tw *Widget) keyUp() bool {
 func (tw *Widget) keyDown() bool {
 	if tw.model.activateNext() {
 		tw.scrollToActive()
+		tw.postActive()
 		return true
 	}
 	return false
@@ -201,14 +213,34 @@ func (tw *Widget) keyRight() bool {
 }
 
 func (tw *Widget) keyEscape() bool {
-	return tw.model.clearActive()
+	if tw.model.clearActive() {
+		tw.PostEvent(newEventRowInactive(tw))
+		return true
+	}
+	return false
 }
 
 func (tw *Widget) scrollToActive() {
-	if idx, row := tw.model.getActive(); idx >= 0 {
+	if idx, _ := tw.model.getActive(); idx >= 0 {
 		tw.rport.MakeVisible(-1, idx)
-		tw.PostEvent(newEventRowActive(tw, row))
-		return
 	}
-	tw.PostEvent(newEventRowInactive(tw))
+}
+
+func (tw *Widget) postActive() {
+	if idx, row := tw.model.getActive(); idx >= 0 {
+		tw.PostEvent(newEventRowActive(tw, row))
+	}
+}
+
+func (tw *Widget) _debug(ctx string) {
+	w, h := tw.view.Size()
+	tw.env.Log().Debugf("%v: view.Size():  (%v,%v)", ctx, w, h)
+
+	w, h = tw.hport.Size()
+	tw.env.Log().Debugf("%v: hport.Size(): (%v,%v)", ctx, w, h)
+
+	w, h = tw.rport.Size()
+	tw.env.Log().Debugf("%v: rport.Size(): (%v,%v)", ctx, w, h)
+
+	tw.env.Log().Debugf("%v: model.size():  %v", ctx, tw.model.size())
 }
