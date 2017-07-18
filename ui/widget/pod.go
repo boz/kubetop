@@ -1,18 +1,18 @@
 package widget
 
 import (
-	"github.com/boz/kcache"
-	"github.com/boz/kubetop/backend"
-	"github.com/boz/kubetop/backend/nsname"
-	"github.com/boz/kubetop/backend/pod"
+	"github.com/boz/kcache/filter"
+	"github.com/boz/kcache/nsname"
+	"github.com/boz/kcache/types/pod"
 	"github.com/boz/kubetop/ui/controller"
 	"github.com/boz/kubetop/ui/elements"
 	"github.com/boz/kubetop/ui/elements/table"
 	"github.com/boz/kubetop/ui/view"
 	"github.com/gdamore/tcell/views"
+	"k8s.io/client-go/pkg/api/v1"
 )
 
-func NewPodTable(ctx elements.Context, ds pod.BaseDatasource) elements.Widget {
+func NewPodTable(ctx elements.Context, ds pod.Publisher) elements.Widget {
 	ctx = ctx.New("pod/table")
 	content := table.NewWidget(ctx.Env(), view.PodTableColumns())
 	handler := controller.NewPodsPostHandler(ctx, view.NewPodTableWriter(content))
@@ -35,7 +35,7 @@ func NewPodDetails(ctx elements.Context, id string) (elements.Widget, error) {
 		return nil, err
 	}
 
-	podDS := podsDS.Filter(backend.NSNamesSelector(nsName))
+	podDS := podsDS.CloneWithFilter(filter.NSNamesSelector(nsName))
 
 	svcRootDS, err := ctx.Backend().Services()
 	if err != nil {
@@ -45,7 +45,7 @@ func NewPodDetails(ctx elements.Context, id string) (elements.Widget, error) {
 	}
 
 	//svcDS := svcRootDS.Filter(backend.ServiceSelector(map[string]string{}))
-	svcDS := svcRootDS.Filter(kcache.NullFilter())
+	svcDS := svcRootDS.CloneWithFilter(filter.Null())
 
 	//svcDS := svcRootDS.Filter(kcache.NullFilter())
 
@@ -74,7 +74,7 @@ func NewPodDetails(ctx elements.Context, id string) (elements.Widget, error) {
 }
 
 type filterable interface {
-	Refilter(kcache.Filter)
+	Refilter(filter.Filter)
 }
 
 type refilterHandler struct {
@@ -85,24 +85,24 @@ func newServiceFilterhandler(ds filterable) controller.PodHandler {
 	return &refilterHandler{ds}
 }
 
-func (h *refilterHandler) OnInitialize(obj pod.Pod) {
+func (h *refilterHandler) OnInitialize(obj *v1.Pod) {
 	h.refilter(obj)
 }
 
-func (h *refilterHandler) OnCreate(obj pod.Pod) {
+func (h *refilterHandler) OnCreate(obj *v1.Pod) {
 	h.refilter(obj)
 }
 
-func (h *refilterHandler) OnUpdate(obj pod.Pod) {
+func (h *refilterHandler) OnUpdate(obj *v1.Pod) {
 	h.refilter(obj)
 }
 
-func (h *refilterHandler) OnDelete(obj pod.Pod) {
-	filter := backend.ServiceSelector(map[string]string{})
+func (h *refilterHandler) OnDelete(obj *v1.Pod) {
+	filter := filter.ServiceSelector(map[string]string{})
 	h.ds.Refilter(filter)
 }
 
-func (h *refilterHandler) refilter(obj pod.Pod) {
-	filter := backend.ServiceSelector(obj.Resource().GetLabels())
+func (h *refilterHandler) refilter(obj *v1.Pod) {
+	filter := filter.ServiceSelector(obj.GetLabels())
 	h.ds.Refilter(filter)
 }

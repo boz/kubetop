@@ -1,7 +1,7 @@
 package view
 
 import (
-	"github.com/boz/kubetop/backend/pod"
+	"github.com/boz/kubetop/backend"
 	"github.com/boz/kubetop/ui/controller"
 	"github.com/boz/kubetop/ui/elements/table"
 	"github.com/boz/kubetop/ui/theme"
@@ -28,27 +28,27 @@ func NewPodTableWriter(content table.Display) controller.PodsHandler {
 	return &podTable{content}
 }
 
-func (pt *podTable) OnInitialize(objs []pod.Pod) {
+func (pt *podTable) OnInitialize(objs []*v1.Pod) {
 	for _, obj := range objs {
 		pt.content.InsertRow(pt.renderRow(obj))
 	}
 }
 
-func (pt *podTable) OnCreate(obj pod.Pod) {
+func (pt *podTable) OnCreate(obj *v1.Pod) {
 	pt.content.InsertRow(pt.renderRow(obj))
 }
 
-func (pt *podTable) OnUpdate(obj pod.Pod) {
+func (pt *podTable) OnUpdate(obj *v1.Pod) {
 	pt.content.UpdateRow(pt.renderRow(obj))
 }
 
-func (pt *podTable) OnDelete(obj pod.Pod) {
-	pt.content.RemoveRow(obj.ID())
+func (pt *podTable) OnDelete(obj *v1.Pod) {
+	pt.content.RemoveRow(backend.ObjectID(obj))
 }
 
-func (pt *podTable) renderRow(obj pod.Pod) table.TR {
+func (pt *podTable) renderRow(obj *v1.Pod) table.TR {
 
-	stat := obj.Resource().Status
+	stat := obj.Status
 
 	phase := string(stat.Phase)
 	message := stat.Message
@@ -67,14 +67,14 @@ func (pt *podTable) renderRow(obj pod.Pod) table.TR {
 	}
 
 	cols := []table.TD{
-		table.NewTD("ns", obj.Resource().GetNamespace(), theme.LabelNormal),
-		table.NewTD("name", obj.Resource().GetName(), theme.LabelNormal),
-		table.NewTD("version", obj.Resource().GetResourceVersion(), theme.LabelNormal),
+		table.NewTD("ns", obj.GetNamespace(), theme.LabelNormal),
+		table.NewTD("name", obj.GetName(), theme.LabelNormal),
+		table.NewTD("version", obj.GetResourceVersion(), theme.LabelNormal),
 		table.NewTD("phase", phase, theme.LabelNormal),
 		table.NewTD("conditions", conditions, theme.LabelNormal),
 		table.NewTD("message", message, theme.LabelNormal),
 	}
-	return table.NewTR(obj.ID(), cols)
+	return table.NewTR(backend.ObjectID(obj), cols)
 }
 
 type PodDetails interface {
@@ -90,28 +90,28 @@ type podDetails struct {
 	views.Text
 }
 
-func (w *podDetails) OnInitialize(obj pod.Pod) {
+func (w *podDetails) OnInitialize(obj *v1.Pod) {
 	w.drawObject(obj)
 }
 
-func (w *podDetails) OnCreate(obj pod.Pod) {
+func (w *podDetails) OnCreate(obj *v1.Pod) {
 	w.drawObject(obj)
 }
 
-func (w *podDetails) OnUpdate(obj pod.Pod) {
+func (w *podDetails) OnUpdate(obj *v1.Pod) {
 	w.drawObject(obj)
 }
 
-func (w *podDetails) OnDelete(obj pod.Pod) {
+func (w *podDetails) OnDelete(obj *v1.Pod) {
 	w.drawObject(obj)
 }
 
-func (w *podDetails) drawObject(obj pod.Pod) {
+func (w *podDetails) drawObject(obj *v1.Pod) {
 	if obj == nil {
 		return
 	}
 
-	text := "name: " + obj.Name() + "\n"
+	text := "name: " + obj.GetName() + "\n"
 
 	w.SetText(text)
 }

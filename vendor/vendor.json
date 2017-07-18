@@ -87,16 +87,40 @@
 			"revisionTime": "2017-05-05T05:50:23Z"
 		},
 		{
-			"checksumSHA1": "tuaxoMH77eAiHEr4b3CfeQxYsD0=",
+			"checksumSHA1": "3nkL98qwEBAa5spf6VWuunZ0C9g=",
 			"path": "github.com/boz/kcache",
-			"revision": "1f82c64d887b31ce78851eb8cddb2ba5388e1a30",
-			"revisionTime": "2017-06-13T04:19:19Z"
+			"revision": "b845c85035472e10f3a9d7d92777c9a2bd260749",
+			"revisionTime": "2017-07-18T03:14:10Z"
 		},
 		{
 			"checksumSHA1": "/GZV5ILQ0bg7QGfnplduyYaKOjo=",
 			"path": "github.com/boz/kcache/client",
-			"revision": "70b104fbbf4747541f066cbfc608a103b5376904",
-			"revisionTime": "2017-05-26T05:15:31Z"
+			"revision": "b845c85035472e10f3a9d7d92777c9a2bd260749",
+			"revisionTime": "2017-07-18T03:14:10Z"
+		},
+		{
+			"checksumSHA1": "YTMOCNL157GgQXL/KADq+KpyXO8=",
+			"path": "github.com/boz/kcache/filter",
+			"revision": "b845c85035472e10f3a9d7d92777c9a2bd260749",
+			"revisionTime": "2017-07-18T03:14:10Z"
+		},
+		{
+			"checksumSHA1": "C4WspWUfRnEaG220BSJv5f7RhWA=",
+			"path": "github.com/boz/kcache/nsname",
+			"revision": "b845c85035472e10f3a9d7d92777c9a2bd260749",
+			"revisionTime": "2017-07-18T03:14:10Z"
+		},
+		{
+			"checksumSHA1": "YZUKFCn984nAHjGGgO4ANrVw2UU=",
+			"path": "github.com/boz/kcache/types/pod",
+			"revision": "b845c85035472e10f3a9d7d92777c9a2bd260749",
+			"revisionTime": "2017-07-18T03:14:10Z"
+		},
+		{
+			"checksumSHA1": "CGm0L/z8KFTXKZQl5YwKqAWnR64=",
+			"path": "github.com/boz/kcache/types/service",
+			"revision": "b845c85035472e10f3a9d7d92777c9a2bd260749",
+			"revisionTime": "2017-07-18T03:14:10Z"
 		},
 		{
 			"checksumSHA1": "vM0AXBjMyPUVF7sLxjXX0to78l0=",
