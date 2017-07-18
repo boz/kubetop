@@ -1,7 +1,7 @@
 package screen
 
 import (
-	"github.com/boz/kubetop/backend/service"
+	"github.com/boz/kcache/types/service"
 	"github.com/boz/kubetop/ui/elements"
 	"github.com/boz/kubetop/ui/widget"
 	"github.com/gdamore/tcell"
@@ -13,7 +13,7 @@ type serviceIndex struct {
 	ctx     elements.Context
 }
 
-func NewServiceIndex(ctx elements.Context, ds service.BaseDatasource) elements.Widget {
+func NewServiceIndex(ctx elements.Context, ds service.Publisher) elements.Widget {
 	ctx = ctx.New("service/index")
 	content := widget.NewServiceTable(ctx, ds)
 	index := &serviceIndex{content, ctx}

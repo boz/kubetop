@@ -1,10 +1,11 @@
 package view
 
 import (
-	"github.com/boz/kubetop/backend/service"
+	"github.com/boz/kubetop/backend"
 	"github.com/boz/kubetop/ui/controller"
 	"github.com/boz/kubetop/ui/elements/table"
 	"github.com/boz/kubetop/ui/theme"
+	"k8s.io/client-go/pkg/api/v1"
 )
 
 func ServiceTableColumns() []table.TH {
@@ -24,30 +25,30 @@ func NewServiceTableWriter(content table.Display) controller.ServicesHandler {
 	return &serviceTable{content}
 }
 
-func (pt *serviceTable) OnInitialize(objs []service.Service) {
+func (pt *serviceTable) OnInitialize(objs []*v1.Service) {
 	for _, obj := range objs {
 		pt.content.InsertRow(pt.renderRow(obj))
 	}
 }
 
-func (pt *serviceTable) OnCreate(obj service.Service) {
+func (pt *serviceTable) OnCreate(obj *v1.Service) {
 	pt.content.InsertRow(pt.renderRow(obj))
 }
 
-func (pt *serviceTable) OnUpdate(obj service.Service) {
+func (pt *serviceTable) OnUpdate(obj *v1.Service) {
 	pt.content.UpdateRow(pt.renderRow(obj))
 }
 
-func (pt *serviceTable) OnDelete(obj service.Service) {
-	pt.content.RemoveRow(obj.ID())
+func (pt *serviceTable) OnDelete(obj *v1.Service) {
+	pt.content.RemoveRow(backend.ObjectID(obj))
 }
 
-func (pt *serviceTable) renderRow(obj service.Service) table.TR {
+func (pt *serviceTable) renderRow(obj *v1.Service) table.TR {
 	cols := []table.TD{
-		table.NewTD("ns", obj.Resource().GetNamespace(), theme.LabelNormal),
-		table.NewTD("name", obj.Resource().GetName(), theme.LabelNormal),
-		table.NewTD("type", string(obj.Resource().Spec.Type), theme.LabelNormal),
-		table.NewTD("ip", obj.Resource().Spec.ClusterIP, theme.LabelNormal),
+		table.NewTD("ns", obj.GetNamespace(), theme.LabelNormal),
+		table.NewTD("name", obj.GetName(), theme.LabelNormal),
+		table.NewTD("type", string(obj.Spec.Type), theme.LabelNormal),
+		table.NewTD("ip", obj.Spec.ClusterIP, theme.LabelNormal),
 	}
-	return table.NewTR(obj.ID(), cols)
+	return table.NewTR(backend.ObjectID(obj), cols)
 }

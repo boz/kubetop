@@ -1,7 +1,7 @@
 package screen
 
 import (
-	"github.com/boz/kubetop/backend/pod"
+	"github.com/boz/kcache/types/pod"
 	"github.com/boz/kubetop/ui/elements"
 	"github.com/boz/kubetop/ui/elements/table"
 	"github.com/boz/kubetop/ui/widget"
@@ -16,7 +16,7 @@ type podIndex struct {
 	ctx     elements.Context
 }
 
-func NewPodIndex(ctx elements.Context, ds pod.BaseDatasource) elements.Widget {
+func NewPodIndex(ctx elements.Context, ds pod.Publisher) elements.Widget {
 	ctx = ctx.New("pod/index")
 
 	table := widget.NewPodTable(ctx, ds)

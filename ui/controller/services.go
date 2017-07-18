@@ -2,15 +2,16 @@ package controller
 
 import (
 	"github.com/boz/kcache"
-	"github.com/boz/kubetop/backend/service"
+	"github.com/boz/kcache/types/service"
 	"github.com/boz/kubetop/ui/elements"
+	"k8s.io/client-go/pkg/api/v1"
 )
 
 type ServicesHandler interface {
-	OnInitialize([]service.Service)
-	OnCreate(service.Service)
-	OnUpdate(service.Service)
-	OnDelete(service.Service)
+	OnInitialize([]*v1.Service)
+	OnCreate(*v1.Service)
+	OnUpdate(*v1.Service)
+	OnDelete(*v1.Service)
 }
 
 type servicesPostHandler struct {
@@ -22,19 +23,19 @@ func NewServicesPostHandler(poster elements.Poster, handler ServicesHandler) Ser
 	return &servicesPostHandler{poster, handler}
 }
 
-func (p *servicesPostHandler) OnInitialize(objs []service.Service) {
+func (p *servicesPostHandler) OnInitialize(objs []*v1.Service) {
 	p.poster.PostFunc(func() { p.handler.OnInitialize(objs) })
 }
 
-func (p *servicesPostHandler) OnCreate(obj service.Service) {
+func (p *servicesPostHandler) OnCreate(obj *v1.Service) {
 	p.poster.PostFunc(func() { p.handler.OnCreate(obj) })
 }
 
-func (p *servicesPostHandler) OnUpdate(obj service.Service) {
+func (p *servicesPostHandler) OnUpdate(obj *v1.Service) {
 	p.poster.PostFunc(func() { p.handler.OnUpdate(obj) })
 }
 
-func (p *servicesPostHandler) OnDelete(obj service.Service) {
+func (p *servicesPostHandler) OnDelete(obj *v1.Service) {
 	p.poster.PostFunc(func() { p.handler.OnDelete(obj) })
 }
 
@@ -47,8 +48,8 @@ type servicesController struct {
 	ctx     elements.Context
 }
 
-func NewServiceController(ctx elements.Context, ds service.BaseDatasource, handler ServicesHandler) ServicesController {
-	controller := &servicesController{ds.Subscribe(kcache.NullFilter()), handler, ctx}
+func NewServiceController(ctx elements.Context, ds service.Publisher, handler ServicesHandler) ServicesController {
+	controller := &servicesController{ds.Subscribe(), handler, ctx}
 	go controller.run()
 	return controller
 }
@@ -61,10 +62,10 @@ func (c *servicesController) run() {
 		select {
 		case <-c.ctx.Closed():
 			return
-		case <-c.sub.Closed():
+		case <-c.sub.Done():
 			return
 		case <-readych:
-			objs, _ := c.sub.List()
+			objs, _ := c.sub.Cache().List()
 			c.ctx.Env().Log().Debugf("%v services", len(objs))
 			c.handler.OnInitialize(objs)
 			readych = nil
