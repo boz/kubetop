@@ -79,6 +79,7 @@ func (c *servicesController) run() {
 			case kcache.EventTypeUpdate:
 				c.handler.OnUpdate(ev.Resource())
 			case kcache.EventTypeDelete:
+				c.ctx.Env().Log().Debugf("RESOURCE DELETED: %v", ev.Resource().GetName())
 				c.handler.OnDelete(ev.Resource())
 			}
 		}

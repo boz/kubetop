@@ -44,10 +44,8 @@ func NewPodDetails(ctx elements.Context, id string) (elements.Widget, error) {
 		return nil, err
 	}
 
-	//svcDS := svcRootDS.Filter(backend.ServiceSelector(map[string]string{}))
-	svcDS := svcRootDS.CloneWithFilter(filter.Null())
-
-	//svcDS := svcRootDS.Filter(kcache.NullFilter())
+	svcDS := svcRootDS.CloneWithFilter(filter.ServiceSelector(map[string]string{}))
+	// svcDS := svcRootDS.CloneWithFilter(filter.Null())
 
 	pdetails := view.NewPodDetails()
 

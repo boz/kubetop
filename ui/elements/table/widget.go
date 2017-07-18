@@ -37,26 +37,30 @@ func NewWidget(env util.Env, cols []TH) *Widget {
 
 func (tw *Widget) ResetRows(rows []TR) {
 	tw.model.reset(rows)
+	tw.env.Log().Debugf("ResetRows() %v rows", tw.model.size())
 	tw.PostEventWidgetContent(tw)
 }
 
 func (tw *Widget) InsertRow(row TR) {
 	tw.model.insert(row)
+	tw.env.Log().Debugf("InsertRow() %v rows", tw.model.size())
 	tw.PostEventWidgetContent(tw)
 }
 
 func (tw *Widget) UpdateRow(row TR) {
 	tw.model.update(row)
+	tw.env.Log().Debugf("UpdateRow() %v rows", tw.model.size())
 	tw.PostEventWidgetContent(tw)
 }
 
 func (tw *Widget) RemoveRow(id string) {
 	tw.model.remove(id)
+	tw.env.Log().Debugf("RemoveRow() %v rows", tw.model.size())
 	tw.PostEventWidgetContent(tw)
 }
 
 func (tw *Widget) Draw() {
-	tw._debug("Draw()")
+	//tw._debug("Draw()")
 	tw.hport.Fill(' ', theme.Base)
 	tw.rport.Fill(' ', theme.Base)
 	tw.drawHeader()
@@ -70,7 +74,7 @@ func (tw *Widget) Resize() {
 		return
 	}
 	tw.resizeContent()
-	tw._debug("Resize()")
+	//tw._debug("Resize()")
 }
 
 func (tw *Widget) HandleEvent(ev tcell.Event) bool {
@@ -110,7 +114,7 @@ func (tw *Widget) SetView(view views.View) {
 	tw.hport.SetView(view)
 	tw.rport.SetView(view)
 	tw.Resize()
-	tw._debug("SetView()")
+	//tw._debug("SetView()")
 }
 
 func (tw *Widget) Size() (int, int) {
@@ -148,7 +152,7 @@ func (tw *Widget) resizeContent() {
 	tw.rport.Resize(0, 1, width, height)
 
 	tw.env.Log().Debugf("resizeContent(): width=%v, height=%v", width, height)
-	tw._debug("resizeContent()")
+	//tw._debug("resizeContent()")
 	tw.scrollToActive()
 }
 
