@@ -29,9 +29,11 @@ func NewPodTableWriter(content table.Display) controller.PodsHandler {
 }
 
 func (pt *podTable) OnInitialize(objs []*v1.Pod) {
+	rows := make([]table.TR, 0, len(objs))
 	for _, obj := range objs {
-		pt.content.InsertRow(pt.renderRow(obj))
+		rows = append(rows, pt.renderRow(obj))
 	}
+	pt.content.ResetRows(rows)
 }
 
 func (pt *podTable) OnCreate(obj *v1.Pod) {

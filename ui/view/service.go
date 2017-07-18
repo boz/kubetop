@@ -26,9 +26,11 @@ func NewServiceTableWriter(content table.Display) controller.ServicesHandler {
 }
 
 func (pt *serviceTable) OnInitialize(objs []*v1.Service) {
+	rows := make([]table.TR, 0, len(objs))
 	for _, obj := range objs {
-		pt.content.InsertRow(pt.renderRow(obj))
+		rows = append(rows, pt.renderRow(obj))
 	}
+	pt.content.ResetRows(rows)
 }
 
 func (pt *serviceTable) OnCreate(obj *v1.Service) {
