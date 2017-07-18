@@ -35,7 +35,7 @@ func NewPodDetails(ctx elements.Context, id string) (elements.Widget, error) {
 		return nil, err
 	}
 
-	podDS := podsDS.CloneWithFilter(filter.NSNamesSelector(nsName))
+	podDS := podsDS.CloneWithFilter(filter.NSName(nsName))
 
 	svcRootDS, err := ctx.Backend().Services()
 	if err != nil {
@@ -44,7 +44,7 @@ func NewPodDetails(ctx elements.Context, id string) (elements.Widget, error) {
 		return nil, err
 	}
 
-	svcDS := svcRootDS.CloneWithFilter(filter.ServiceSelector(map[string]string{}))
+	svcDS := svcRootDS.CloneWithFilter(filter.ServiceFor(map[string]string{}))
 	// svcDS := svcRootDS.CloneWithFilter(filter.Null())
 
 	pdetails := view.NewPodDetails()
@@ -96,11 +96,11 @@ func (h *refilterHandler) OnUpdate(obj *v1.Pod) {
 }
 
 func (h *refilterHandler) OnDelete(obj *v1.Pod) {
-	filter := filter.ServiceSelector(map[string]string{})
+	filter := filter.ServiceFor(map[string]string{})
 	h.ds.Refilter(filter)
 }
 
 func (h *refilterHandler) refilter(obj *v1.Pod) {
-	filter := filter.ServiceSelector(obj.GetLabels())
+	filter := filter.ServiceFor(obj.GetLabels())
 	h.ds.Refilter(filter)
 }
