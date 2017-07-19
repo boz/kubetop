@@ -24,6 +24,7 @@ ways.  It also adds substantial functionality beyond termbox.
 * mouse demo - [screenshot](http://2.bp.blogspot.com/-fWvW5opT0es/VhIdItdKqJI/AAAAAAAAATE/7Ojc0L1SpB0/s1600/Screen%2BShot%2B2015-10-04%2Bat%2B11.47.13%2BPM.png) - included mouse test
 * [gomatrix](https://github.com/gdamore/gomatrix) - converted from Termbox
 * [micro](https://github.com/zyedidia/micro/) - lightweight text editor with syntax-highlighting and themes
+* [godu](https://github.com/viktomas/godu) - simple golang utility helping to discover large files/folders.
 
 ## Pure Go Terminfo Database
 
@@ -35,7 +36,7 @@ when Go provides standard support for terminal handling via termio ioctls on
 all POSIX platforms.)  The database itself, while built using CGO, as well
 as the parser for it, is implemented in Pure Go.
 
-The database is also flexible & extensibel, and can modified by either running a
+The database is also flexible & extensible, and can modified by either running a
 program to build the database, or hand editing of simple JSON files.
 
 ## More Portable
