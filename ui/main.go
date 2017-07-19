@@ -19,6 +19,8 @@ type mainWidget struct {
 
 	popupper *elements.Popupper
 
+	navigator elements.Navigator
+
 	ctx elements.Context
 }
 
@@ -36,18 +38,27 @@ func newMainTitle() views.Widget {
 }
 
 func newMainWidget(ctx elements.Context, stopch chan<- bool) views.Widget {
+	ctx = ctx.New("ui/main")
+
 	panel := views.NewPanel()
 	panel.SetTitle(newMainTitle())
 	panel.SetStatus(newMainTitle())
 
+	router := elements.NewRouter(ctx)
+	screen.RegisterPodRoutes(router)
+	screen.RegisterServiceRoutes(router)
+
 	widget := &mainWidget{
-		stopch:   stopch,
-		panel:    panel,
-		popupper: elements.NewPopupper(ctx),
-		ctx:      ctx.New("ui/main"),
+		stopch:    stopch,
+		panel:     panel,
+		popupper:  elements.NewPopupper(ctx),
+		ctx:       ctx,
+		navigator: router,
 	}
 
-	widget.showPodIndex()
+	ctx.WatchNavigation(widget)
+
+	ctx.NavigateTo(screen.PodIndexRequest())
 
 	return widget
 }
@@ -80,9 +91,9 @@ func (w *mainWidget) HandleEvent(ev tcell.Event) bool {
 				w.stopch <- true
 				return true
 			case 'P', 'p':
-				w.showPodIndex()
+				w.ctx.NavigateTo(screen.PodIndexRequest())
 			case 'S', 's':
-				w.showServiceIndex()
+				w.ctx.NavigateTo(screen.ServiceIndexRequest())
 			case 'X', 'x':
 				popup := elements.NewPopup(w.ctx, 10, 10, theme.Base)
 				popup.SetContent(w.textArea())
@@ -95,16 +106,13 @@ func (w *mainWidget) HandleEvent(ev tcell.Event) bool {
 	return false
 }
 
-func (w *mainWidget) showPodIndex() {
-	ds, _ := w.ctx.Backend().Pods()
-	widget := screen.NewPodIndex(w.ctx, ds)
-	w.setContent(widget)
-}
-
-func (w *mainWidget) showServiceIndex() {
-	ds, _ := w.ctx.Backend().Services()
-	widget := screen.NewServiceIndex(w.ctx, ds)
-	w.setContent(widget)
+func (w *mainWidget) HandleNavigationRequest(req elements.Request) {
+	screen, err := w.navigator.Open(req)
+	if err != nil {
+		w.ctx.Env().LogErr(err, "can't open request %v", req.Route())
+		return
+	}
+	w.setContent(screen)
 }
 
 func (w *mainWidget) setContent(child elements.Widget) {

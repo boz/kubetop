@@ -1,13 +1,25 @@
 package screen
 
 import (
-	"github.com/boz/kcache/types/pod"
 	"github.com/boz/kubetop/ui/elements"
 	"github.com/boz/kubetop/ui/elements/table"
 	"github.com/boz/kubetop/ui/widget"
 	"github.com/gdamore/tcell"
 	"github.com/gdamore/tcell/views"
 )
+
+const (
+	podIndexPath = "/pods"
+	podShowPath  = "/pods/show"
+)
+
+func RegisterPodRoutes(router elements.Router) {
+	router.Register(elements.NewRoute(podIndexPath), elements.NewHandler(podIndexHandler))
+}
+
+func PodIndexRequest() elements.Request {
+	return elements.NewRequest(podIndexPath)
+}
 
 type podIndex struct {
 	layout  *views.BoxLayout
@@ -16,10 +28,15 @@ type podIndex struct {
 	ctx     elements.Context
 }
 
-func NewPodIndex(ctx elements.Context, ds pod.Publisher) elements.Widget {
+func podIndexHandler(ctx elements.Context, req elements.Request) (elements.Screen, error) {
 	ctx = ctx.New("pod/index")
 
-	table := widget.NewPodTable(ctx, ds)
+	pods, err := ctx.Backend().Pods()
+	if err != nil {
+		return nil, err
+	}
+
+	table := widget.NewPodTable(ctx, pods)
 
 	layout := views.NewBoxLayout(views.Vertical)
 	layout.AddWidget(table, 0.3)
@@ -34,7 +51,7 @@ func NewPodIndex(ctx elements.Context, ds pod.Publisher) elements.Widget {
 	layout.Watch(index)
 	table.Watch(index)
 
-	return index
+	return elements.NewScreen(ctx, req, "Pods", index), nil
 }
 
 func (w *podIndex) Draw() {
@@ -77,10 +94,6 @@ func (w *podIndex) Watch(handler tcell.EventHandler) {
 
 func (w *podIndex) Unwatch(handler tcell.EventHandler) {
 	w.layout.Unwatch(handler)
-}
-
-func (w *podIndex) Close() {
-	w.ctx.Close()
 }
 
 func (w *podIndex) showDetails(id string) {
