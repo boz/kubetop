@@ -233,16 +233,18 @@
 			"revisionTime": "2015-12-15T21:28:35Z"
 		},
 		{
-			"checksumSHA1": "/YSim9+8m3Zulor162s5zW8/+xY=",
+			"checksumSHA1": "Gln0PKDCywj/e/AUQL9s6j001M8=",
+			"origin": "github.com/boz/tcell",
 			"path": "github.com/gdamore/tcell",
-			"revision": "44772c121bb7838819d3ba4a7e84c0c2d617328e",
-			"revisionTime": "2016-12-05T23:37:37Z"
+			"revision": "9dd2ee9b46daf210a9f1f7f836241a3a25ac7d59",
+			"revisionTime": "2017-07-18T23:47:20Z"
 		},
 		{
-			"checksumSHA1": "3SZY3tkTfXS/Hhi3iA1vo1vLZFo=",
+			"checksumSHA1": "5GFlK+HF01bKTRqY/eg3ONuZ7fc=",
+			"origin": "github.com/boz/tcell/views",
 			"path": "github.com/gdamore/tcell/views",
-			"revision": "62d7350d170ffa942c74ae40a99c8b0a6dcc8c95",
-			"revisionTime": "2017-05-01T21:23:58Z"
+			"revision": "9dd2ee9b46daf210a9f1f7f836241a3a25ac7d59",
+			"revisionTime": "2017-07-18T23:47:20Z"
 		},
 		{
 			"checksumSHA1": "ImX1uv6O09ggFeBPUJJ2nu7MPSA=",
