@@ -19,6 +19,13 @@ type Context interface {
 	SetEnv(env util.Env)
 
 	PostFunc(fn func())
+
+	WatchNavigation(NavWatcher)
+	NavigateTo(Request)
+}
+
+type NavWatcher interface {
+	HandleNavigationRequest(Request)
 }
 
 type Poster interface {
@@ -26,10 +33,11 @@ type Poster interface {
 }
 
 type context struct {
-	poster  Poster
-	backend backend.Backend
-	env     util.Env
-	lc      lifecycle.Lifecycle
+	poster      Poster
+	navWatchers map[NavWatcher]bool
+	backend     backend.Backend
+	env         util.Env
+	lc          lifecycle.Lifecycle
 }
 
 func NewContext(env util.Env, backend backend.Backend, poster Poster) Context {
@@ -42,17 +50,35 @@ func NewContext(env util.Env, backend backend.Backend, poster Poster) Context {
 	}()
 
 	return &context{
-		poster:  poster,
-		backend: backend,
-		env:     env,
-		lc:      lc,
+		poster:      poster,
+		navWatchers: make(map[NavWatcher]bool),
+		backend:     backend,
+		env:         env,
+		lc:          lc,
+	}
+}
+
+func (p *context) clone(name string) *context {
+	lc := lifecycle.New()
+	go func() {
+		defer lc.ShutdownCompleted()
+		defer lc.ShutdownInitiated()
+		<-lc.ShutdownRequest()
+	}()
+
+	go lc.WatchChannel(p.Closed())
+
+	return &context{
+		poster:      p.poster,
+		navWatchers: make(map[NavWatcher]bool),
+		backend:     p.backend,
+		env:         p.env.ForComponent(name),
+		lc:          lc,
 	}
 }
 
 func (p *context) New(name string) Context {
-	new := NewContext(p.env.ForComponent(name), p.backend, p.poster)
-	go new.WatchChannel(p.Closed())
-	return new
+	return p.clone(name)
 }
 
 func (p *context) NewWithID(name string) Context {
@@ -87,4 +113,14 @@ func (p *context) Env() util.Env {
 
 func (p *context) Backend() backend.Backend {
 	return p.backend
+}
+
+func (p *context) WatchNavigation(nh NavWatcher) {
+	p.navWatchers[nh] = true
+}
+
+func (p *context) NavigateTo(req Request) {
+	for nw, _ := range p.navWatchers {
+		nw.HandleNavigationRequest(req)
+	}
 }

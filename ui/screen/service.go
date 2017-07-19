@@ -1,24 +1,42 @@
 package screen
 
 import (
-	"github.com/boz/kcache/types/service"
 	"github.com/boz/kubetop/ui/elements"
 	"github.com/boz/kubetop/ui/widget"
 	"github.com/gdamore/tcell"
 	"github.com/gdamore/tcell/views"
 )
 
+const (
+	serviceIndexPath = "/service"
+	serviceShowPath  = "/service/show"
+)
+
+func RegisterServiceRoutes(router elements.Router) {
+	router.Register(elements.NewRoute(serviceIndexPath), elements.NewHandler(serviceIndexHandler))
+}
+
+func ServiceIndexRequest() elements.Request {
+	return elements.NewRequest(serviceIndexPath)
+}
+
 type serviceIndex struct {
 	content elements.Widget
 	ctx     elements.Context
 }
 
-func NewServiceIndex(ctx elements.Context, ds service.Publisher) elements.Widget {
+func serviceIndexHandler(ctx elements.Context, req elements.Request) (elements.Screen, error) {
 	ctx = ctx.New("service/index")
-	content := widget.NewServiceTable(ctx, ds)
+
+	db, err := ctx.Backend().Services()
+	if err != nil {
+		return nil, err
+	}
+	content := widget.NewServiceTable(ctx, db)
 	index := &serviceIndex{content, ctx}
 	content.Watch(index)
-	return index
+
+	return elements.NewScreen(ctx, req, "Pods", index), nil
 }
 
 func (w *serviceIndex) Draw() {
@@ -52,8 +70,4 @@ func (w *serviceIndex) Watch(handler tcell.EventHandler) {
 
 func (w *serviceIndex) Unwatch(handler tcell.EventHandler) {
 	w.content.Unwatch(handler)
-}
-
-func (w *serviceIndex) Close() {
-	w.ctx.Close()
 }
