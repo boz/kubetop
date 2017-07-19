@@ -28,7 +28,7 @@ func newMainTitle() views.Widget {
 
 	title.RegisterLeftStyle('N', theme.AppHeader.Bar)
 	title.RegisterLeftStyle('A', theme.AppHeader.Action)
-	title.SetLeft("%N[%AQ%N] Quit")
+	title.SetLeft("%N[%AQ%N] Quit %N[%AP%N] Pods %N[%AS%N] Services")
 
 	title.RegisterRightStyle('N', theme.AppHeader.Bar)
 	title.SetRight("%Nkubetop")
@@ -38,13 +38,18 @@ func newMainTitle() views.Widget {
 func newMainWidget(ctx elements.Context, stopch chan<- bool) views.Widget {
 	panel := views.NewPanel()
 	panel.SetTitle(newMainTitle())
+	panel.SetStatus(newMainTitle())
 
-	return &mainWidget{
+	widget := &mainWidget{
 		stopch:   stopch,
 		panel:    panel,
 		popupper: elements.NewPopupper(ctx),
 		ctx:      ctx.New("ui/main"),
 	}
+
+	widget.showPodIndex()
+
+	return widget
 }
 
 func (w *mainWidget) Draw() {
