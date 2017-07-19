@@ -22,7 +22,8 @@ func NewPodIndex(ctx elements.Context, ds pod.Publisher) elements.Widget {
 	table := widget.NewPodTable(ctx, ds)
 
 	layout := views.NewBoxLayout(views.Vertical)
-	layout.AddWidget(table, 1.0)
+	layout.AddWidget(table, 0.3)
+	layout.AddWidget(views.NewSpacer(), 0.0)
 
 	index := &podIndex{
 		layout: layout,
@@ -87,7 +88,7 @@ func (w *podIndex) showDetails(id string) {
 	details, _ := widget.NewPodDetails(w.ctx, id)
 	details.Watch(w)
 	w.details = details
-	w.layout.InsertWidget(0, w.details, 1)
+	w.layout.InsertWidget(0, w.details, 0.2)
 }
 
 func (w *podIndex) removeDetails() {
