@@ -63,7 +63,6 @@ func (w *podIndex) Resize() {
 }
 
 func (w *podIndex) HandleEvent(ev tcell.Event) bool {
-	w.ctx.Env().Log().Debugf("HandleEvent: %#v", ev)
 	switch ev := ev.(type) {
 	case *views.EventWidgetContent:
 		if ev.Widget() == w.layout {

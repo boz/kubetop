@@ -66,7 +66,6 @@ func (c *servicesController) run() {
 			return
 		case <-readych:
 			objs, _ := c.sub.Cache().List()
-			c.ctx.Env().Log().Debugf("%v services", len(objs))
 			c.handler.OnInitialize(objs)
 			readych = nil
 		case ev, ok := <-c.sub.Events():
@@ -79,7 +78,6 @@ func (c *servicesController) run() {
 			case kcache.EventTypeUpdate:
 				c.handler.OnUpdate(ev.Resource())
 			case kcache.EventTypeDelete:
-				c.ctx.Env().Log().Debugf("RESOURCE DELETED: %v", ev.Resource().GetName())
 				c.handler.OnDelete(ev.Resource())
 			}
 		}
