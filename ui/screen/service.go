@@ -36,7 +36,7 @@ func serviceIndexHandler(ctx elements.Context, req elements.Request) (elements.S
 	index := &serviceIndex{content, ctx}
 	content.Watch(index)
 
-	return elements.NewScreen(ctx, req, "Pods", index), nil
+	return elements.NewScreen(ctx, req, "Services", index), nil
 }
 
 func (w *serviceIndex) Draw() {

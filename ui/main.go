@@ -1,12 +1,14 @@
 package ui
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
 	"github.com/boz/kubetop/ui/elements"
 	"github.com/boz/kubetop/ui/screen"
 	"github.com/boz/kubetop/ui/theme"
+	"github.com/boz/kubetop/version"
 	"github.com/gdamore/tcell"
 	"github.com/gdamore/tcell/views"
 )
@@ -14,6 +16,8 @@ import (
 type mainWidget struct {
 	stopch chan<- bool
 	panel  *views.Panel
+
+	navbar *views.SimpleStyledTextBar
 
 	content elements.Widget
 
@@ -24,25 +28,36 @@ type mainWidget struct {
 	ctx elements.Context
 }
 
-func newMainTitle() views.Widget {
-	title := views.NewSimpleStyledTextBar()
-	title.SetStyle(theme.AppHeader.Bar)
+func newNavBar() *views.SimpleStyledTextBar {
+	bar := views.NewSimpleStyledTextBar()
+	bar.SetStyle(theme.AppHeader.Bar)
+	bar.RegisterCenterStyle('N', theme.AppHeader.Bar)
+	bar.RegisterCenterStyle('A', theme.AppHeader.Action)
+	bar.SetCenter("%Nloading...")
+	return bar
+}
 
-	title.RegisterLeftStyle('N', theme.AppHeader.Bar)
-	title.RegisterLeftStyle('A', theme.AppHeader.Action)
-	title.SetLeft("%N[%AQ%N] Quit %N[%AP%N] Pods %N[%AS%N] Services")
+func newMainStatus() views.Widget {
+	bar := views.NewSimpleStyledTextBar()
+	bar.SetStyle(theme.AppHeader.Bar)
 
-	title.RegisterRightStyle('N', theme.AppHeader.Bar)
-	title.SetRight("%Nkubetop")
-	return title
+	bar.RegisterLeftStyle('N', theme.AppHeader.Bar)
+	bar.RegisterLeftStyle('A', theme.AppHeader.Action)
+	bar.SetLeft("%N[%AQ%N] Quit %N[%AP%N] Pods %N[%AS%N] Services")
+
+	bar.RegisterRightStyle('N', theme.AppHeader.Bar)
+	bar.SetRight(fmt.Sprintf("%%Nkubetop %v", version.Version()))
+	return bar
 }
 
 func newMainWidget(ctx elements.Context, stopch chan<- bool) views.Widget {
 	ctx = ctx.New("ui/main")
 
+	navbar := newNavBar()
+
 	panel := views.NewPanel()
-	panel.SetTitle(newMainTitle())
-	panel.SetStatus(newMainTitle())
+	panel.SetTitle(navbar)
+	panel.SetStatus(newMainStatus())
 
 	router := elements.NewRouter(ctx)
 	screen.RegisterPodRoutes(router)
@@ -51,6 +66,7 @@ func newMainWidget(ctx elements.Context, stopch chan<- bool) views.Widget {
 	widget := &mainWidget{
 		stopch:    stopch,
 		panel:     panel,
+		navbar:    navbar,
 		popupper:  elements.NewPopupper(ctx),
 		ctx:       ctx,
 		navigator: router,
@@ -115,12 +131,13 @@ func (w *mainWidget) HandleNavigationRequest(req elements.Request) {
 	w.setContent(screen)
 }
 
-func (w *mainWidget) setContent(child elements.Widget) {
+func (w *mainWidget) setContent(child elements.Screen) {
 	if cur := w.content; cur != nil {
 		cur.Close()
 	}
 	w.content = child
 	w.panel.SetContent(child)
+	w.navbar.SetCenter(child.State().Title())
 	w.Resize()
 }
 
@@ -133,7 +150,7 @@ func (w *mainWidget) textArea() views.Widget {
 	text = text + text
 
 	txt := views.NewTextArea()
-	txt.SetContent(text)
+	txt.SetContent("%N" + text)
 	txt.EnableCursor(true)
 	return txt
 }
