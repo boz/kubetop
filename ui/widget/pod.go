@@ -4,6 +4,7 @@ import (
 	"github.com/boz/kcache/filter"
 	"github.com/boz/kcache/nsname"
 	"github.com/boz/kcache/types/pod"
+	"github.com/boz/kcache/types/service"
 	"github.com/boz/kubetop/ui/controller"
 	"github.com/boz/kubetop/ui/elements"
 	"github.com/boz/kubetop/ui/elements/table"
@@ -44,7 +45,7 @@ func NewPodDetails(ctx elements.Context, id string) (elements.Widget, error) {
 		return nil, err
 	}
 
-	svcDS := svcRootDS.CloneWithFilter(filter.ServiceFor(map[string]string{}))
+	svcDS := svcRootDS.CloneWithFilter(service.SelectorMatchFilter(map[string]string{}))
 	// svcDS := svcRootDS.CloneWithFilter(filter.Null())
 
 	pdetails := view.NewPodDetails()
@@ -96,11 +97,11 @@ func (h *refilterHandler) OnUpdate(obj *v1.Pod) {
 }
 
 func (h *refilterHandler) OnDelete(obj *v1.Pod) {
-	filter := filter.ServiceFor(map[string]string{})
+	filter := service.SelectorMatchFilter(map[string]string{})
 	h.ds.Refilter(filter)
 }
 
 func (h *refilterHandler) refilter(obj *v1.Pod) {
-	filter := filter.ServiceFor(obj.GetLabels())
+	filter := service.SelectorMatchFilter(obj.GetLabels())
 	h.ds.Refilter(filter)
 }
