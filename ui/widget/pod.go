@@ -37,16 +37,17 @@ func NewPodDetails(ctx elements.Context, id string) (elements.Widget, error) {
 	}
 
 	podDS := podsDS.CloneWithFilter(filter.NSName(nsName))
+	ctx.OnClose(podDS.Close)
 
 	svcRootDS, err := ctx.Backend().Services()
 	if err != nil {
-		podDS.Close()
+		ctx.Close()
 		ctx.Env().LogErr(err, "service backend")
 		return nil, err
 	}
 
-	svcDS := svcRootDS.CloneWithFilter(service.SelectorMatchFilter(map[string]string{}))
-	// svcDS := svcRootDS.CloneWithFilter(filter.Null())
+	svcDS := svcRootDS.CloneWithFilter(filter.All())
+	ctx.OnClose(podDS.svcDS)
 
 	pdetails := view.NewPodDetails()
 
@@ -58,9 +59,6 @@ func NewPodDetails(ctx elements.Context, id string) (elements.Widget, error) {
 		controller.NewPodHandler(ctx.Env(), newServiceFilterhandler(svcDS)))
 
 	svcTable := NewServiceTable(ctx, svcDS)
-
-	//svcTable := NewServiceTable(ctx, svcRootDS)
-	// return svcTable, nil
 
 	layout := views.NewBoxLayout(views.Vertical)
 

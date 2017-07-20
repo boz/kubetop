@@ -20,6 +20,8 @@ type Context interface {
 
 	PostFunc(fn func())
 
+	OnClose(fn func())
+
 	WatchNavigation(NavWatcher)
 	NavigateTo(Request)
 }
@@ -113,6 +115,13 @@ func (p *context) Env() util.Env {
 
 func (p *context) Backend() backend.Backend {
 	return p.backend
+}
+
+func (p *context) OnClose(fn func()) {
+	go func() {
+		<-p.lc.Done()
+		fn()
+	}()
 }
 
 func (p *context) WatchNavigation(nh NavWatcher) {
