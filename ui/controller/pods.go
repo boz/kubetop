@@ -5,7 +5,7 @@ import (
 	"github.com/boz/kcache/types/pod"
 	"github.com/boz/kubetop/ui/elements"
 	"github.com/boz/kubetop/util"
-	"k8s.io/client-go/pkg/api/v1"
+	"k8s.io/api/core/v1"
 )
 
 type PodsHandler interface {
