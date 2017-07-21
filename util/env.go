@@ -6,6 +6,8 @@ import (
 	"os"
 	"sync/atomic"
 
+	logutil "github.com/boz/go-logutil"
+	lrlogutil "github.com/boz/go-logutil/logrus"
 	"github.com/sirupsen/logrus"
 )
 
@@ -27,6 +29,8 @@ type Env interface {
 
 	FDebugf(fmt string, args ...interface{})
 	Flush()
+
+	Logutil() logutil.Log
 }
 
 func NewEnv(out *os.File, level string) (Env, error) {
@@ -80,4 +84,8 @@ func (e *env) FDebugf(fmt string, args ...interface{}) {
 
 func (e *env) Flush() {
 	bufio.NewWriter(e.out).Flush()
+}
+
+func (e *env) Logutil() logutil.Log {
+	return lrlogutil.New(e.log)
 }

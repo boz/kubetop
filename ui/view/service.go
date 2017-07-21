@@ -1,8 +1,8 @@
 package view
 
 import (
+	"github.com/boz/kcache/types/service"
 	"github.com/boz/kubetop/backend"
-	"github.com/boz/kubetop/ui/controller"
 	"github.com/boz/kubetop/ui/elements/table"
 	"github.com/boz/kubetop/ui/theme"
 	"k8s.io/api/core/v1"
@@ -21,7 +21,7 @@ type serviceTable struct {
 	content table.Display
 }
 
-func NewServiceTableWriter(content table.Display) controller.ServicesHandler {
+func NewServiceTableWriter(content table.Display) service.Handler {
 	return &serviceTable{content}
 }
 

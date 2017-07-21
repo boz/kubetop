@@ -4,7 +4,6 @@ import (
 	"context"
 	"sync"
 
-	lr "github.com/boz/go-logutil/logrus"
 	"github.com/boz/kcache/types/pod"
 	"github.com/boz/kcache/types/service"
 	"github.com/boz/kubetop/util"
@@ -12,10 +11,9 @@ import (
 )
 
 type Backend interface {
-	Pods() (pod.Controller, error)
-	Services() (service.Controller, error)
-
-	Stop()
+	Pods() (BasePodController, error)
+	Services() (BaseServiceController, error)
+	Close()
 }
 
 type backend struct {
@@ -39,22 +37,21 @@ func NewBackend(env util.Env, clientset kubernetes.Interface) Backend {
 	}
 }
 
-func (b *backend) Stop() {
+func (b *backend) Close() {
 	var wg sync.WaitGroup
 	b.cancel()
 
 	b.env.Log().Debug("stopping...")
 
-	b.doStop(&wg, b.pods)
-	b.doStop(&wg, b.services)
+	b.doClose(&wg, b.pods)
+	b.doClose(&wg, b.services)
 
 	wg.Wait()
 }
 
-func (b *backend) Pods() (pod.Controller, error) {
+func (b *backend) Pods() (BasePodController, error) {
 	if b.pods == nil {
-		log := lr.New(b.env.Log())
-		controller, err := pod.NewController(b.ctx, log, b.clientset, "")
+		controller, err := pod.NewController(b.ctx, b.env.Logutil(), b.clientset, "")
 		if err != nil {
 			return nil, err
 		}
@@ -63,10 +60,9 @@ func (b *backend) Pods() (pod.Controller, error) {
 	return b.pods, nil
 }
 
-func (b *backend) Services() (service.Controller, error) {
+func (b *backend) Services() (BaseServiceController, error) {
 	if b.services == nil {
-		log := lr.New(b.env.Log())
-		controller, err := service.NewController(b.ctx, log, b.clientset, "")
+		controller, err := service.NewController(b.ctx, b.env.Logutil(), b.clientset, "")
 		if err != nil {
 			return nil, err
 		}
@@ -79,7 +75,7 @@ type closeable interface {
 	Done() <-chan struct{}
 }
 
-func (b *backend) doStop(wg *sync.WaitGroup, db closeable) {
+func (b *backend) doClose(wg *sync.WaitGroup, db closeable) {
 	if db == nil {
 		return
 	}

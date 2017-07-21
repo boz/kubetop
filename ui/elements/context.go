@@ -21,6 +21,7 @@ type Context interface {
 	PostFunc(fn func())
 
 	OnClose(fn func())
+	AlsoClose(Closeable)
 
 	WatchNavigation(NavWatcher)
 	NavigateTo(Request)
@@ -32,6 +33,10 @@ type NavWatcher interface {
 
 type Poster interface {
 	PostFunc(fn func())
+}
+
+type Closeable interface {
+	Close()
 }
 
 type context struct {
@@ -122,6 +127,10 @@ func (p *context) OnClose(fn func()) {
 		<-p.lc.Done()
 		fn()
 	}()
+}
+
+func (p *context) AlsoClose(child Closeable) {
+	p.OnClose(child.Close)
 }
 
 func (p *context) WatchNavigation(nh NavWatcher) {

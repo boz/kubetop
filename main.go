@@ -48,7 +48,7 @@ func main() {
 			Fatal("error running app")
 	}
 
-	backend.Stop()
+	backend.Close()
 }
 
 func watchSignals(env util.Env, app *ui.App, donech chan bool) {
