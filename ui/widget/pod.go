@@ -5,7 +5,7 @@ import (
 	"github.com/boz/kcache/nsname"
 	"github.com/boz/kcache/types/pod"
 	"github.com/boz/kcache/types/service"
-	"github.com/boz/kubetop/ui/controller"
+	"github.com/boz/kubetop/backend/monitor"
 	"github.com/boz/kubetop/ui/elements"
 	"github.com/boz/kubetop/ui/elements/table"
 	"github.com/boz/kubetop/ui/view"
@@ -16,8 +16,8 @@ import (
 func NewPodTable(ctx elements.Context, ds pod.Publisher) elements.Widget {
 	ctx = ctx.New("pod/table")
 	content := table.NewWidget(ctx.Env(), view.PodTableColumns())
-	handler := controller.NewPodsPostHandler(ctx, view.NewPodTableWriter(content))
-	controller.NewPodsController(ctx, ds, handler)
+	handler := monitor.NewPodsPostHandler(ctx, view.NewPodTableWriter(content))
+	ctx.OnClose(pod.NewMonitor(ds, handler).Close)
 	return elements.NewWidget(ctx, content)
 }
 
@@ -47,16 +47,14 @@ func NewPodDetails(ctx elements.Context, id string) (elements.Widget, error) {
 	}
 
 	svcDS := svcRootDS.CloneWithFilter(filter.All())
-	ctx.OnClose(podDS.svcDS)
+	ctx.OnClose(svcDS.Close)
 
 	pdetails := view.NewPodDetails()
 
-	phandler := controller.NewPodsPostHandler(ctx,
-		controller.NewPodHandler(ctx.Env(), pdetails))
-	controller.NewPodsController(ctx, podDS, phandler)
+	phandler := monitor.NewPodsPostHandler(ctx, monitor.NewPodHandler(ctx.Env(), pdetails))
+	ctx.OnClose(pod.NewMonitor(podDS, phandler).Close)
 
-	controller.NewPodsController(ctx, podDS,
-		controller.NewPodHandler(ctx.Env(), newServiceFilterhandler(svcDS)))
+	ctx.OnClose(pod.NewMonitor(podDS, monitor.NewPodHandler(ctx.Env(), newServiceFilterhandler(svcDS))).Close)
 
 	svcTable := NewServiceTable(ctx, svcDS)
 
@@ -78,7 +76,7 @@ type refilterHandler struct {
 	ds filterable
 }
 
-func newServiceFilterhandler(ds filterable) controller.PodHandler {
+func newServiceFilterhandler(ds filterable) monitor.PodHandler {
 	return &refilterHandler{ds}
 }
 

@@ -1,8 +1,9 @@
 package view
 
 import (
+	"github.com/boz/kcache/types/pod"
 	"github.com/boz/kubetop/backend"
-	"github.com/boz/kubetop/ui/controller"
+	"github.com/boz/kubetop/backend/monitor"
 	"github.com/boz/kubetop/ui/elements/table"
 	"github.com/boz/kubetop/ui/theme"
 	"github.com/gdamore/tcell/views"
@@ -24,7 +25,7 @@ type podTable struct {
 	content table.Display
 }
 
-func NewPodTableWriter(content table.Display) controller.PodsHandler {
+func NewPodTableWriter(content table.Display) pod.Handler {
 	return &podTable{content}
 }
 
@@ -80,7 +81,7 @@ func (pt *podTable) renderRow(obj *v1.Pod) table.TR {
 }
 
 type PodDetails interface {
-	controller.PodHandler
+	monitor.PodHandler
 	views.Widget
 }
 
