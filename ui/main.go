@@ -63,6 +63,7 @@ func newMainWidget(ctx elements.Context, stopch chan<- bool) views.Widget {
 	screen.RegisterPodRoutes(router)
 	screen.RegisterServiceRoutes(router)
 	screen.RegisterNodeRoutes(router)
+	screen.RegisterEventRoutes(router)
 
 	widget := &mainWidget{
 		stopch:    stopch,
@@ -113,6 +114,8 @@ func (w *mainWidget) HandleEvent(ev tcell.Event) bool {
 				w.ctx.NavigateTo(screen.ServiceIndexRequest())
 			case 'N', 'n':
 				w.ctx.NavigateTo(screen.NodeIndexRequest())
+			case 'E', 'e':
+				w.ctx.NavigateTo(screen.EventIndexRequest())
 			case 'X', 'x':
 				popup := elements.NewPopup(w.ctx, 10, 10, theme.Base)
 				popup.SetContent(w.textArea())

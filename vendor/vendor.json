@@ -75,6 +75,12 @@
 			"revisionTime": "2017-07-21T06:51:07Z"
 		},
 		{
+			"checksumSHA1": "6Jk+k3eH1diy08dxTwkAuQJzYFM=",
+			"path": "github.com/boz/kcache/types/event",
+			"revision": "8e91eb367de3e8ec3e32d199d42cb6d6ee0fc275",
+			"revisionTime": "2017-07-21T06:51:07Z"
+		},
+		{
 			"checksumSHA1": "0aCKaRoyewS9Up1o3y3MmA4/bD0=",
 			"path": "github.com/boz/kcache/types/node",
 			"revision": "8e91eb367de3e8ec3e32d199d42cb6d6ee0fc275",

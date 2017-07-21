@@ -1,6 +1,7 @@
 package backend
 
 import (
+	"github.com/boz/kcache/types/event"
 	"github.com/boz/kcache/types/node"
 	"github.com/boz/kcache/types/pod"
 	"github.com/boz/kcache/types/service"
@@ -21,5 +22,11 @@ type BaseServiceController interface {
 type BaseNodeController interface {
 	node.CacheController
 	node.Publisher
+	Done() <-chan struct{}
+}
+
+type BaseEventController interface {
+	event.CacheController
+	event.Publisher
 	Done() <-chan struct{}
 }

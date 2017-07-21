@@ -1,6 +1,7 @@
 package util
 
 import (
+	"github.com/boz/kcache/types/event"
 	"github.com/boz/kcache/types/node"
 	"github.com/boz/kcache/types/pod"
 	"github.com/boz/kcache/types/service"
@@ -52,6 +53,22 @@ func NodesPoster(poster elements.Poster, delegate node.Handler) node.Handler {
 			poster.PostFunc(func() { delegate.OnUpdate(obj) })
 		}).
 		OnDelete(func(obj *v1.Node) {
+			poster.PostFunc(func() { delegate.OnDelete(obj) })
+		}).Create()
+}
+
+func EventsPoster(poster elements.Poster, delegate event.Handler) event.Handler {
+	return event.BuildHandler().
+		OnInitialize(func(objs []*v1.Event) {
+			poster.PostFunc(func() { delegate.OnInitialize(objs) })
+		}).
+		OnCreate(func(obj *v1.Event) {
+			poster.PostFunc(func() { delegate.OnCreate(obj) })
+		}).
+		OnUpdate(func(obj *v1.Event) {
+			poster.PostFunc(func() { delegate.OnUpdate(obj) })
+		}).
+		OnDelete(func(obj *v1.Event) {
 			poster.PostFunc(func() { delegate.OnDelete(obj) })
 		}).Create()
 }
