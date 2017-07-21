@@ -53,38 +53,38 @@
 		{
 			"checksumSHA1": "QZjoWNp42pNoB6Ea+tH3figTqNE=",
 			"path": "github.com/boz/kcache",
-			"revision": "680325c8d395272f279a63ceca0781d851f66ac0",
-			"revisionTime": "2017-07-20T23:38:25Z"
+			"revision": "0cc94c6f62b63642ac3204c4b0ba9bf3c974458c",
+			"revisionTime": "2017-07-21T04:13:54Z"
 		},
 		{
 			"checksumSHA1": "RGlf5AzjJwJDpwCJWUZKRX+lfgw=",
 			"path": "github.com/boz/kcache/client",
-			"revision": "680325c8d395272f279a63ceca0781d851f66ac0",
-			"revisionTime": "2017-07-20T23:38:25Z"
+			"revision": "0cc94c6f62b63642ac3204c4b0ba9bf3c974458c",
+			"revisionTime": "2017-07-21T04:13:54Z"
 		},
 		{
 			"checksumSHA1": "fM9q+AeeT01z8SHiwh1AsFfdY0U=",
 			"path": "github.com/boz/kcache/filter",
-			"revision": "680325c8d395272f279a63ceca0781d851f66ac0",
-			"revisionTime": "2017-07-20T23:38:25Z"
+			"revision": "0cc94c6f62b63642ac3204c4b0ba9bf3c974458c",
+			"revisionTime": "2017-07-21T04:13:54Z"
 		},
 		{
 			"checksumSHA1": "C4WspWUfRnEaG220BSJv5f7RhWA=",
 			"path": "github.com/boz/kcache/nsname",
-			"revision": "680325c8d395272f279a63ceca0781d851f66ac0",
-			"revisionTime": "2017-07-20T23:38:25Z"
+			"revision": "0cc94c6f62b63642ac3204c4b0ba9bf3c974458c",
+			"revisionTime": "2017-07-21T04:13:54Z"
 		},
 		{
-			"checksumSHA1": "bnlWKn8cyJd28/MfmofXHiK3ykU=",
+			"checksumSHA1": "VOg8PfQHtAJrHzSMzXesI/aVzyU=",
 			"path": "github.com/boz/kcache/types/pod",
-			"revision": "680325c8d395272f279a63ceca0781d851f66ac0",
-			"revisionTime": "2017-07-20T23:38:25Z"
+			"revision": "0cc94c6f62b63642ac3204c4b0ba9bf3c974458c",
+			"revisionTime": "2017-07-21T04:13:54Z"
 		},
 		{
-			"checksumSHA1": "2r3cqv6rNu0tUpao/HkxaYHDveM=",
+			"checksumSHA1": "EKDcl7g0FEh6Zf6Oq3oReXvVric=",
 			"path": "github.com/boz/kcache/types/service",
-			"revision": "680325c8d395272f279a63ceca0781d851f66ac0",
-			"revisionTime": "2017-07-20T23:38:25Z"
+			"revision": "0cc94c6f62b63642ac3204c4b0ba9bf3c974458c",
+			"revisionTime": "2017-07-21T04:13:54Z"
 		},
 		{
 			"checksumSHA1": "mrz/kicZiUaHxkyfvC/DyQcr8Do=",
