@@ -4,7 +4,7 @@ import (
 	"github.com/boz/kcache"
 	"github.com/boz/kcache/types/service"
 	"github.com/boz/kubetop/ui/elements"
-	"k8s.io/client-go/pkg/api/v1"
+	"k8s.io/api/core/v1"
 )
 
 type ServicesHandler interface {

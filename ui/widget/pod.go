@@ -10,7 +10,7 @@ import (
 	"github.com/boz/kubetop/ui/elements/table"
 	"github.com/boz/kubetop/ui/view"
 	"github.com/gdamore/tcell/views"
-	"k8s.io/client-go/pkg/api/v1"
+	"k8s.io/api/core/v1"
 )
 
 func NewPodTable(ctx elements.Context, ds pod.Publisher) elements.Widget {
