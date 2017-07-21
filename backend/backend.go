@@ -4,6 +4,7 @@ import (
 	"context"
 	"sync"
 
+	"github.com/boz/kcache/types/node"
 	"github.com/boz/kcache/types/pod"
 	"github.com/boz/kcache/types/service"
 	"github.com/boz/kubetop/util"
@@ -13,6 +14,7 @@ import (
 type Backend interface {
 	Pods() (BasePodController, error)
 	Services() (BaseServiceController, error)
+	Nodes() (BaseNodeController, error)
 	Close()
 }
 
@@ -21,6 +23,7 @@ type backend struct {
 
 	pods     pod.Controller
 	services service.Controller
+	nodes    node.Controller
 
 	ctx    context.Context
 	cancel context.CancelFunc
@@ -69,6 +72,17 @@ func (b *backend) Services() (BaseServiceController, error) {
 		b.services = controller
 	}
 	return b.services, nil
+}
+
+func (b *backend) Nodes() (BaseNodeController, error) {
+	if b.nodes == nil {
+		controller, err := node.NewController(b.ctx, b.env.Logutil(), b.clientset, "")
+		if err != nil {
+			return nil, err
+		}
+		b.nodes = controller
+	}
+	return b.nodes, nil
 }
 
 type closeable interface {

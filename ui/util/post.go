@@ -1,6 +1,7 @@
 package util
 
 import (
+	"github.com/boz/kcache/types/node"
 	"github.com/boz/kcache/types/pod"
 	"github.com/boz/kcache/types/service"
 	"github.com/boz/kubetop/ui/elements"
@@ -35,6 +36,22 @@ func ServicesPoster(poster elements.Poster, delegate service.Handler) service.Ha
 			poster.PostFunc(func() { delegate.OnUpdate(obj) })
 		}).
 		OnDelete(func(obj *v1.Service) {
+			poster.PostFunc(func() { delegate.OnDelete(obj) })
+		}).Create()
+}
+
+func NodesPoster(poster elements.Poster, delegate node.Handler) node.Handler {
+	return node.BuildHandler().
+		OnInitialize(func(objs []*v1.Node) {
+			poster.PostFunc(func() { delegate.OnInitialize(objs) })
+		}).
+		OnCreate(func(obj *v1.Node) {
+			poster.PostFunc(func() { delegate.OnCreate(obj) })
+		}).
+		OnUpdate(func(obj *v1.Node) {
+			poster.PostFunc(func() { delegate.OnUpdate(obj) })
+		}).
+		OnDelete(func(obj *v1.Node) {
 			poster.PostFunc(func() { delegate.OnDelete(obj) })
 		}).Create()
 }

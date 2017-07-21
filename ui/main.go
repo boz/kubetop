@@ -43,7 +43,7 @@ func newMainStatus() views.Widget {
 
 	bar.RegisterLeftStyle('N', theme.AppHeader.Bar)
 	bar.RegisterLeftStyle('A', theme.AppHeader.Action)
-	bar.SetLeft("%N[%AQ%N] Quit %N[%AP%N] Pods %N[%AS%N] Services")
+	bar.SetLeft("%N[%AQ%N] Quit %N[%AP%N] Pods %N[%AS%N] Services %N[%AN%N] Nodes")
 
 	bar.RegisterRightStyle('N', theme.AppHeader.Bar)
 	bar.SetRight(fmt.Sprintf("%%Nkubetop %v", version.Version()))
@@ -62,6 +62,7 @@ func newMainWidget(ctx elements.Context, stopch chan<- bool) views.Widget {
 	router := elements.NewRouter(ctx)
 	screen.RegisterPodRoutes(router)
 	screen.RegisterServiceRoutes(router)
+	screen.RegisterNodeRoutes(router)
 
 	widget := &mainWidget{
 		stopch:    stopch,
@@ -110,6 +111,8 @@ func (w *mainWidget) HandleEvent(ev tcell.Event) bool {
 				w.ctx.NavigateTo(screen.PodIndexRequest())
 			case 'S', 's':
 				w.ctx.NavigateTo(screen.ServiceIndexRequest())
+			case 'N', 'n':
+				w.ctx.NavigateTo(screen.NodeIndexRequest())
 			case 'X', 'x':
 				popup := elements.NewPopup(w.ctx, 10, 10, theme.Base)
 				popup.SetContent(w.textArea())
