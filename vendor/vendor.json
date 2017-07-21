@@ -51,40 +51,40 @@
 			"revisionTime": "2017-05-05T05:50:23Z"
 		},
 		{
-			"checksumSHA1": "unG9uAorhhQuUVoq4T3tRyNZHrk=",
+			"checksumSHA1": "QZjoWNp42pNoB6Ea+tH3figTqNE=",
 			"path": "github.com/boz/kcache",
-			"revision": "1f943151661eb4cdffaedd2436550ce833bae440",
-			"revisionTime": "2017-07-21T01:08:51Z"
+			"revision": "680325c8d395272f279a63ceca0781d851f66ac0",
+			"revisionTime": "2017-07-20T23:38:25Z"
 		},
 		{
 			"checksumSHA1": "RGlf5AzjJwJDpwCJWUZKRX+lfgw=",
 			"path": "github.com/boz/kcache/client",
-			"revision": "1f943151661eb4cdffaedd2436550ce833bae440",
-			"revisionTime": "2017-07-21T01:08:51Z"
+			"revision": "680325c8d395272f279a63ceca0781d851f66ac0",
+			"revisionTime": "2017-07-20T23:38:25Z"
 		},
 		{
 			"checksumSHA1": "fM9q+AeeT01z8SHiwh1AsFfdY0U=",
 			"path": "github.com/boz/kcache/filter",
-			"revision": "1f943151661eb4cdffaedd2436550ce833bae440",
-			"revisionTime": "2017-07-21T01:08:51Z"
+			"revision": "680325c8d395272f279a63ceca0781d851f66ac0",
+			"revisionTime": "2017-07-20T23:38:25Z"
 		},
 		{
 			"checksumSHA1": "C4WspWUfRnEaG220BSJv5f7RhWA=",
 			"path": "github.com/boz/kcache/nsname",
-			"revision": "1f943151661eb4cdffaedd2436550ce833bae440",
-			"revisionTime": "2017-07-21T01:08:51Z"
+			"revision": "680325c8d395272f279a63ceca0781d851f66ac0",
+			"revisionTime": "2017-07-20T23:38:25Z"
 		},
 		{
-			"checksumSHA1": "oeL08MgYW/9kYBRRVl/xHCkE/9E=",
+			"checksumSHA1": "bnlWKn8cyJd28/MfmofXHiK3ykU=",
 			"path": "github.com/boz/kcache/types/pod",
-			"revision": "1f943151661eb4cdffaedd2436550ce833bae440",
-			"revisionTime": "2017-07-21T01:08:51Z"
+			"revision": "680325c8d395272f279a63ceca0781d851f66ac0",
+			"revisionTime": "2017-07-20T23:38:25Z"
 		},
 		{
-			"checksumSHA1": "/xc+2uLCo8ZLiL0H9HNoJvM7UjY=",
+			"checksumSHA1": "2r3cqv6rNu0tUpao/HkxaYHDveM=",
 			"path": "github.com/boz/kcache/types/service",
-			"revision": "1f943151661eb4cdffaedd2436550ce833bae440",
-			"revisionTime": "2017-07-21T01:08:51Z"
+			"revision": "680325c8d395272f279a63ceca0781d851f66ac0",
+			"revisionTime": "2017-07-20T23:38:25Z"
 		},
 		{
 			"checksumSHA1": "mrz/kicZiUaHxkyfvC/DyQcr8Do=",
