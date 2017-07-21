@@ -37,13 +37,28 @@ func newNavBar() *views.SimpleStyledTextBar {
 	return bar
 }
 
+var kbdNav = []struct {
+	key   string
+	label string
+}{
+	{"P", "Pods"},
+	{"S", "Services"},
+	{"N", "Nodes"},
+	{"E", "Events"},
+}
+
 func newMainStatus() views.Widget {
 	bar := views.NewSimpleStyledTextBar()
 	bar.SetStyle(theme.AppHeader.Bar)
 
 	bar.RegisterLeftStyle('N', theme.AppHeader.Bar)
 	bar.RegisterLeftStyle('A', theme.AppHeader.Action)
-	bar.SetLeft("%N[%AQ%N] Quit %N[%AP%N] Pods %N[%AS%N] Services %N[%AN%N] Nodes")
+
+	leftNav := "%N[%AQ%N] Quit"
+	for _, nav := range kbdNav {
+		leftNav += fmt.Sprintf(" %%N[%%A%v%%N] %v", nav.key, nav.label)
+	}
+	bar.SetLeft(leftNav)
 
 	bar.RegisterRightStyle('N', theme.AppHeader.Bar)
 	bar.SetRight(fmt.Sprintf("%%Nkubetop %v", version.Version()))
