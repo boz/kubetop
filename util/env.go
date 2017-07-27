@@ -40,6 +40,9 @@ func NewEnv(out *os.File, level string) (Env, error) {
 		return nil, err
 	}
 
+	logrus.StandardLogger().SetLevel(lvl)
+	logrus.StandardLogger().Out = out
+
 	log := logrus.New()
 	log.Level = lvl
 	log.Out = out

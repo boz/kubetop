@@ -18,6 +18,9 @@ type Widget struct {
 	model model
 	colsz []int
 
+	width  int
+	height int
+
 	view  views.View
 	hport *views.ViewPort
 	rport *views.ViewPort
@@ -111,8 +114,7 @@ func (tw *Widget) SetView(view views.View) {
 }
 
 func (tw *Widget) Size() (int, int) {
-	x, y := tw.rport.Size()
-	return x, y + 1
+	return tw.width, tw.height
 }
 
 func (tw *Widget) resizeContent() {
@@ -155,15 +157,17 @@ func (tw *Widget) resizeContent() {
 		width = vwidth
 	}
 
-	tw.colsz = colsz
-
-	height := tw.model.size()
+	mheight := tw.model.size()
 
 	tw.hport.Resize(0, 0, width, 1)
 	tw.hport.SetContentSize(width, 1, false)
 
-	tw.rport.Resize(0, 1, width, height)
-	tw.rport.SetContentSize(width, height, false)
+	tw.rport.Resize(0, 1, width, mheight)
+	tw.rport.SetContentSize(width, mheight, false)
+
+	tw.colsz = colsz
+	tw.width = width
+	tw.height = mheight + 1
 
 	tw.scrollToActive()
 }

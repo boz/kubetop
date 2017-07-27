@@ -3,6 +3,9 @@ IMG_LDFLAGS := -w -linkmode external -extldflags "-static"
 build:
 	go build
 
+test:
+	govendor test +local
+
 build-linux:
 	CC=$$(which musl-gcc) go build --ldflags '$(IMG_LDFLAGS)' -o kubetop-linux
 

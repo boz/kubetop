@@ -22,10 +22,11 @@ func PodIndexRequest() elements.Request {
 }
 
 type podIndex struct {
-	layout  *views.BoxLayout
+	layout  elements.Panes
 	table   elements.Widget
 	details elements.Widget
 	ctx     elements.Context
+	views.WidgetWatchers
 }
 
 func podIndexHandler(ctx elements.Context, req elements.Request) (elements.Screen, error) {
@@ -38,9 +39,8 @@ func podIndexHandler(ctx elements.Context, req elements.Request) (elements.Scree
 
 	table := widget.NewPodTable(ctx, pods)
 
-	layout := views.NewBoxLayout(views.Vertical)
-	layout.AddWidget(table, 0.3)
-	layout.AddWidget(views.NewSpacer(), 0.0)
+	layout := elements.NewPanes()
+	layout.PushBackWidget(table)
 
 	index := &podIndex{
 		layout: layout,
@@ -65,10 +65,8 @@ func (w *podIndex) Resize() {
 func (w *podIndex) HandleEvent(ev tcell.Event) bool {
 	switch ev := ev.(type) {
 	case *views.EventWidgetContent:
-		if ev.Widget() == w.layout {
-			w.Resize()
-			return true
-		}
+		w.PostEventWidgetContent(w)
+		return true
 	case *table.EventRowActive:
 		w.showDetails(ev.Row().ID())
 		return true
@@ -87,20 +85,12 @@ func (w *podIndex) Size() (int, int) {
 	return w.layout.Size()
 }
 
-func (w *podIndex) Watch(handler tcell.EventHandler) {
-	w.layout.Watch(handler)
-}
-
-func (w *podIndex) Unwatch(handler tcell.EventHandler) {
-	w.layout.Unwatch(handler)
-}
-
 func (w *podIndex) showDetails(id string) {
 	w.removeDetails()
 	details, _ := widget.NewPodDetails(w.ctx, id)
 	details.Watch(w)
 	w.details = details
-	w.layout.InsertWidget(0, w.details, 0.2)
+	w.layout.PushFrontWidget(w.details)
 }
 
 func (w *podIndex) removeDetails() {

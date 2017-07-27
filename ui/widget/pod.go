@@ -9,7 +9,6 @@ import (
 	"github.com/boz/kubetop/ui/elements/table"
 	uiutil "github.com/boz/kubetop/ui/util"
 	"github.com/boz/kubetop/ui/view"
-	"github.com/gdamore/tcell/views"
 	"k8s.io/api/core/v1"
 )
 
@@ -41,8 +40,9 @@ func NewPodDetails(ctx elements.Context, id string) (elements.Widget, error) {
 
 	// pod details
 	pdetails := view.NewPodDetails()
-	uiutil.PodsPoster(ctx,
-		pod.ToUnitary(ctx.Env().Logutil(), pdetails))
+	pod.NewMonitor(podController,
+		uiutil.PodsPoster(ctx,
+			pod.ToUnitary(ctx.Env().Logutil(), pdetails)))
 
 	svcBase, err := ctx.Backend().Services()
 	if err != nil {
@@ -62,10 +62,9 @@ func NewPodDetails(ctx elements.Context, id string) (elements.Widget, error) {
 	// display services matching pod
 	svcTable := NewServiceTable(ctx, svcController)
 
-	layout := views.NewBoxLayout(views.Vertical)
-
-	layout.AddWidget(pdetails, 0.5)
-	layout.AddWidget(svcTable, 1)
+	layout := elements.NewPanes()
+	layout.PushBackWidget(pdetails)
+	layout.PushBackWidget(svcTable)
 
 	widget := elements.NewWidget(ctx, layout)
 
