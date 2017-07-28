@@ -5,8 +5,10 @@ import (
 
 	"github.com/boz/kcache/types/pod"
 	"github.com/boz/kubetop/backend"
+	"github.com/boz/kubetop/ui/elements/deflist"
 	"github.com/boz/kubetop/ui/elements/table"
 	"github.com/boz/kubetop/ui/theme"
+	"github.com/gdamore/tcell"
 	"github.com/gdamore/tcell/views"
 	"k8s.io/api/core/v1"
 )
@@ -125,11 +127,39 @@ type PodDetails interface {
 }
 
 func NewPodDetails() PodDetails {
-	return &podDetails{*views.NewText()}
+	return &podDetails{deflist.NewWidget(nil)}
 }
 
 type podDetails struct {
-	views.Text
+	leftdl deflist.Widget
+}
+
+func (w *podDetails) Draw() {
+	w.leftdl.Draw()
+}
+
+func (w *podDetails) Resize() {
+	w.leftdl.Resize()
+}
+
+func (w *podDetails) HandleEvent(ev tcell.Event) bool {
+	return w.leftdl.HandleEvent(ev)
+}
+
+func (w *podDetails) SetView(view views.View) {
+	w.leftdl.SetView(view)
+}
+
+func (w *podDetails) Size() (int, int) {
+	return w.leftdl.Size()
+}
+
+func (w *podDetails) Watch(handler tcell.EventHandler) {
+	w.leftdl.Watch(handler)
+}
+
+func (w *podDetails) Unwatch(handler tcell.EventHandler) {
+	w.leftdl.Unwatch(handler)
 }
 
 func (w *podDetails) OnInitialize(obj *v1.Pod) {
@@ -153,54 +183,64 @@ func (w *podDetails) drawObject(obj *v1.Pod) {
 		return
 	}
 
-	text := "name: " + obj.GetName() + "\n"
-	text += "namespace: " + obj.GetNamespace() + "\n"
-
-	text += "owners: "
-
-	for _, ref := range obj.GetOwnerReferences() {
-		text += ref.Kind + "/" + ref.Name
+	rows := []deflist.Row{
+		deflist.NewSimpleRow("Name", obj.GetName()),
+		deflist.NewSimpleRow("Namespace", obj.GetNamespace()),
+		deflist.NewSimpleRow("Node", obj.Spec.NodeName),
 	}
 
-	text += "\n"
-	text += "node: " + obj.Spec.NodeName + "\n"
+	w.leftdl.SetRows(rows)
+	/*
 
-	text += "start time: "
-	if obj.Status.StartTime == nil {
-		text += "N/A"
-	} else {
-		text += obj.Status.StartTime.String()
-	}
+		text := "name: " + obj.GetName() + "\n"
+		text += "namespace: " + obj.GetNamespace() + "\n"
 
-	text += "\n"
+		text += "owners: "
 
-	nready := 0
-	for _, cs := range obj.Status.ContainerStatuses {
-		if cs.Ready {
-			nready++
+		for _, ref := range obj.GetOwnerReferences() {
+			text += ref.Kind + "/" + ref.Name
 		}
 
-	}
-
-	text += fmt.Sprintf("containers ( %v/%v ready ):\n", nready, len(obj.Status.ContainerStatuses))
-
-	text += "  name ready restarts state\n"
-
-	for _, cs := range obj.Status.ContainerStatuses {
-		text += fmt.Sprintf("  %v: %v %v ", cs.Name, cs.Ready, cs.RestartCount)
-
-		switch {
-		case cs.State.Waiting != nil:
-			text += "W: " + cs.State.Waiting.Reason
-		case cs.State.Running != nil:
-			text += "R: " + cs.State.Running.StartedAt.String()
-		case cs.State.Terminated != nil:
-			text += "T: " + cs.State.Terminated.FinishedAt.String()
-		default:
-			text += "W: <unknown>"
-		}
 		text += "\n"
-	}
+		text += "node: " + obj.Spec.NodeName + "\n"
 
-	w.SetText(text)
+		text += "start time: "
+		if obj.Status.StartTime == nil {
+			text += "N/A"
+		} else {
+			text += obj.Status.StartTime.String()
+		}
+
+		text += "\n"
+
+		nready := 0
+		for _, cs := range obj.Status.ContainerStatuses {
+			if cs.Ready {
+				nready++
+			}
+
+		}
+
+		text += fmt.Sprintf("containers ( %v/%v ready ):\n", nready, len(obj.Status.ContainerStatuses))
+
+		text += "  name ready restarts state\n"
+
+		for _, cs := range obj.Status.ContainerStatuses {
+			text += fmt.Sprintf("  %v: %v %v ", cs.Name, cs.Ready, cs.RestartCount)
+
+			switch {
+			case cs.State.Waiting != nil:
+				text += "W: " + cs.State.Waiting.Reason
+			case cs.State.Running != nil:
+				text += "R: " + cs.State.Running.StartedAt.String()
+			case cs.State.Terminated != nil:
+				text += "T: " + cs.State.Terminated.FinishedAt.String()
+			default:
+				text += "W: <unknown>"
+			}
+			text += "\n"
+		}
+
+		w.SetText(text)
+	*/
 }

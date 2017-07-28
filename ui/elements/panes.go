@@ -50,10 +50,6 @@ func (p *panes) Draw() {
 func (p *panes) Resize() {
 	p.layout()
 
-	for _, c := range p.children {
-		c.widget.Resize()
-	}
-
 	p.PostEventWidgetResize(p)
 }
 
