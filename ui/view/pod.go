@@ -184,23 +184,23 @@ func (w *podDetails) drawObject(obj *v1.Pod) {
 
 	text += fmt.Sprintf("containers ( %v/%v ready ):\n", nready, len(obj.Status.ContainerStatuses))
 
+	text += "  name ready restarts state\n"
+
 	for _, cs := range obj.Status.ContainerStatuses {
-		text += fmt.Sprintf("  %v: ready=%v restarts=%v state=", cs.Name, cs.Ready, cs.RestartCount)
+		text += fmt.Sprintf("  %v: %v %v ", cs.Name, cs.Ready, cs.RestartCount)
 
 		switch {
 		case cs.State.Waiting != nil:
-			text += "waiting: " + cs.State.Waiting.Reason
+			text += "W: " + cs.State.Waiting.Reason
 		case cs.State.Running != nil:
-			text += "running: " + cs.State.Running.StartedAt.String()
+			text += "R: " + cs.State.Running.StartedAt.String()
 		case cs.State.Terminated != nil:
-			text += "terminated: " + cs.State.Terminated.FinishedAt.String()
+			text += "T: " + cs.State.Terminated.FinishedAt.String()
 		default:
-			text += "waiting"
+			text += "W: <unknown>"
 		}
-
+		text += "\n"
 	}
-
-	text += "\n"
 
 	w.SetText(text)
 }
