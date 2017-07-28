@@ -44,29 +44,30 @@ func NewPodDetails(ctx elements.Context, id string) (elements.Widget, error) {
 		uiutil.PodsPoster(ctx,
 			pod.ToUnitary(ctx.Env().Logutil(), pdetails)))
 
-	svcBase, err := ctx.Backend().Services()
-	if err != nil {
-		ctx.Env().LogErr(err, "service backend")
-		ctx.Close()
-		return nil, err
-	}
+	/*
+		svcBase, err := ctx.Backend().Services()
+		if err != nil {
+			ctx.Env().LogErr(err, "service backend")
+			ctx.Close()
+			return nil, err
+		}
 
-	svcController := svcBase.CloneWithFilter(filter.All())
-	ctx.AlsoClose(svcController)
+		svcController := svcBase.CloneWithFilter(filter.All())
+		ctx.AlsoClose(svcController)
 
-	// keep svcController up to date with pod
-	pod.NewMonitor(podController,
-		pod.ToUnitary(ctx.Env().Logutil(),
-			podServicesHandler(svcController)))
+		// keep svcController up to date with pod
+		pod.NewMonitor(podController,
+			pod.ToUnitary(ctx.Env().Logutil(),
+				podServicesHandler(svcController)))
 
-	// display services matching pod
-	svcTable := NewServiceTable(ctx, svcController)
+		// display services matching pod
+		svcTable := NewServiceTable(ctx, svcController)
+		layout.PushBackWidget(svcTable)
+		layout := elements.NewPanes()
+		layout.PushBackWidget(pdetails)
+	*/
 
-	layout := elements.NewPanes()
-	layout.PushBackWidget(pdetails)
-	layout.PushBackWidget(svcTable)
-
-	widget := elements.NewWidget(ctx, layout)
+	widget := elements.NewWidget(ctx, pdetails)
 
 	return widget, nil
 }

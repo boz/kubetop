@@ -5,13 +5,13 @@ metadata:
   name: echopod
 spec:
   containers:
-  - name: busybox
+  - name: dater
     image: busybox
     command:
     - /bin/sh
     - "-c"
     - while true; do date; sleep 1; done
-  - name: busybox
+  - name: dfer
     image: busybox
     command:
     - /bin/sh

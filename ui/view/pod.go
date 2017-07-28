@@ -1,6 +1,8 @@
 package view
 
 import (
+	"fmt"
+
 	"github.com/boz/kcache/types/pod"
 	"github.com/boz/kubetop/backend"
 	"github.com/boz/kubetop/ui/elements/table"
@@ -13,9 +15,8 @@ func PodTableColumns() []table.TH {
 	return []table.TH{
 		table.NewTH("ns", "Namespace", true, 0),
 		table.NewTH("name", "Name", true, 1),
-		table.NewTH("version", "Version", true, -1),
-		table.NewTH("phase", "Phase", true, -1),
-		table.NewTH("conditions", "Conditions", true, -1),
+		table.NewTH("status", "Status", true, -1),
+		table.NewTH("containers", "Containers", true, -1),
 		table.NewTH("message", "Message", true, -1),
 	}
 }
@@ -52,9 +53,6 @@ func (pt *podTable) renderRow(obj *v1.Pod) table.TR {
 
 	stat := obj.Status
 
-	phase := string(stat.Phase)
-	message := stat.Message
-
 	conditions := ""
 	for _, c := range stat.Conditions {
 		conditions += string(c.Type)[0:1]
@@ -68,13 +66,55 @@ func (pt *podTable) renderRow(obj *v1.Pod) table.TR {
 		}
 	}
 
+	pstatus := conditions
+
+	switch stat.Phase {
+	case v1.PodPending:
+		pstatus = "P " + conditions
+	case v1.PodRunning:
+		pstatus = "R " + conditions
+	case v1.PodSucceeded:
+		pstatus = "S " + conditions
+	case v1.PodFailed:
+		pstatus = "F " + conditions
+	case v1.PodUnknown:
+		pstatus = "U " + conditions
+	}
+
+	cready := 0
+	cwaiting := 0
+	crunning := 0
+	cterminated := 0
+	crestarts := int32(0)
+
+	for _, cs := range obj.Status.ContainerStatuses {
+		if cs.Ready {
+			cready++
+		}
+
+		crestarts += cs.RestartCount
+
+		switch {
+		case cs.State.Waiting != nil && cs.State.Waiting.Reason != "":
+			cwaiting++
+		case cs.State.Running != nil:
+			crunning++
+		case cs.State.Terminated != nil:
+			cterminated++
+		default:
+			cwaiting++
+		}
+	}
+
+	cstatus := fmt.Sprintf("%v: %v/%v/%v (%v)",
+		cready, cwaiting, crunning, cterminated, crestarts)
+
 	cols := []table.TD{
 		table.NewTD("ns", obj.GetNamespace(), theme.LabelNormal),
 		table.NewTD("name", obj.GetName(), theme.LabelNormal),
-		table.NewTD("version", obj.GetResourceVersion(), theme.LabelNormal),
-		table.NewTD("phase", phase, theme.LabelNormal),
-		table.NewTD("conditions", conditions, theme.LabelNormal),
-		table.NewTD("message", message, theme.LabelNormal),
+		table.NewTD("status", pstatus, theme.LabelNormal),
+		table.NewTD("containers", cstatus, theme.LabelNormal),
+		table.NewTD("message", obj.Status.Message, theme.LabelNormal),
 	}
 	return table.NewTR(backend.ObjectID(obj), cols)
 }
@@ -114,6 +154,53 @@ func (w *podDetails) drawObject(obj *v1.Pod) {
 	}
 
 	text := "name: " + obj.GetName() + "\n"
+	text += "namespace: " + obj.GetNamespace() + "\n"
+
+	text += "owners: "
+
+	for _, ref := range obj.GetOwnerReferences() {
+		text += ref.Kind + "/" + ref.Name
+	}
+
+	text += "\n"
+	text += "node: " + obj.Spec.NodeName + "\n"
+
+	text += "start time: "
+	if obj.Status.StartTime == nil {
+		text += "N/A"
+	} else {
+		text += obj.Status.StartTime.String()
+	}
+
+	text += "\n"
+
+	nready := 0
+	for _, cs := range obj.Status.ContainerStatuses {
+		if cs.Ready {
+			nready++
+		}
+
+	}
+
+	text += fmt.Sprintf("containers ( %v/%v ready ):\n", nready, len(obj.Status.ContainerStatuses))
+
+	for _, cs := range obj.Status.ContainerStatuses {
+		text += fmt.Sprintf("  %v: ready=%v restarts=%v state=", cs.Name, cs.Ready, cs.RestartCount)
+
+		switch {
+		case cs.State.Waiting != nil:
+			text += "waiting: " + cs.State.Waiting.Reason
+		case cs.State.Running != nil:
+			text += "running: " + cs.State.Running.StartedAt.String()
+		case cs.State.Terminated != nil:
+			text += "terminated: " + cs.State.Terminated.FinishedAt.String()
+		default:
+			text += "waiting"
+		}
+
+	}
+
+	text += "\n"
 
 	w.SetText(text)
 }
