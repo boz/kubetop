@@ -5,6 +5,17 @@ import (
 	"github.com/gdamore/tcell/views"
 )
 
+const (
+	boxBorderTopLeft     = '╔'
+	boxBorderBottomLeft  = '╚'
+	boxBorderTopRight    = '╗'
+	boxBorderBottomRight = '╝'
+	boxBorderTop         = '═'
+	boxBorderRight       = '║'
+	boxBorderBottom      = boxBorderTop
+	boxBorderLeft        = boxBorderRight
+)
+
 type Popup struct {
 	view views.View
 
@@ -81,24 +92,32 @@ func (p *Popup) Size() (int, int) {
 
 func (p *Popup) Draw() {
 
-	// top
-	for x, y := 0, 0; x < p.width; x++ {
-		p.view.SetContent(x+p.xoff, y+p.yoff, 'x', nil, p.style)
+	if p.width <= 0 || p.height <= 0 {
+		return
 	}
 
-	// bottom
-	for x, y := 0, p.height-1; x < p.width; x++ {
-		p.view.SetContent(x+p.xoff, y+p.yoff, 'x', nil, p.style)
+	// top left
+	p.view.SetContent(p.xoff, p.yoff, boxBorderTopLeft, nil, p.style)
+	// top right
+	p.view.SetContent(p.xoff+p.width-1, p.yoff, boxBorderTopRight, nil, p.style)
+
+	// bot right
+	p.view.SetContent(p.xoff+p.width-1, p.yoff+p.height-1, boxBorderBottomRight, nil, p.style)
+	// bot left
+	p.view.SetContent(p.xoff, p.yoff+p.height-1, boxBorderBottomLeft, nil, p.style)
+
+	for x := 1; x < p.width-1; x++ {
+		// top
+		p.view.SetContent(p.xoff+x, p.yoff, boxBorderTop, nil, p.style)
+		// bottom
+		p.view.SetContent(p.xoff+x, p.yoff+p.height-1, boxBorderBottom, nil, p.style)
 	}
 
-	// left
-	for x, y := 0, 1; y < p.height-1; y++ {
-		p.view.SetContent(x+p.xoff, y+p.yoff, 'x', nil, p.style)
-	}
-
-	// right
-	for x, y := p.width-1, 1; y < p.height-1; y++ {
-		p.view.SetContent(x+p.xoff, y+p.yoff, 'x', nil, p.style)
+	for y := 1; y < p.height-1; y++ {
+		// left
+		p.view.SetContent(p.xoff, p.yoff+y, boxBorderLeft, nil, p.style)
+		// right
+		p.view.SetContent(p.xoff+p.width-1, p.yoff+y, boxBorderRight, nil, p.style)
 	}
 
 	if p.content != nil {

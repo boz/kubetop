@@ -2,10 +2,9 @@ package ui
 
 import (
 	"fmt"
-	"strconv"
-	"strings"
 
 	"github.com/boz/kubetop/ui/elements"
+	"github.com/boz/kubetop/ui/elements/deflist"
 	"github.com/boz/kubetop/ui/screen"
 	"github.com/boz/kubetop/ui/theme"
 	"github.com/boz/kubetop/version"
@@ -41,10 +40,12 @@ var kbdNav = []struct {
 	key   string
 	label string
 }{
+	{"?", "Help"},
 	{"P", "Pods"},
 	{"S", "Services"},
 	{"N", "Nodes"},
 	{"E", "Events"},
+	{"Q", "Quit"},
 }
 
 func newMainStatus() views.Widget {
@@ -54,7 +55,7 @@ func newMainStatus() views.Widget {
 	bar.RegisterLeftStyle('N', theme.AppHeader.Bar)
 	bar.RegisterLeftStyle('A', theme.AppHeader.Action)
 
-	leftNav := "%N[%AQ%N] Quit"
+	leftNav := ""
 	for _, nav := range kbdNav {
 		leftNav += fmt.Sprintf(" %%N[%%A%v%%N] %v", nav.key, nav.label)
 	}
@@ -120,21 +121,23 @@ func (w *mainWidget) HandleEvent(ev tcell.Event) bool {
 		switch ev.Key() {
 		case tcell.KeyRune:
 			switch ev.Rune() {
-			case 'Q', 'q':
-				w.stopch <- true
+			case '?':
+				w.openHelp()
 				return true
-			case 'P', 'p':
+			case 'P':
 				w.ctx.NavigateTo(screen.PodIndexRequest())
-			case 'S', 's':
+				return true
+			case 'S':
 				w.ctx.NavigateTo(screen.ServiceIndexRequest())
-			case 'N', 'n':
+				return true
+			case 'N':
 				w.ctx.NavigateTo(screen.NodeIndexRequest())
-			case 'E', 'e':
+				return true
+			case 'E':
 				w.ctx.NavigateTo(screen.EventIndexRequest())
-			case 'X', 'x':
-				popup := elements.NewPopup(w.ctx, 10, 10, theme.Base)
-				popup.SetContent(w.textArea())
-				w.popupper.Push(popup)
+				return true
+			case 'Q':
+				w.stopch <- true
 				return true
 			}
 		}
@@ -162,18 +165,19 @@ func (w *mainWidget) setContent(child elements.Screen) {
 	w.Resize()
 }
 
-func (w *mainWidget) textArea() views.Widget {
-	var text string
+func (w *mainWidget) openHelp() {
+	popup := elements.NewPopup(w.ctx, 10, 10, theme.Base)
+	popup.SetContent(w.helpWidget())
+	w.popupper.Push(popup)
+}
 
-	for i := 0; i < 9; i++ {
-		text = text + strconv.Itoa(i) + " " + strings.Repeat("123456789", 2) + "\n"
+func (w *mainWidget) helpWidget() views.Widget {
+	rows := make([]deflist.Row, 0, len(kbdNav))
+
+	for _, row := range kbdNav {
+		rows = append(rows, deflist.NewSimpleRow(row.key, row.label))
 	}
-	text = text + text
-
-	txt := views.NewTextArea()
-	txt.SetContent("%N" + text)
-	txt.EnableCursor(true)
-	return txt
+	return deflist.NewWidget(rows)
 }
 
 func (w *mainWidget) SetView(view views.View) {
