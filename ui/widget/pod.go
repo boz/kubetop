@@ -20,8 +20,8 @@ func NewPodTable(ctx elements.Context, ds pod.Publisher) elements.Widget {
 	return elements.NewWidget(ctx, content)
 }
 
-func NewPodDetails(ctx elements.Context, id string) (elements.Widget, error) {
-	ctx = ctx.New("pod/details")
+func NewPodSummary(ctx elements.Context, id string) (elements.Widget, error) {
+	ctx = ctx.New("pod/summary")
 
 	nsName, err := nsname.Parse(id)
 	if err != nil {
@@ -38,11 +38,11 @@ func NewPodDetails(ctx elements.Context, id string) (elements.Widget, error) {
 	podController := podsBase.CloneWithFilter(filter.NSName(nsName))
 	ctx.AlsoClose(podController)
 
-	// pod details
-	pdetails := view.NewPodDetails()
+	// pod summary
+	psummary := view.NewPodSummary()
 	pod.NewMonitor(podController,
 		uiutil.PodsPoster(ctx,
-			pod.ToUnitary(ctx.Env().Logutil(), pdetails)))
+			pod.ToUnitary(ctx.Env().Logutil(), psummary)))
 
 	/*
 		svcBase, err := ctx.Backend().Services()
@@ -64,10 +64,10 @@ func NewPodDetails(ctx elements.Context, id string) (elements.Widget, error) {
 		svcTable := NewServiceTable(ctx, svcController)
 		layout.PushBackWidget(svcTable)
 		layout := elements.NewPanes()
-		layout.PushBackWidget(pdetails)
+		layout.PushBackWidget(psummary)
 	*/
 
-	widget := elements.NewWidget(ctx, pdetails)
+	widget := elements.NewWidget(ctx, psummary)
 
 	return widget, nil
 }

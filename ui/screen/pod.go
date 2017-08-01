@@ -24,7 +24,7 @@ func PodIndexRequest() elements.Request {
 type podIndex struct {
 	layout  elements.Panes
 	table   elements.Widget
-	details elements.Widget
+	summary elements.Widget
 	ctx     elements.Context
 	views.WidgetWatchers
 }
@@ -68,10 +68,10 @@ func (w *podIndex) HandleEvent(ev tcell.Event) bool {
 		w.PostEventWidgetContent(w)
 		return true
 	case *table.EventRowActive:
-		w.showDetails(ev.Row().ID())
+		w.showSummary(ev.Row().ID())
 		return true
 	case *table.EventRowInactive:
-		w.removeDetails()
+		w.removeSummary()
 		return true
 	}
 	return w.table.HandleEvent(ev)
@@ -85,18 +85,18 @@ func (w *podIndex) Size() (int, int) {
 	return w.layout.Size()
 }
 
-func (w *podIndex) showDetails(id string) {
-	w.removeDetails()
-	details, _ := widget.NewPodDetails(w.ctx, id)
-	details.Watch(w)
-	w.details = details
-	w.layout.PushFrontWidget(w.details)
+func (w *podIndex) showSummary(id string) {
+	w.removeSummary()
+	summary, _ := widget.NewPodSummary(w.ctx, id)
+	summary.Watch(w)
+	w.summary = summary
+	w.layout.PushFrontWidget(w.summary)
 }
 
-func (w *podIndex) removeDetails() {
-	if w.details != nil {
-		w.details.Unwatch(w)
-		w.layout.RemoveWidget(w.details)
-		w.details.Close()
+func (w *podIndex) removeSummary() {
+	if w.summary != nil {
+		w.summary.Unwatch(w)
+		w.layout.RemoveWidget(w.summary)
+		w.summary.Close()
 	}
 }

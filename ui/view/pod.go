@@ -2,12 +2,14 @@ package view
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/boz/kcache/types/pod"
 	"github.com/boz/kubetop/backend"
 	"github.com/boz/kubetop/ui/elements/deflist"
 	"github.com/boz/kubetop/ui/elements/table"
 	"github.com/boz/kubetop/ui/theme"
+	"github.com/boz/kubetop/ui/util"
 	"github.com/gdamore/tcell"
 	"github.com/gdamore/tcell/views"
 	"k8s.io/api/core/v1"
@@ -121,72 +123,83 @@ func (pt *podTable) renderRow(obj *v1.Pod) table.TR {
 	return table.NewTR(backend.ObjectID(obj), cols)
 }
 
-type PodDetails interface {
+type PodSummary interface {
 	pod.UnitaryHandler
 	views.Widget
 }
 
-func NewPodDetails() PodDetails {
-	return &podDetails{deflist.NewWidget(nil)}
+func NewPodSummary() PodSummary {
+	return &podSummary{deflist.NewWidget(nil)}
 }
 
-type podDetails struct {
+type podSummary struct {
 	leftdl deflist.Widget
 }
 
-func (w *podDetails) Draw() {
+func (w *podSummary) Draw() {
 	w.leftdl.Draw()
 }
 
-func (w *podDetails) Resize() {
+func (w *podSummary) Resize() {
 	w.leftdl.Resize()
 }
 
-func (w *podDetails) HandleEvent(ev tcell.Event) bool {
+func (w *podSummary) HandleEvent(ev tcell.Event) bool {
 	return w.leftdl.HandleEvent(ev)
 }
 
-func (w *podDetails) SetView(view views.View) {
+func (w *podSummary) SetView(view views.View) {
 	w.leftdl.SetView(view)
 }
 
-func (w *podDetails) Size() (int, int) {
+func (w *podSummary) Size() (int, int) {
 	return w.leftdl.Size()
 }
 
-func (w *podDetails) Watch(handler tcell.EventHandler) {
+func (w *podSummary) Watch(handler tcell.EventHandler) {
 	w.leftdl.Watch(handler)
 }
 
-func (w *podDetails) Unwatch(handler tcell.EventHandler) {
+func (w *podSummary) Unwatch(handler tcell.EventHandler) {
 	w.leftdl.Unwatch(handler)
 }
 
-func (w *podDetails) OnInitialize(obj *v1.Pod) {
+func (w *podSummary) OnInitialize(obj *v1.Pod) {
 	w.drawObject(obj)
 }
 
-func (w *podDetails) OnCreate(obj *v1.Pod) {
+func (w *podSummary) OnCreate(obj *v1.Pod) {
 	w.drawObject(obj)
 }
 
-func (w *podDetails) OnUpdate(obj *v1.Pod) {
+func (w *podSummary) OnUpdate(obj *v1.Pod) {
 	w.drawObject(obj)
 }
 
-func (w *podDetails) OnDelete(obj *v1.Pod) {
+func (w *podSummary) OnDelete(obj *v1.Pod) {
 	w.drawObject(obj)
 }
 
-func (w *podDetails) drawObject(obj *v1.Pod) {
+func (w *podSummary) drawObject(obj *v1.Pod) {
 	if obj == nil {
 		return
+	}
+
+	var owners []string
+
+	if len(obj.GetOwnerReferences()) == 0 {
+		owners = append(owners, "N/A")
+	}
+
+	for _, ref := range obj.GetOwnerReferences() {
+		owners = append(owners, util.FormatOwnerReference(ref))
 	}
 
 	rows := []deflist.Row{
 		deflist.NewSimpleRow("Name", obj.GetName()),
 		deflist.NewSimpleRow("Namespace", obj.GetNamespace()),
 		deflist.NewSimpleRow("Node", obj.Spec.NodeName),
+		deflist.NewSimpleRow("Owners", strings.Join(owners, ",")),
 	}
 
 	w.leftdl.SetRows(rows)
