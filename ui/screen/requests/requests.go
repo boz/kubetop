@@ -1,9 +1,13 @@
 package requests
 
-import "github.com/boz/kubetop/ui/elements"
+import (
+	"github.com/boz/kcache/nsname"
+	"github.com/boz/kubetop/ui/elements"
+)
 
 const (
 	PodIndexRoute     elements.Route = "/pod"
+	PodShowRoute      elements.Route = "/pod/show"
 	ServiceIndexRoute elements.Route = "/service"
 	EventIndexRoute   elements.Route = "/event"
 	NodeIndexRoute    elements.Route = "/node"
@@ -11,6 +15,10 @@ const (
 
 func PodIndexRequest() elements.Request {
 	return elements.NewRequest(PodIndexRoute)
+}
+
+func PodShowRequest(id nsname.NSName) elements.NSNameRequest {
+	return elements.NewNSNameRequest(PodShowRoute, id)
 }
 
 func ServiceIndexRequest() elements.Request {

@@ -3,6 +3,7 @@ package pod
 import (
 	"github.com/boz/kubetop/ui/elements"
 	"github.com/boz/kubetop/ui/elements/table"
+	"github.com/boz/kubetop/ui/screen/requests"
 	"github.com/boz/kubetop/ui/widget"
 	"github.com/gdamore/tcell"
 	"github.com/gdamore/tcell/views"
@@ -11,7 +12,7 @@ import (
 type indexScreen struct {
 	layout  elements.Panes
 	table   elements.Widget
-	summary elements.Widget
+	summary elements.NSNameWidget
 	ctx     elements.Context
 	views.WidgetWatchers
 }
@@ -26,7 +27,7 @@ func NewIndex(ctx elements.Context, req elements.Request) (elements.Screen, erro
 
 	table := widget.NewPodTable(ctx, pods)
 
-	layout := elements.NewVPanes()
+	layout := elements.NewVPanes(true)
 	layout.PushBackWidget(table)
 
 	index := &indexScreen{
@@ -60,6 +61,15 @@ func (w *indexScreen) HandleEvent(ev tcell.Event) bool {
 	case *table.EventRowInactive:
 		w.removeSummary()
 		return true
+	case *tcell.EventKey:
+		switch ev.Key() {
+		case tcell.KeyEnter:
+			if w.summary != nil {
+				// navigate to pods/show
+				w.ctx.NavigateTo(requests.PodShowRequest(w.summary.ID()))
+				return true
+			}
+		}
 	}
 	return w.table.HandleEvent(ev)
 }

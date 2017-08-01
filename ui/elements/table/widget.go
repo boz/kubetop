@@ -171,6 +171,8 @@ func (tw *Widget) resizeContent() {
 	tw.width = width
 	tw.height = mheight + 1
 
+	//tw._debug("resizeContent")
+
 	tw.scrollToActive()
 }
 

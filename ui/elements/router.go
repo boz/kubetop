@@ -36,8 +36,8 @@ type NSNameRequest interface {
 	NSName() nsname.NSName
 }
 
-func NewNSNameRequest(path string, id nsname.NSName) NSNameRequest {
-	return nsNameRequest{request{NewRoute(path)}, id}
+func NewNSNameRequest(route Route, id nsname.NSName) NSNameRequest {
+	return nsNameRequest{request{route}, id}
 }
 
 type nsNameRequest struct {

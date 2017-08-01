@@ -1,6 +1,7 @@
 package elements
 
 import (
+	"github.com/boz/kcache/nsname"
 	"github.com/gdamore/tcell"
 	"github.com/gdamore/tcell/views"
 )
@@ -8,6 +9,11 @@ import (
 type Widget interface {
 	views.Widget
 	Close()
+}
+
+type NSNameWidget interface {
+	Widget
+	ID() nsname.NSName
 }
 
 type widget struct {
@@ -49,4 +55,20 @@ func (w *widget) Unwatch(handler tcell.EventHandler) {
 
 func (w *widget) Close() {
 	w.ctx.Close()
+}
+
+func NewNSNameWidget(ctx Context, content views.Widget, id nsname.NSName) NSNameWidget {
+	return &nsNameWidget{
+		widget: widget{content, ctx},
+		id:     id,
+	}
+}
+
+type nsNameWidget struct {
+	widget
+	id nsname.NSName
+}
+
+func (w *nsNameWidget) ID() nsname.NSName {
+	return w.id
 }

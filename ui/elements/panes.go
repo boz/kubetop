@@ -27,6 +27,8 @@ type panes struct {
 
 	orientation views.Orientation
 
+	expand bool
+
 	width  int
 	height int
 
@@ -34,16 +36,16 @@ type panes struct {
 	views.WidgetWatchers
 }
 
-func NewVPanes() Panes {
-	return NewPanes(views.Vertical)
+func NewVPanes(expand bool) Panes {
+	return NewPanes(views.Vertical, expand)
 }
 
-func NewHPanes() Panes {
-	return NewPanes(views.Horizontal)
+func NewHPanes(expand bool) Panes {
+	return NewPanes(views.Horizontal, expand)
 }
 
-func NewPanes(o views.Orientation) Panes {
-	return &panes{orientation: o}
+func NewPanes(o views.Orientation, expand bool) Panes {
+	return &panes{orientation: o, expand: expand}
 }
 
 func (p *panes) Widgets() []views.Widget {
@@ -164,21 +166,6 @@ func (p *panes) afterModify() {
 	p.PostEventWidgetContent(p)
 }
 
-/*
-	px, py := 0, 0
-
-	for _, c := range p.children {
-		cx, cy := c.widget.Size()
-
-		py += cy
-		if cx > px {
-			px = cx
-		}
-	}
-
-	return px, py
-*/
-
 func (p *panes) layout() {
 	switch p.orientation {
 	case views.Horizontal:
@@ -204,11 +191,12 @@ func (p *panes) vlayout() {
 			px = wx
 		}
 
-		if wy+py > vy {
-			wy = vy - py
-		}
+		// if wy+py > vy {
+		// 	logrus.StandardLogger().Debugf("vlayout: %v+%v>%v", wy, py, vy)
+		// 	wy = vy - py
+		// }
 
-		if i == len(p.children)-1 {
+		if p.expand && i == len(p.children)-1 && vy-py > wy {
 			wy = vy - py
 		}
 
@@ -238,11 +226,11 @@ func (p *panes) hlayout() {
 			py = wy
 		}
 
-		if wx+px > vx {
-			wx = vx - px
-		}
+		// if wx+px > vx {
+		// 	wx = vx - px
+		// }
 
-		if i == len(p.children)-1 {
+		if p.expand && i == len(p.children)-1 && vx-px > wx {
 			wx = vx - px
 		}
 
@@ -254,18 +242,4 @@ func (p *panes) hlayout() {
 
 	p.width = px
 	p.height = py
-}
-
-func (p *panes) maxSize() (int, int) {
-	px, py := 0, 0
-	for _, c := range p.children {
-		cx, cy := c.widget.Size()
-		if cx > px {
-			px = cx
-		}
-		if cy > py {
-			py = cy
-		}
-	}
-	return px, py
 }

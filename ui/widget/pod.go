@@ -20,7 +20,7 @@ func NewPodTable(ctx elements.Context, ds pod.Publisher) elements.Widget {
 	return elements.NewWidget(ctx, content)
 }
 
-func NewPodSummary(ctx elements.Context, id string) (elements.Widget, error) {
+func NewPodSummary(ctx elements.Context, id string) (elements.NSNameWidget, error) {
 	ctx = ctx.New("pod/summary")
 
 	nsName, err := nsname.Parse(id)
@@ -51,11 +51,11 @@ func NewPodSummary(ctx elements.Context, id string) (elements.Widget, error) {
 		uiutil.PodsPoster(ctx,
 			pod.ToUnitary(ctx.Env().Logutil(), pview.NewContainersTable(ctable))))
 
-	layout := elements.NewHPanes()
+	layout := elements.NewHPanes(true)
 	layout.PushBackWidget(psummary)
 	layout.PushBackWidget(elements.AlignRight(ctable))
 
-	widget := elements.NewWidget(ctx, layout)
+	widget := elements.NewNSNameWidget(ctx, layout, nsName)
 
 	return widget, nil
 }

@@ -11,6 +11,7 @@ import (
 
 func RegisterRoutes(router elements.Router) {
 	router.Register(requests.PodIndexRoute, elements.NewHandler(pod.NewIndex))
+	router.Register(requests.PodShowRoute, elements.NewNSNameHandler(pod.NewShow))
 	router.Register(requests.ServiceIndexRoute, elements.NewHandler(service.NewIndex))
 	router.Register(requests.NodeIndexRoute, elements.NewHandler(node.NewIndex))
 	router.Register(requests.EventIndexRoute, elements.NewHandler(event.NewIndex))

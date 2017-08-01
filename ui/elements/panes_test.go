@@ -14,7 +14,7 @@ func TestPanesPushBackWidget(t *testing.T) {
 	w3 := views.NewSpacer()
 
 	{
-		p := elements.NewVPanes()
+		p := elements.NewVPanes(true)
 
 		p.PushBackWidget(w1)
 		p.PushBackWidget(w2)
@@ -30,7 +30,7 @@ func TestPanesPushFrontWidget(t *testing.T) {
 	w3 := views.NewSpacer()
 
 	{
-		p := elements.NewVPanes()
+		p := elements.NewVPanes(true)
 
 		p.PushFrontWidget(w1)
 		p.PushFrontWidget(w2)
@@ -46,7 +46,7 @@ func TestPanesRemoveWidget(t *testing.T) {
 	w3 := views.NewSpacer()
 
 	{
-		p := elements.NewVPanes()
+		p := elements.NewVPanes(true)
 		p.PushBackWidget(w1)
 		p.PushBackWidget(w2)
 		p.PushBackWidget(w3)
@@ -64,7 +64,7 @@ func TestPanesRemoveWidget(t *testing.T) {
 	}
 
 	{
-		p := elements.NewVPanes()
+		p := elements.NewVPanes(true)
 		p.PushBackWidget(w1)
 		p.PushBackWidget(w2)
 		p.PushBackWidget(w3)
@@ -74,7 +74,7 @@ func TestPanesRemoveWidget(t *testing.T) {
 	}
 
 	{
-		p := elements.NewVPanes()
+		p := elements.NewVPanes(true)
 		p.PushBackWidget(w1)
 		p.PushBackWidget(w2)
 		p.PushBackWidget(w3)
@@ -90,14 +90,14 @@ func TestPanesInsertBeforeWidget(t *testing.T) {
 	w3 := views.NewSpacer()
 
 	{
-		p := elements.NewVPanes()
+		p := elements.NewVPanes(true)
 		p.InsertBeforeWidget(w1, w1)
 
 		assert.Empty(t, p.Widgets())
 	}
 
 	{
-		p := elements.NewVPanes()
+		p := elements.NewVPanes(true)
 		p.PushBackWidget(w1)
 
 		p.InsertBeforeWidget(w3, w2)
@@ -105,7 +105,7 @@ func TestPanesInsertBeforeWidget(t *testing.T) {
 	}
 
 	{
-		p := elements.NewVPanes()
+		p := elements.NewVPanes(true)
 		p.PushBackWidget(w1)
 		p.PushBackWidget(w3)
 
@@ -114,7 +114,7 @@ func TestPanesInsertBeforeWidget(t *testing.T) {
 	}
 
 	{
-		p := elements.NewVPanes()
+		p := elements.NewVPanes(true)
 		p.PushBackWidget(w1)
 		p.PushBackWidget(w3)
 
@@ -129,13 +129,13 @@ func TestPanesInsertAfterWidget(t *testing.T) {
 	w3 := views.NewSpacer()
 
 	{
-		p := elements.NewVPanes()
+		p := elements.NewVPanes(true)
 		p.InsertAfterWidget(w1, w1)
 		assert.Empty(t, p.Widgets())
 	}
 
 	{
-		p := elements.NewVPanes()
+		p := elements.NewVPanes(true)
 		p.PushBackWidget(w1)
 
 		p.InsertAfterWidget(w3, w2)
@@ -143,7 +143,7 @@ func TestPanesInsertAfterWidget(t *testing.T) {
 	}
 
 	{
-		p := elements.NewVPanes()
+		p := elements.NewVPanes(true)
 		p.PushBackWidget(w1)
 		p.PushBackWidget(w3)
 
@@ -152,7 +152,7 @@ func TestPanesInsertAfterWidget(t *testing.T) {
 	}
 
 	{
-		p := elements.NewVPanes()
+		p := elements.NewVPanes(true)
 		p.PushBackWidget(w1)
 		p.PushBackWidget(w3)
 

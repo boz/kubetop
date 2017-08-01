@@ -77,7 +77,7 @@ func (p *context) clone(name string) *context {
 
 	return &context{
 		poster:      p.poster,
-		navWatchers: make(map[NavWatcher]bool),
+		navWatchers: p.navWatchers,
 		backend:     p.backend,
 		env:         p.env.ForComponent(name),
 		lc:          lc,
