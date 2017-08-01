@@ -1,4 +1,4 @@
-package view
+package table
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 	"k8s.io/api/core/v1"
 )
 
-func EventTableColumns() []table.TH {
+func TableColumns() []table.TH {
 	return []table.TH{
 		table.NewTH("timestamp", "Timestamp", true, 0),
 		table.NewTH("type", "Type", true, -1),
@@ -20,15 +20,15 @@ func EventTableColumns() []table.TH {
 	}
 }
 
-type eventTable struct {
+type eventsTable struct {
 	content table.Display
 }
 
-func NewEventTableWriter(content table.Display) event.Handler {
-	return &eventTable{content}
+func NewTable(content table.Display) event.Handler {
+	return &eventsTable{content}
 }
 
-func (pt *eventTable) OnInitialize(objs []*v1.Event) {
+func (pt *eventsTable) OnInitialize(objs []*v1.Event) {
 	rows := make([]table.TR, 0, len(objs))
 	for _, obj := range objs {
 		rows = append(rows, pt.renderRow(obj))
@@ -36,19 +36,19 @@ func (pt *eventTable) OnInitialize(objs []*v1.Event) {
 	pt.content.ResetRows(rows)
 }
 
-func (pt *eventTable) OnCreate(obj *v1.Event) {
+func (pt *eventsTable) OnCreate(obj *v1.Event) {
 	pt.content.InsertRow(pt.renderRow(obj))
 }
 
-func (pt *eventTable) OnUpdate(obj *v1.Event) {
+func (pt *eventsTable) OnUpdate(obj *v1.Event) {
 	pt.content.UpdateRow(pt.renderRow(obj))
 }
 
-func (pt *eventTable) OnDelete(obj *v1.Event) {
+func (pt *eventsTable) OnDelete(obj *v1.Event) {
 	pt.content.RemoveRow(backend.ObjectID(obj))
 }
 
-func (pt *eventTable) renderRow(obj *v1.Event) table.TR {
+func (pt *eventsTable) renderRow(obj *v1.Event) table.TR {
 
 	object := eventFormatInvolvedObject(obj)
 
