@@ -1,4 +1,4 @@
-package view
+package service
 
 import (
 	"github.com/boz/kcache/types/service"
@@ -8,7 +8,7 @@ import (
 	"k8s.io/api/core/v1"
 )
 
-func ServiceTableColumns() []table.TH {
+func TableColumns() []table.TH {
 	return []table.TH{
 		table.NewTH("ns", "Namespace", true, 0),
 		table.NewTH("name", "Name", true, 1),
@@ -17,15 +17,15 @@ func ServiceTableColumns() []table.TH {
 	}
 }
 
-type serviceTable struct {
+type servicesTable struct {
 	content table.Display
 }
 
-func NewServiceTableWriter(content table.Display) service.Handler {
-	return &serviceTable{content}
+func NewTable(content table.Display) service.Handler {
+	return &servicesTable{content}
 }
 
-func (pt *serviceTable) OnInitialize(objs []*v1.Service) {
+func (pt *servicesTable) OnInitialize(objs []*v1.Service) {
 	rows := make([]table.TR, 0, len(objs))
 	for _, obj := range objs {
 		rows = append(rows, pt.renderRow(obj))
@@ -33,19 +33,19 @@ func (pt *serviceTable) OnInitialize(objs []*v1.Service) {
 	pt.content.ResetRows(rows)
 }
 
-func (pt *serviceTable) OnCreate(obj *v1.Service) {
+func (pt *servicesTable) OnCreate(obj *v1.Service) {
 	pt.content.InsertRow(pt.renderRow(obj))
 }
 
-func (pt *serviceTable) OnUpdate(obj *v1.Service) {
+func (pt *servicesTable) OnUpdate(obj *v1.Service) {
 	pt.content.UpdateRow(pt.renderRow(obj))
 }
 
-func (pt *serviceTable) OnDelete(obj *v1.Service) {
+func (pt *servicesTable) OnDelete(obj *v1.Service) {
 	pt.content.RemoveRow(backend.ObjectID(obj))
 }
 
-func (pt *serviceTable) renderRow(obj *v1.Service) table.TR {
+func (pt *servicesTable) renderRow(obj *v1.Service) table.TR {
 	cols := []table.TD{
 		table.NewTD("ns", obj.GetNamespace(), theme.LabelNormal),
 		table.NewTD("name", obj.GetName(), theme.LabelNormal),

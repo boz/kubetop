@@ -5,15 +5,15 @@ import (
 	"github.com/boz/kubetop/ui/elements"
 	"github.com/boz/kubetop/ui/elements/table"
 	uiutil "github.com/boz/kubetop/ui/util"
-	"github.com/boz/kubetop/ui/view"
+	sview "github.com/boz/kubetop/ui/view/service"
 )
 
 func NewServiceTable(ctx elements.Context, ds service.Publisher) elements.Widget {
 	ctx = ctx.New("service/table")
-	content := table.NewWidget(ctx.Env(), view.ServiceTableColumns())
+	content := table.NewWidget(ctx.Env(), sview.TableColumns())
 
 	ctx.AlsoClose(service.NewMonitor(ds,
-		uiutil.ServicesPoster(ctx, view.NewServiceTableWriter(content))))
+		uiutil.ServicesPoster(ctx, sview.NewTable(content))))
 
 	return elements.NewWidget(ctx, content)
 }
