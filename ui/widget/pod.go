@@ -8,14 +8,14 @@ import (
 	"github.com/boz/kubetop/ui/elements"
 	"github.com/boz/kubetop/ui/elements/table"
 	uiutil "github.com/boz/kubetop/ui/util"
-	"github.com/boz/kubetop/ui/view"
+	pview "github.com/boz/kubetop/ui/view/pod"
 	"k8s.io/api/core/v1"
 )
 
 func NewPodTable(ctx elements.Context, ds pod.Publisher) elements.Widget {
 	ctx = ctx.New("pod/table")
-	content := table.NewWidget(ctx.Env(), view.PodTableColumns())
-	handler := uiutil.PodsPoster(ctx, view.NewPodTableWriter(content))
+	content := table.NewWidget(ctx.Env(), pview.TableColumns())
+	handler := uiutil.PodsPoster(ctx, pview.NewTable(content))
 	ctx.AlsoClose(pod.NewMonitor(ds, handler))
 	return elements.NewWidget(ctx, content)
 }
@@ -39,7 +39,7 @@ func NewPodSummary(ctx elements.Context, id string) (elements.Widget, error) {
 	ctx.AlsoClose(podController)
 
 	// pod summary
-	psummary := view.NewPodSummary()
+	psummary := pview.NewSummary()
 	pod.NewMonitor(podController,
 		uiutil.PodsPoster(ctx,
 			pod.ToUnitary(ctx.Env().Logutil(), psummary)))
