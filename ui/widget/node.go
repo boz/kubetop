@@ -5,15 +5,15 @@ import (
 	"github.com/boz/kubetop/ui/elements"
 	"github.com/boz/kubetop/ui/elements/table"
 	uiutil "github.com/boz/kubetop/ui/util"
-	"github.com/boz/kubetop/ui/view"
+	nview "github.com/boz/kubetop/ui/view/node"
 )
 
 func NewNodeTable(ctx elements.Context, ds node.Publisher) elements.Widget {
 	ctx = ctx.New("node/table")
-	content := table.NewWidget(ctx.Env(), view.NodeTableColumns())
+	content := table.NewWidget(ctx.Env(), nview.TableColumns())
 
 	ctx.AlsoClose(node.NewMonitor(ds,
-		uiutil.NodesPoster(ctx, view.NewNodeTableWriter(content))))
+		uiutil.NodesPoster(ctx, nview.NewTable(content))))
 
 	return elements.NewWidget(ctx, content)
 }
