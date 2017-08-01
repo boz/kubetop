@@ -20,6 +20,7 @@ type Widget struct {
 
 	width  int
 	height int
+	expand bool
 
 	view  views.View
 	hport *views.ViewPort
@@ -29,12 +30,13 @@ type Widget struct {
 	env util.Env
 }
 
-func NewWidget(env util.Env, cols []TH) *Widget {
+func NewWidget(env util.Env, cols []TH, expand bool) *Widget {
 	return &Widget{
-		model: newModel(cols),
-		hport: views.NewViewPort(nil, 0, 0, 0, 0),
-		rport: views.NewViewPort(nil, 0, 1, 0, 0),
-		env:   env,
+		model:  newModel(cols),
+		hport:  views.NewViewPort(nil, 0, 0, 0, 0),
+		rport:  views.NewViewPort(nil, 0, 1, 0, 0),
+		expand: expand,
+		env:    env,
 	}
 }
 
@@ -143,7 +145,7 @@ func (tw *Widget) resizeContent() {
 
 	vwidth, _ := tw.view.Size()
 
-	if vwidth > width {
+	if tw.expand && vwidth > width {
 		delta := vwidth - width
 		pad := delta / len(colsz)
 		rem := delta % len(colsz)

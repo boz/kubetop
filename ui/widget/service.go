@@ -10,7 +10,7 @@ import (
 
 func NewServiceTable(ctx elements.Context, ds service.Publisher) elements.Widget {
 	ctx = ctx.New("service/table")
-	content := table.NewWidget(ctx.Env(), sview.TableColumns())
+	content := table.NewWidget(ctx.Env(), sview.TableColumns(), true)
 
 	ctx.AlsoClose(service.NewMonitor(ds,
 		uiutil.ServicesPoster(ctx, sview.NewTable(content))))

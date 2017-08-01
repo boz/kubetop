@@ -10,7 +10,7 @@ import (
 
 func NewEventTable(ctx elements.Context, ds event.Publisher) elements.Widget {
 	ctx = ctx.New("event/table")
-	content := table.NewWidget(ctx.Env(), eview.TableColumns())
+	content := table.NewWidget(ctx.Env(), eview.TableColumns(), true)
 
 	ctx.AlsoClose(event.NewMonitor(ds,
 		uiutil.EventsPoster(ctx, eview.NewTable(content))))

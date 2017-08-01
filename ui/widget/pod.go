@@ -14,7 +14,7 @@ import (
 
 func NewPodTable(ctx elements.Context, ds pod.Publisher) elements.Widget {
 	ctx = ctx.New("pod/table")
-	content := table.NewWidget(ctx.Env(), pview.TableColumns())
+	content := table.NewWidget(ctx.Env(), pview.TableColumns(), true)
 	handler := uiutil.PodsPoster(ctx, pview.NewTable(content))
 	ctx.AlsoClose(pod.NewMonitor(ds, handler))
 	return elements.NewWidget(ctx, content)
@@ -46,7 +46,7 @@ func NewPodSummary(ctx elements.Context, id string) (elements.Widget, error) {
 
 	// container summary
 
-	ctable := table.NewWidget(ctx.Env(), pview.ContainersTableColumns())
+	ctable := table.NewWidget(ctx.Env(), pview.ContainersTableColumns(), false)
 	pod.NewMonitor(podController,
 		uiutil.PodsPoster(ctx,
 			pod.ToUnitary(ctx.Env().Logutil(), pview.NewContainersTable(ctable))))
@@ -79,3 +79,25 @@ func podServicesHandler(target filterable) pod.UnitaryHandler {
 type filterable interface {
 	Refilter(filter.Filter)
 }
+
+/*
+	log := ctx.Env().WithID().Log()
+	pod.NewMonitor(podController,
+		pod.BuildHandler().
+			OnInitialize(func(objs []*v1.Pod) {
+				var name string
+				if len(objs) > 0 {
+					name = objs[0].Namespace + "/" + objs[0].Name
+				}
+				log.Debugf("initialize: (%v) %v", len(objs), name)
+			}).
+			OnCreate(func(obj *v1.Pod) {
+				log.Debugf("create: %v/%v", obj.Namespace, obj.Name)
+			}).
+			OnUpdate(func(obj *v1.Pod) {
+				log.Debugf("update: %v/%v", obj.Namespace, obj.Name)
+			}).
+			OnDelete(func(obj *v1.Pod) {
+				log.Debugf("delete: %v/%v", obj.Namespace, obj.Name)
+			}).Create())
+*/

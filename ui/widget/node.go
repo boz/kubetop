@@ -10,7 +10,7 @@ import (
 
 func NewNodeTable(ctx elements.Context, ds node.Publisher) elements.Widget {
 	ctx = ctx.New("node/table")
-	content := table.NewWidget(ctx.Env(), nview.TableColumns())
+	content := table.NewWidget(ctx.Env(), nview.TableColumns(), true)
 
 	ctx.AlsoClose(node.NewMonitor(ds,
 		uiutil.NodesPoster(ctx, nview.NewTable(content))))
