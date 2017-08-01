@@ -53,7 +53,7 @@ func NewPodSummary(ctx elements.Context, id string) (elements.Widget, error) {
 
 	layout := elements.NewHPanes()
 	layout.PushBackWidget(psummary)
-	layout.PushBackWidget(ctable)
+	layout.PushBackWidget(elements.AlignRight(ctable))
 
 	widget := elements.NewWidget(ctx, layout)
 
