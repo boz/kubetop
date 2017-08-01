@@ -19,8 +19,8 @@ type Request interface {
 	Route() Route
 }
 
-func NewRequest(path string) Request {
-	return request{NewRoute(path)}
+func NewRequest(route Route) Request {
+	return request{route}
 }
 
 type request struct {

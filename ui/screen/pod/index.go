@@ -1,4 +1,4 @@
-package screen
+package pod
 
 import (
 	"github.com/boz/kubetop/ui/elements"
@@ -8,20 +8,7 @@ import (
 	"github.com/gdamore/tcell/views"
 )
 
-const (
-	podIndexPath = "/pods"
-	podShowPath  = "/pods/show"
-)
-
-func RegisterPodRoutes(router elements.Router) {
-	router.Register(elements.NewRoute(podIndexPath), elements.NewHandler(podIndexHandler))
-}
-
-func PodIndexRequest() elements.Request {
-	return elements.NewRequest(podIndexPath)
-}
-
-type podIndex struct {
+type indexScreen struct {
 	layout  elements.Panes
 	table   elements.Widget
 	summary elements.Widget
@@ -29,7 +16,7 @@ type podIndex struct {
 	views.WidgetWatchers
 }
 
-func podIndexHandler(ctx elements.Context, req elements.Request) (elements.Screen, error) {
+func NewIndex(ctx elements.Context, req elements.Request) (elements.Screen, error) {
 	ctx = ctx.New("pod/index")
 
 	pods, err := ctx.Backend().Pods()
@@ -42,7 +29,7 @@ func podIndexHandler(ctx elements.Context, req elements.Request) (elements.Scree
 	layout := elements.NewVPanes()
 	layout.PushBackWidget(table)
 
-	index := &podIndex{
+	index := &indexScreen{
 		layout: layout,
 		table:  table,
 		ctx:    ctx,
@@ -54,15 +41,15 @@ func podIndexHandler(ctx elements.Context, req elements.Request) (elements.Scree
 	return elements.NewScreen(ctx, req, "Pods", index), nil
 }
 
-func (w *podIndex) Draw() {
+func (w *indexScreen) Draw() {
 	w.layout.Draw()
 }
 
-func (w *podIndex) Resize() {
+func (w *indexScreen) Resize() {
 	w.layout.Resize()
 }
 
-func (w *podIndex) HandleEvent(ev tcell.Event) bool {
+func (w *indexScreen) HandleEvent(ev tcell.Event) bool {
 	switch ev := ev.(type) {
 	case *views.EventWidgetContent:
 		w.PostEventWidgetContent(w)
@@ -77,15 +64,15 @@ func (w *podIndex) HandleEvent(ev tcell.Event) bool {
 	return w.table.HandleEvent(ev)
 }
 
-func (w *podIndex) SetView(view views.View) {
+func (w *indexScreen) SetView(view views.View) {
 	w.layout.SetView(view)
 }
 
-func (w *podIndex) Size() (int, int) {
+func (w *indexScreen) Size() (int, int) {
 	return w.layout.Size()
 }
 
-func (w *podIndex) showSummary(id string) {
+func (w *indexScreen) showSummary(id string) {
 	w.removeSummary()
 	summary, _ := widget.NewPodSummary(w.ctx, id)
 	summary.Watch(w)
@@ -93,7 +80,7 @@ func (w *podIndex) showSummary(id string) {
 	w.layout.PushFrontWidget(w.summary)
 }
 
-func (w *podIndex) removeSummary() {
+func (w *indexScreen) removeSummary() {
 	if w.summary != nil {
 		w.summary.Unwatch(w)
 		w.layout.RemoveWidget(w.summary)

@@ -6,6 +6,7 @@ import (
 	"github.com/boz/kubetop/ui/elements"
 	"github.com/boz/kubetop/ui/elements/deflist"
 	"github.com/boz/kubetop/ui/screen"
+	"github.com/boz/kubetop/ui/screen/requests"
 	"github.com/boz/kubetop/ui/theme"
 	"github.com/boz/kubetop/version"
 	"github.com/gdamore/tcell"
@@ -76,10 +77,7 @@ func newMainWidget(ctx elements.Context, stopch chan<- bool) views.Widget {
 	panel.SetStatus(newMainStatus())
 
 	router := elements.NewRouter(ctx)
-	screen.RegisterPodRoutes(router)
-	screen.RegisterServiceRoutes(router)
-	screen.RegisterNodeRoutes(router)
-	screen.RegisterEventRoutes(router)
+	screen.RegisterRoutes(router)
 
 	widget := &mainWidget{
 		stopch:    stopch,
@@ -92,7 +90,7 @@ func newMainWidget(ctx elements.Context, stopch chan<- bool) views.Widget {
 
 	ctx.WatchNavigation(widget)
 
-	ctx.NavigateTo(screen.PodIndexRequest())
+	ctx.NavigateTo(requests.PodIndexRequest())
 
 	return widget
 }
@@ -125,16 +123,16 @@ func (w *mainWidget) HandleEvent(ev tcell.Event) bool {
 				w.openHelp()
 				return true
 			case 'P':
-				w.ctx.NavigateTo(screen.PodIndexRequest())
+				w.ctx.NavigateTo(requests.PodIndexRequest())
 				return true
 			case 'S':
-				w.ctx.NavigateTo(screen.ServiceIndexRequest())
+				w.ctx.NavigateTo(requests.ServiceIndexRequest())
 				return true
 			case 'N':
-				w.ctx.NavigateTo(screen.NodeIndexRequest())
+				w.ctx.NavigateTo(requests.NodeIndexRequest())
 				return true
 			case 'E':
-				w.ctx.NavigateTo(screen.EventIndexRequest())
+				w.ctx.NavigateTo(requests.EventIndexRequest())
 				return true
 			case 'Q':
 				w.stopch <- true
