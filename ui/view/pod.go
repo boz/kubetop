@@ -21,6 +21,7 @@ func PodTableColumns() []table.TH {
 		table.NewTH("name", "Name", true, 1),
 		table.NewTH("status", "Status", true, -1),
 		table.NewTH("containers", "Containers", true, -1),
+		table.NewTH("age", "Age", true, -1),
 		table.NewTH("message", "Message", true, -1),
 	}
 }
@@ -113,11 +114,14 @@ func (pt *podTable) renderRow(obj *v1.Pod) table.TR {
 	cstatus := fmt.Sprintf("%v: %v/%v/%v (%v)",
 		cready, cwaiting, crunning, cterminated, crestarts)
 
+	age := util.FormatAgeFromNow(obj.GetCreationTimestamp().Time)
+
 	cols := []table.TD{
 		table.NewTD("ns", obj.GetNamespace(), theme.LabelNormal),
 		table.NewTD("name", obj.GetName(), theme.LabelNormal),
 		table.NewTD("status", pstatus, theme.LabelNormal),
 		table.NewTD("containers", cstatus, theme.LabelNormal),
+		table.NewTD("age", age, theme.LabelNormal),
 		table.NewTD("message", obj.Status.Message, theme.LabelNormal),
 	}
 	return table.NewTR(backend.ObjectID(obj), cols)
@@ -188,7 +192,7 @@ func (w *podSummary) drawObject(obj *v1.Pod) {
 	var owners []string
 
 	if len(obj.GetOwnerReferences()) == 0 {
-		owners = append(owners, "N/A")
+		owners = append(owners, util.NASymbol)
 	}
 
 	for _, ref := range obj.GetOwnerReferences() {
@@ -203,27 +207,10 @@ func (w *podSummary) drawObject(obj *v1.Pod) {
 	}
 
 	w.leftdl.SetRows(rows)
+
+	// obj.Status.StartTime
+
 	/*
-
-		text := "name: " + obj.GetName() + "\n"
-		text += "namespace: " + obj.GetNamespace() + "\n"
-
-		text += "owners: "
-
-		for _, ref := range obj.GetOwnerReferences() {
-			text += ref.Kind + "/" + ref.Name
-		}
-
-		text += "\n"
-		text += "node: " + obj.Spec.NodeName + "\n"
-
-		text += "start time: "
-		if obj.Status.StartTime == nil {
-			text += "N/A"
-		} else {
-			text += obj.Status.StartTime.String()
-		}
-
 		text += "\n"
 
 		nready := 0
