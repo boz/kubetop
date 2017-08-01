@@ -39,7 +39,7 @@ func podIndexHandler(ctx elements.Context, req elements.Request) (elements.Scree
 
 	table := widget.NewPodTable(ctx, pods)
 
-	layout := elements.NewPanes()
+	layout := elements.NewVPanes()
 	layout.PushBackWidget(table)
 
 	index := &podIndex{

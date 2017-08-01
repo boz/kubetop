@@ -24,13 +24,26 @@ type panesChild struct {
 
 type panes struct {
 	children []*panesChild
-	view     views.View
 
+	orientation views.Orientation
+
+	width  int
+	height int
+
+	view views.View
 	views.WidgetWatchers
 }
 
-func NewPanes() Panes {
-	return &panes{}
+func NewVPanes() Panes {
+	return NewPanes(views.Vertical)
+}
+
+func NewHPanes() Panes {
+	return NewPanes(views.Horizontal)
+}
+
+func NewPanes(o views.Orientation) Panes {
+	return &panes{orientation: o}
 }
 
 func (p *panes) Widgets() []views.Widget {
@@ -76,18 +89,7 @@ func (p *panes) SetView(view views.View) {
 }
 
 func (p *panes) Size() (int, int) {
-	px, py := 0, 0
-
-	for _, c := range p.children {
-		cx, cy := c.widget.Size()
-
-		py += cy
-		if cx > px {
-			px = cx
-		}
-	}
-
-	return px, py
+	return p.width, p.height
 }
 
 func (p *panes) PushBackWidget(w views.Widget) {
@@ -162,17 +164,45 @@ func (p *panes) afterModify() {
 	p.PostEventWidgetContent(p)
 }
 
+/*
+	px, py := 0, 0
+
+	for _, c := range p.children {
+		cx, cy := c.widget.Size()
+
+		py += cy
+		if cx > px {
+			px = cx
+		}
+	}
+
+	return px, py
+*/
+
 func (p *panes) layout() {
+	switch p.orientation {
+	case views.Horizontal:
+		p.hlayout()
+	default:
+		p.vlayout()
+	}
+}
+
+func (p *panes) vlayout() {
 	if p.view == nil {
 		return
 	}
 
 	vx, vy := p.view.Size()
 
-	py := 0
+	px, py := 0, 0
 
 	for i, c := range p.children {
-		_, wy := c.widget.Size()
+		wx, wy := c.widget.Size()
+
+		if wx > px {
+			px = wx
+		}
 
 		if wy+py > vy {
 			wy = vy - py
@@ -187,4 +217,55 @@ func (p *panes) layout() {
 
 		py += wy
 	}
+
+	p.width = px
+	p.height = py
+}
+
+func (p *panes) hlayout() {
+	if p.view == nil {
+		return
+	}
+
+	vx, vy := p.view.Size()
+
+	px, py := 0, 0
+
+	for i, c := range p.children {
+		wx, wy := c.widget.Size()
+
+		if wy > py {
+			py = wy
+		}
+
+		if wx+px > vx {
+			wx = vx - px
+		}
+
+		if i == len(p.children)-1 {
+			wx = vx - px
+		}
+
+		c.view.Resize(px, 0, wx, vy)
+		c.widget.Resize()
+
+		px += wx
+	}
+
+	p.width = px
+	p.height = py
+}
+
+func (p *panes) maxSize() (int, int) {
+	px, py := 0, 0
+	for _, c := range p.children {
+		cx, cy := c.widget.Size()
+		if cx > px {
+			px = cx
+		}
+		if cy > py {
+			py = cy
+		}
+	}
+	return px, py
 }

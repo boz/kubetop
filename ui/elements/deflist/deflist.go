@@ -48,8 +48,10 @@ func (r *row) Definition() views.Widget {
 }
 
 type widget struct {
-	view views.View
-	rows []Row
+	view   views.View
+	rows   []Row
+	width  int
+	height int
 	views.WidgetWatchers
 }
 
@@ -96,16 +98,7 @@ func (w *widget) SetView(view views.View) {
 }
 
 func (w *widget) Size() (int, int) {
-
-	wx := 0
-
-	for _, row := range w.rows {
-		tx, _ := row.Term().Size()
-		dx, _ := row.Definition().Size()
-		wx += tx + dx + padsize
-	}
-
-	return wx, len(w.rows)
+	return w.width, w.height
 }
 
 func (w *widget) SetRows(rows []Row) {
@@ -155,4 +148,7 @@ func (w *widget) layout() {
 		row.Definition().SetView(defv)
 		row.Definition().Resize()
 	}
+
+	w.width = termx + defx + padsize
+	w.height = len(w.rows)
 }

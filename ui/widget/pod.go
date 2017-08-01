@@ -44,30 +44,18 @@ func NewPodSummary(ctx elements.Context, id string) (elements.Widget, error) {
 		uiutil.PodsPoster(ctx,
 			pod.ToUnitary(ctx.Env().Logutil(), psummary)))
 
-	/*
-		svcBase, err := ctx.Backend().Services()
-		if err != nil {
-			ctx.Env().LogErr(err, "service backend")
-			ctx.Close()
-			return nil, err
-		}
+	// container summary
 
-		svcController := svcBase.CloneWithFilter(filter.All())
-		ctx.AlsoClose(svcController)
+	ctable := table.NewWidget(ctx.Env(), pview.ContainersTableColumns())
+	pod.NewMonitor(podController,
+		uiutil.PodsPoster(ctx,
+			pod.ToUnitary(ctx.Env().Logutil(), pview.NewContainersTable(ctable))))
 
-		// keep svcController up to date with pod
-		pod.NewMonitor(podController,
-			pod.ToUnitary(ctx.Env().Logutil(),
-				podServicesHandler(svcController)))
+	layout := elements.NewHPanes()
+	layout.PushBackWidget(psummary)
+	layout.PushBackWidget(ctable)
 
-		// display services matching pod
-		svcTable := NewServiceTable(ctx, svcController)
-		layout.PushBackWidget(svcTable)
-		layout := elements.NewPanes()
-		layout.PushBackWidget(psummary)
-	*/
-
-	widget := elements.NewWidget(ctx, psummary)
+	widget := elements.NewWidget(ctx, layout)
 
 	return widget, nil
 }
