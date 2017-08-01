@@ -59,7 +59,7 @@ func (pt *podTable) renderRow(obj *v1.Pod) table.TR {
 
 	conditions := ""
 	for _, c := range stat.Conditions {
-		conditions += string(c.Type)[0:1]
+		conditions += abbreviatePodConditionType(c.Type)
 		switch c.Status {
 		case v1.ConditionTrue:
 			conditions += "+"
@@ -256,4 +256,17 @@ func (w *podSummary) drawObject(obj *v1.Pod) {
 
 		w.SetText(text)
 	*/
+}
+
+func abbreviatePodConditionType(ct v1.PodConditionType) string {
+	switch ct {
+	case v1.PodScheduled:
+		return "S"
+	case v1.PodReady:
+		return "R"
+	case v1.PodInitialized:
+		return "I"
+	default:
+		return "?"
+	}
 }
