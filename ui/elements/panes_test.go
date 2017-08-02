@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestPanesPushBackWidget(t *testing.T) {
+func TestPanesAppend(t *testing.T) {
 	w1 := views.NewSpacer()
 	w2 := views.NewSpacer()
 	w3 := views.NewSpacer()
@@ -16,15 +16,15 @@ func TestPanesPushBackWidget(t *testing.T) {
 	{
 		p := elements.NewVPanes(true)
 
-		p.PushBackWidget(w1)
-		p.PushBackWidget(w2)
-		p.PushBackWidget(w3)
+		p.Append(w1)
+		p.Append(w2)
+		p.Append(w3)
 
 		assert.Equal(t, []views.Widget{w1, w2, w3}, p.Widgets())
 	}
 }
 
-func TestPanesPushFrontWidget(t *testing.T) {
+func TestPanesPrepend(t *testing.T) {
 	w1 := views.NewSpacer()
 	w2 := views.NewSpacer()
 	w3 := views.NewSpacer()
@@ -32,131 +32,131 @@ func TestPanesPushFrontWidget(t *testing.T) {
 	{
 		p := elements.NewVPanes(true)
 
-		p.PushFrontWidget(w1)
-		p.PushFrontWidget(w2)
-		p.PushFrontWidget(w3)
+		p.Prepend(w1)
+		p.Prepend(w2)
+		p.Prepend(w3)
 
 		assert.Equal(t, []views.Widget{w3, w2, w1}, p.Widgets())
 	}
 }
 
-func TestPanesRemoveWidget(t *testing.T) {
+func TestPanesRemove(t *testing.T) {
 	w1 := views.NewSpacer()
 	w2 := views.NewSpacer()
 	w3 := views.NewSpacer()
 
 	{
 		p := elements.NewVPanes(true)
-		p.PushBackWidget(w1)
-		p.PushBackWidget(w2)
-		p.PushBackWidget(w3)
+		p.Append(w1)
+		p.Append(w2)
+		p.Append(w3)
 
-		p.RemoveWidget(w1)
+		p.Remove(w1)
 		assert.Equal(t, []views.Widget{w2, w3}, p.Widgets())
 
-		p.RemoveWidget(w1)
+		p.Remove(w1)
 		assert.Equal(t, []views.Widget{w2, w3}, p.Widgets())
 
 		for _, w := range p.Widgets() {
-			p.RemoveWidget(w)
+			p.Remove(w)
 		}
 		assert.Equal(t, []views.Widget{}, p.Widgets())
 	}
 
 	{
 		p := elements.NewVPanes(true)
-		p.PushBackWidget(w1)
-		p.PushBackWidget(w2)
-		p.PushBackWidget(w3)
+		p.Append(w1)
+		p.Append(w2)
+		p.Append(w3)
 
-		p.RemoveWidget(w2)
+		p.Remove(w2)
 		assert.Equal(t, []views.Widget{w1, w3}, p.Widgets())
 	}
 
 	{
 		p := elements.NewVPanes(true)
-		p.PushBackWidget(w1)
-		p.PushBackWidget(w2)
-		p.PushBackWidget(w3)
+		p.Append(w1)
+		p.Append(w2)
+		p.Append(w3)
 
-		p.RemoveWidget(w3)
+		p.Remove(w3)
 		assert.Equal(t, []views.Widget{w1, w2}, p.Widgets())
 	}
 }
 
-func TestPanesInsertBeforeWidget(t *testing.T) {
+func TestPanesInsertBefore(t *testing.T) {
 	w1 := views.NewSpacer()
 	w2 := views.NewSpacer()
 	w3 := views.NewSpacer()
 
 	{
 		p := elements.NewVPanes(true)
-		p.InsertBeforeWidget(w1, w1)
+		p.InsertBefore(w1, w1)
 
 		assert.Empty(t, p.Widgets())
 	}
 
 	{
 		p := elements.NewVPanes(true)
-		p.PushBackWidget(w1)
+		p.Append(w1)
 
-		p.InsertBeforeWidget(w3, w2)
+		p.InsertBefore(w3, w2)
 		assert.Equal(t, []views.Widget{w1}, p.Widgets())
 	}
 
 	{
 		p := elements.NewVPanes(true)
-		p.PushBackWidget(w1)
-		p.PushBackWidget(w3)
+		p.Append(w1)
+		p.Append(w3)
 
-		p.InsertBeforeWidget(w1, w2)
+		p.InsertBefore(w1, w2)
 		assert.Equal(t, []views.Widget{w2, w1, w3}, p.Widgets())
 	}
 
 	{
 		p := elements.NewVPanes(true)
-		p.PushBackWidget(w1)
-		p.PushBackWidget(w3)
+		p.Append(w1)
+		p.Append(w3)
 
-		p.InsertBeforeWidget(w3, w2)
+		p.InsertBefore(w3, w2)
 		assert.Equal(t, []views.Widget{w1, w2, w3}, p.Widgets())
 	}
 }
 
-func TestPanesInsertAfterWidget(t *testing.T) {
+func TestPanesInsertAfter(t *testing.T) {
 	w1 := views.NewSpacer()
 	w2 := views.NewSpacer()
 	w3 := views.NewSpacer()
 
 	{
 		p := elements.NewVPanes(true)
-		p.InsertAfterWidget(w1, w1)
+		p.InsertAfter(w1, w1)
 		assert.Empty(t, p.Widgets())
 	}
 
 	{
 		p := elements.NewVPanes(true)
-		p.PushBackWidget(w1)
+		p.Append(w1)
 
-		p.InsertAfterWidget(w3, w2)
+		p.InsertAfter(w3, w2)
 		assert.Equal(t, []views.Widget{w1}, p.Widgets())
 	}
 
 	{
 		p := elements.NewVPanes(true)
-		p.PushBackWidget(w1)
-		p.PushBackWidget(w3)
+		p.Append(w1)
+		p.Append(w3)
 
-		p.InsertAfterWidget(w1, w2)
+		p.InsertAfter(w1, w2)
 		assert.Equal(t, []views.Widget{w1, w2, w3}, p.Widgets())
 	}
 
 	{
 		p := elements.NewVPanes(true)
-		p.PushBackWidget(w1)
-		p.PushBackWidget(w3)
+		p.Append(w1)
+		p.Append(w3)
 
-		p.InsertAfterWidget(w3, w2)
+		p.InsertAfter(w3, w2)
 		assert.Equal(t, []views.Widget{w1, w3, w2}, p.Widgets())
 	}
 }

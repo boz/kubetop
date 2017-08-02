@@ -2,12 +2,14 @@ package elements
 
 import (
 	"github.com/boz/kcache/nsname"
+	"github.com/boz/kubetop/ui/theme"
 	"github.com/gdamore/tcell"
 	"github.com/gdamore/tcell/views"
 )
 
 type Widget interface {
 	views.Widget
+	theme.Themeable
 	Close()
 }
 
@@ -19,10 +21,22 @@ type NSNameWidget interface {
 type widget struct {
 	content views.Widget
 	ctx     Context
+	theme   theme.Theme
 }
 
 func NewWidget(ctx Context, content views.Widget) Widget {
-	return &widget{content, ctx}
+	return &widget{content: content, ctx: ctx}
+}
+
+func (w *widget) SetTheme(th theme.Theme) {
+	w.theme = th
+	if content, ok := w.content.(theme.Themeable); ok {
+		content.SetTheme(th)
+	}
+}
+
+func (w *widget) Theme() theme.Theme {
+	return w.theme
 }
 
 func (w *widget) Draw() {
@@ -59,7 +73,7 @@ func (w *widget) Close() {
 
 func NewNSNameWidget(ctx Context, content views.Widget, id nsname.NSName) NSNameWidget {
 	return &nsNameWidget{
-		widget: widget{content, ctx},
+		widget: widget{content: content, ctx: ctx},
 		id:     id,
 	}
 }

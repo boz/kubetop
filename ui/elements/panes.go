@@ -1,20 +1,22 @@
 package elements
 
 import (
+	"github.com/boz/kubetop/ui/theme"
 	"github.com/gdamore/tcell"
 	"github.com/gdamore/tcell/views"
 )
 
 type Panes interface {
 	views.Widget
+	theme.Themeable
 
 	Widgets() []views.Widget
 
-	PushBackWidget(views.Widget)
-	PushFrontWidget(views.Widget)
-	RemoveWidget(views.Widget)
-	InsertBeforeWidget(views.Widget, views.Widget)
-	InsertAfterWidget(views.Widget, views.Widget)
+	Append(views.Widget)
+	Prepend(views.Widget)
+	Remove(views.Widget)
+	InsertBefore(views.Widget, views.Widget)
+	InsertAfter(views.Widget, views.Widget)
 }
 
 type panesChild struct {
@@ -32,7 +34,8 @@ type panes struct {
 	width  int
 	height int
 
-	view views.View
+	view  views.View
+	theme theme.Theme
 	views.WidgetWatchers
 }
 
@@ -46,6 +49,19 @@ func NewHPanes(expand bool) Panes {
 
 func NewPanes(o views.Orientation, expand bool) Panes {
 	return &panes{orientation: o, expand: expand}
+}
+
+func (p *panes) SetTheme(th theme.Theme) {
+	p.theme = th
+	for _, c := range p.children {
+		if w, ok := c.widget.(theme.Themeable); ok {
+			w.SetTheme(th)
+		}
+	}
+}
+
+func (p *panes) Theme() theme.Theme {
+	return p.theme
 }
 
 func (p *panes) Widgets() []views.Widget {
@@ -94,19 +110,19 @@ func (p *panes) Size() (int, int) {
 	return p.width, p.height
 }
 
-func (p *panes) PushBackWidget(w views.Widget) {
+func (p *panes) Append(w views.Widget) {
 	cnew := p.newChild(w)
 	p.children = append(p.children, cnew)
 	p.afterModify()
 }
 
-func (p *panes) PushFrontWidget(w views.Widget) {
+func (p *panes) Prepend(w views.Widget) {
 	cnew := p.newChild(w)
 	p.children = append([]*panesChild{cnew}, p.children...)
 	p.afterModify()
 }
 
-func (p *panes) RemoveWidget(w views.Widget) {
+func (p *panes) Remove(w views.Widget) {
 	changed := false
 
 	for i, c := range p.children {
@@ -121,7 +137,7 @@ func (p *panes) RemoveWidget(w views.Widget) {
 	}
 }
 
-func (p *panes) InsertBeforeWidget(mark views.Widget, w views.Widget) {
+func (p *panes) InsertBefore(mark views.Widget, w views.Widget) {
 	for i, c := range p.children {
 		if c.widget == mark {
 			cnew := p.newChild(w)
@@ -136,7 +152,7 @@ func (p *panes) InsertBeforeWidget(mark views.Widget, w views.Widget) {
 	}
 }
 
-func (p *panes) InsertAfterWidget(mark views.Widget, w views.Widget) {
+func (p *panes) InsertAfter(mark views.Widget, w views.Widget) {
 	for i, c := range p.children {
 		if c.widget == mark {
 			cnew := p.newChild(w)

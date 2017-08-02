@@ -9,7 +9,7 @@ import (
 )
 
 type indexScreen struct {
-	layout  elements.Panes
+	layout  elements.Panels
 	table   elements.Widget
 	summary elements.NSNameWidget
 	ctx     elements.Context
@@ -26,8 +26,8 @@ func NewIndex(ctx elements.Context, req elements.Request) (elements.Screen, erro
 
 	table := newIndexTable(ctx, ds.pods)
 
-	layout := elements.NewVPanes(true)
-	layout.PushBackWidget(table)
+	layout := elements.NewVPanels(true)
+	layout.Append(table)
 
 	index := &indexScreen{
 		layout: layout,
@@ -90,13 +90,13 @@ func (w *indexScreen) showSummary(id string) {
 	}
 	summary.Watch(w)
 	w.summary = summary
-	w.layout.PushFrontWidget(w.summary)
+	w.layout.Prepend(w.summary)
 }
 
 func (w *indexScreen) removeSummary() {
 	if w.summary != nil {
 		w.summary.Unwatch(w)
-		w.layout.RemoveWidget(w.summary)
+		w.layout.Remove(w.summary)
 		w.summary.Close()
 	}
 }

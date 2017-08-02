@@ -31,8 +31,8 @@ func newSummary(ctx elements.Context, id string) (elements.NSNameWidget, error) 
 	pview.MonitorUnitary(ctx, ds.pods, pview.NewContainersTable(ctable))
 
 	layout := elements.NewHPanes(true)
-	layout.PushBackWidget(psummary)
-	layout.PushBackWidget(elements.AlignRight(ctable))
+	layout.Append(psummary)
+	layout.Append(elements.AlignRight(ctable))
 
 	widget := elements.NewNSNameWidget(ctx, layout, nsName)
 

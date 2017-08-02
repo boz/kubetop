@@ -10,6 +10,13 @@ const (
 )
 
 var (
+	LabelVariants = []LabelVariant{
+		LabelNormal,
+		LabelSuccess,
+		LabelWarn,
+		LabelError,
+	}
+
 	Base = tcell.StyleDefault
 
 	AppHeader = AppHeaderTheme{
@@ -21,24 +28,107 @@ var (
 			Foreground(tcell.ColorRed),
 	}
 
-	Table = TableTheme{
-		TH: LabelTheme{
-			Normal:  Base.Bold(true),
-			Success: Base.Bold(true),
-			Warn:    Base.Bold(true),
-			Error:   Base.Bold(true),
+	Popup = PopupTheme{
+		Normal:  Base.Foreground(tcell.ColorSeashell).Bold(true),
+		Success: Base.Foreground(tcell.ColorSpringGreen).Bold(true),
+		Warn:    Base.Foreground(tcell.ColorGold).Bold(true),
+		Error:   Base.Foreground(tcell.ColorCrimson).Bold(true),
+	}
+
+	apbase = Base.
+		Foreground(tcell.ColorWhite)
+	ThemeActive = Theme{
+		Base: apbase,
+		Title: Base.
+			Background(tcell.ColorAquaMarine).
+			Foreground(tcell.ColorBlack).Bold(true),
+		Label: LabelTheme{
+			Normal:  apbase.Foreground(tcell.ColorSeashell).Bold(true),
+			Success: apbase.Foreground(tcell.ColorSpringGreen).Bold(true),
+			Warn:    apbase.Foreground(tcell.ColorGold).Bold(true),
+			Error:   apbase.Foreground(tcell.ColorCrimson).Bold(true),
 		},
-		TD: LabelTheme{
-			Normal:  Base,
-			Success: Base,
-			Warn:    Base,
-			Error:   Base,
+		Table: TableTheme{
+			TH: LabelTheme{
+				Normal:  apbase.Bold(true),
+				Success: apbase.Foreground(tcell.ColorSpringGreen).Bold(true),
+				Warn:    apbase.Foreground(tcell.ColorGold).Bold(true),
+				Error:   apbase.Foreground(tcell.ColorCrimson).Bold(true),
+			},
+			TD: LabelTheme{
+				Normal:  apbase,
+				Success: apbase.Foreground(tcell.ColorSpringGreen).Bold(true),
+				Warn:    apbase.Foreground(tcell.ColorGold).Bold(true),
+				Error:   apbase.Foreground(tcell.ColorCrimson).Bold(true),
+			},
+			TDSelected: LabelTheme{
+				Normal:  apbase.Reverse(true),
+				Success: apbase.Foreground(tcell.ColorSpringGreen).Bold(true).Reverse(true),
+				Warn:    apbase.Foreground(tcell.ColorGold).Bold(true).Reverse(true),
+				Error:   apbase.Foreground(tcell.ColorCrimson).Bold(true).Reverse(true),
+			},
 		},
-		TDSelected: LabelTheme{
-			Normal:  Base.Reverse(true),
-			Success: Base.Reverse(true),
-			Warn:    Base.Reverse(true),
-			Error:   Base.Reverse(true),
+		Deflist: DeflistTheme{
+			Term: LabelTheme{
+				Normal:  apbase.Bold(true),
+				Success: apbase.Bold(true),
+				Warn:    apbase.Bold(true),
+				Error:   apbase.Bold(true),
+			},
+			Definition: LabelTheme{
+				Normal:  apbase,
+				Success: apbase,
+				Warn:    apbase,
+				Error:   apbase,
+			},
+		},
+	}
+
+	ipbase        = Base
+	ThemeInactive = Theme{
+		Base: ipbase,
+		Title: ipbase.
+			Background(tcell.ColorDarkCyan).
+			Foreground(tcell.ColorAntiqueWhite),
+		Label: LabelTheme{
+			Normal:  ipbase,
+			Success: ipbase,
+			Warn:    ipbase,
+			Error:   ipbase,
+		},
+		Table: TableTheme{
+			TH: LabelTheme{
+				Normal:  ipbase.Bold(true),
+				Success: ipbase.Bold(true),
+				Warn:    ipbase.Bold(true),
+				Error:   ipbase.Bold(true),
+			},
+			TD: LabelTheme{
+				Normal:  ipbase,
+				Success: ipbase,
+				Warn:    ipbase,
+				Error:   ipbase,
+			},
+			TDSelected: LabelTheme{
+				Normal:  ipbase.Reverse(true),
+				Success: ipbase.Reverse(true),
+				Warn:    ipbase.Reverse(true),
+				Error:   ipbase.Reverse(true),
+			},
+		},
+		Deflist: DeflistTheme{
+			Term: LabelTheme{
+				Normal:  ipbase.Bold(true),
+				Success: ipbase.Bold(true),
+				Warn:    ipbase.Bold(true),
+				Error:   ipbase.Bold(true),
+			},
+			Definition: LabelTheme{
+				Normal:  ipbase,
+				Success: ipbase,
+				Warn:    ipbase,
+				Error:   ipbase,
+			},
 		},
 	}
 )
@@ -48,10 +138,23 @@ type AppHeaderTheme struct {
 	Action tcell.Style
 }
 
+type Theme struct {
+	Base    tcell.Style
+	Title   tcell.Style
+	Label   LabelTheme
+	Table   TableTheme
+	Deflist DeflistTheme
+}
+
 type TableTheme struct {
 	TH         LabelTheme
 	TD         LabelTheme
 	TDSelected LabelTheme
+}
+
+type DeflistTheme struct {
+	Term       LabelTheme
+	Definition LabelTheme
 }
 
 type LabelVariant string
@@ -77,3 +180,5 @@ func (t LabelTheme) Get(v LabelVariant) tcell.Style {
 		return t.Normal
 	}
 }
+
+type PopupTheme LabelTheme

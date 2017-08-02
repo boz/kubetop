@@ -28,46 +28,46 @@ func NewShow(ctx elements.Context, req elements.NSNameRequest) (elements.Screen,
 		return nil, err
 	}
 
-	layout := elements.NewVPanes(true)
+	layout := elements.NewVPanels(true)
 
 	containerw := showContainersPanel(ctx, ds)
-	layout.PushBackWidget(containerw)
+	layout.Append(containerw)
 
 	servicesw := showServicesPanel(ctx, ds)
-	layout.PushBackWidget(servicesw)
+	layout.Append(servicesw)
 
 	eventsw := showEventsPanel(ctx, ds)
-	layout.PushBackWidget(eventsw)
+	layout.Append(eventsw)
 
 	return elements.NewScreen(ctx, req, fmt.Sprintf("Pod %v", req.NSName()), layout), nil
 }
 
-func showContainersPanel(ctx elements.Context, ds *showDS) views.Widget {
+func showContainersPanel(ctx elements.Context, ds *showDS) elements.SelectableWidget {
 	ctx = ctx.New("pod/show/containers")
 	content := table.NewWidget(ctx.Env(), pview.ContainersTableColumns(), true)
 	pview.MonitorUnitary(ctx, ds.pods, pview.NewContainersTable(content))
 	return newPanel("Containers", content)
 }
 
-func showServicesPanel(ctx elements.Context, ds *showDS) views.Widget {
+func showServicesPanel(ctx elements.Context, ds *showDS) elements.SelectableWidget {
 	ctx = ctx.New("pod/show/services")
 	content := table.NewWidget(ctx.Env(), sview.TableColumns(), true)
 	sview.Monitor(ctx, ds.services, sview.NewTable(content))
 	return newPanel("Services", content)
 }
 
-func showEventsPanel(ctx elements.Context, ds *showDS) views.Widget {
+func showEventsPanel(ctx elements.Context, ds *showDS) elements.SelectableWidget {
 	ctx = ctx.New("pod/show/events")
 	content := table.NewWidget(ctx.Env(), eview.TableColumns(), true)
 	eview.Monitor(ctx, ds.events, eview.NewTable(content))
 	return newPanel("Events", content)
 }
 
-func newPanel(title string, content views.Widget) views.Widget {
+func newPanel(title string, content views.Widget) elements.SelectableWidget {
 	titlew := views.NewTextBar()
 	titlew.SetCenter(title, theme.Base)
 	layout := elements.NewVPanes(false)
-	layout.PushBackWidget(titlew)
-	layout.PushBackWidget(content)
+	layout.Append(titlew)
+	layout.Append(content)
 	return layout
 }

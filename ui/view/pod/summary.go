@@ -5,6 +5,7 @@ import (
 
 	"github.com/boz/kcache/types/pod"
 	"github.com/boz/kubetop/ui/elements/deflist"
+	"github.com/boz/kubetop/ui/theme"
 	"github.com/boz/kubetop/ui/util"
 	"github.com/gdamore/tcell"
 	"github.com/gdamore/tcell/views"
@@ -17,11 +18,12 @@ type Summary interface {
 }
 
 func NewSummary() Summary {
-	return &summary{deflist.NewWidget(nil)}
+	return &summary{leftdl: deflist.NewWidget(nil)}
 }
 
 type summary struct {
 	leftdl deflist.Widget
+	theme.ThemeableWidget
 }
 
 func (w *summary) Draw() {
@@ -84,10 +86,10 @@ func (w *summary) drawObject(obj *v1.Pod) {
 	}
 
 	rows := []deflist.Row{
-		deflist.NewSimpleRow("Name", obj.GetName()),
-		deflist.NewSimpleRow("Namespace", obj.GetNamespace()),
-		deflist.NewSimpleRow("Node", obj.Spec.NodeName),
-		deflist.NewSimpleRow("Owners", strings.Join(owners, ",")),
+		deflist.NewSimpleRow("Name", obj.GetName(), w.Theme().Deflist),
+		deflist.NewSimpleRow("Namespace", obj.GetNamespace(), w.Theme().Deflist),
+		deflist.NewSimpleRow("Node", obj.Spec.NodeName, w.Theme().Deflist),
+		deflist.NewSimpleRow("Owners", strings.Join(owners, ","), w.Theme().Deflist),
 	}
 
 	w.leftdl.SetRows(rows)

@@ -1,6 +1,7 @@
 package deflist
 
 import (
+	"github.com/boz/kubetop/ui/theme"
 	"github.com/gdamore/tcell"
 	"github.com/gdamore/tcell/views"
 )
@@ -9,7 +10,6 @@ const padsize = 1
 
 type Widget interface {
 	views.Widget
-
 	SetRows([]Row)
 }
 
@@ -23,14 +23,16 @@ type row struct {
 	definition views.Widget
 }
 
-func NewSimpleRow(termtxt, deftxt string) Row {
+func NewSimpleRow(termtxt, deftxt string, theme theme.DeflistTheme) Row {
 	termw := views.NewText()
 	termw.SetAlignment(views.HAlignLeft)
 	termw.SetText(termtxt)
+	termw.SetStyle(theme.Term.Normal)
 
 	defw := views.NewText()
 	defw.SetAlignment(views.HAlignLeft)
 	defw.SetText(deftxt)
+	termw.SetStyle(theme.Definition.Normal)
 
 	return NewRow(termw, defw)
 }

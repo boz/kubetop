@@ -14,7 +14,7 @@ type screen struct {
 }
 
 func NewScreen(ctx Context, req Request, title string, content views.Widget) Screen {
-	return &screen{widget{content, ctx}, NewScreenState(req, title)}
+	return &screen{widget{content: content, ctx: ctx}, NewScreenState(req, title)}
 }
 
 func (s *screen) State() ScreenState {

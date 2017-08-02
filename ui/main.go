@@ -21,7 +21,7 @@ type mainWidget struct {
 
 	content elements.Widget
 
-	popupper *elements.Popupper
+	popupper elements.Popupper
 
 	navigator elements.Navigator
 
@@ -106,6 +106,7 @@ func (w *mainWidget) Resize() {
 }
 
 func (w *mainWidget) HandleEvent(ev tcell.Event) bool {
+
 	if w.popupper.HandleEvent(ev) {
 		return true
 	}
@@ -133,6 +134,9 @@ func (w *mainWidget) HandleEvent(ev tcell.Event) bool {
 				return true
 			case 'E':
 				w.ctx.NavigateTo(requests.EventIndexRequest())
+				return true
+			case 'T':
+				w.ctx.NavigateTo(requests.ThemeIndexRequest())
 				return true
 			case 'Q':
 				w.stopch <- true
@@ -164,8 +168,7 @@ func (w *mainWidget) setContent(child elements.Screen) {
 }
 
 func (w *mainWidget) openHelp() {
-	popup := elements.NewPopup(w.ctx, 10, 10, theme.Base)
-	popup.SetContent(w.helpWidget())
+	popup := elements.NewPopup(w.ctx, theme.Popup.Normal, w.helpWidget())
 	w.popupper.Push(popup)
 }
 
@@ -173,7 +176,8 @@ func (w *mainWidget) helpWidget() views.Widget {
 	rows := make([]deflist.Row, 0, len(kbdNav))
 
 	for _, row := range kbdNav {
-		rows = append(rows, deflist.NewSimpleRow(row.key, row.label))
+		roww := deflist.NewSimpleRow(row.key, row.label, theme.ThemeActive.Deflist)
+		rows = append(rows, roww)
 	}
 	return deflist.NewWidget(rows)
 }

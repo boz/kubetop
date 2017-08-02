@@ -11,6 +11,7 @@ const (
 	ServiceIndexRoute elements.Route = "/service"
 	EventIndexRoute   elements.Route = "/event"
 	NodeIndexRoute    elements.Route = "/node"
+	ThemeIndexRoute   elements.Route = "/theme"
 )
 
 func PodIndexRequest() elements.Request {
@@ -31,4 +32,8 @@ func EventIndexRequest() elements.Request {
 
 func NodeIndexRequest() elements.Request {
 	return elements.NewRequest(NodeIndexRoute)
+}
+
+func ThemeIndexRequest() elements.Request {
+	return elements.NewRequest(ThemeIndexRoute)
 }

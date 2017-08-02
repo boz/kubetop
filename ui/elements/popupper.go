@@ -5,7 +5,13 @@ import (
 	"github.com/gdamore/tcell/views"
 )
 
-type Popupper struct {
+type Popupper interface {
+	views.Widget
+	Push(w views.Widget)
+	Pop() views.Widget
+}
+
+type popupper struct {
 	view    views.View
 	current views.Widget
 	views.WidgetWatchers
@@ -13,24 +19,24 @@ type Popupper struct {
 	ctx Context
 }
 
-func NewPopupper(ctx Context) *Popupper {
-	w := &Popupper{ctx: ctx.New("ui/elements/popupper")}
+func NewPopupper(ctx Context) Popupper {
+	w := &popupper{ctx: ctx.New("ui/elements/popupper")}
 	return w
 }
 
 // todo: stack
 
-func (p *Popupper) Push(w views.Widget) {
+func (p *popupper) Push(w views.Widget) {
 	if w == nil {
 		return
 	}
 	p.Pop()
-	w.Watch(p)
 	w.SetView(p.view)
+	w.Watch(p)
 	p.current = w
 }
 
-func (p *Popupper) Pop() views.Widget {
+func (p *popupper) Pop() views.Widget {
 	prev := p.current
 	if prev != nil {
 		prev.Unwatch(p)
@@ -39,30 +45,30 @@ func (p *Popupper) Pop() views.Widget {
 	return prev
 }
 
-func (p *Popupper) Draw() {
+func (p *popupper) Draw() {
 	if p.current != nil {
 		p.current.Draw()
 	}
 }
 
-func (p *Popupper) Resize() {
+func (p *popupper) Resize() {
 	if p.current != nil {
 		p.current.Resize()
 	}
 }
 
-func (p *Popupper) Size() (int, int) {
+func (p *popupper) Size() (int, int) {
 	return 0, 0
 }
 
-func (p *Popupper) SetView(view views.View) {
+func (p *popupper) SetView(view views.View) {
 	p.view = view
 	if p.current != nil {
 		p.current.SetView(view)
 	}
 }
 
-func (p *Popupper) HandleEvent(ev tcell.Event) bool {
+func (p *popupper) HandleEvent(ev tcell.Event) bool {
 
 	if p.current == nil {
 		return false
@@ -76,6 +82,13 @@ func (p *Popupper) HandleEvent(ev tcell.Event) bool {
 		}
 	}
 
-	return p.current.HandleEvent(ev)
+	if p.current.HandleEvent(ev) {
+		return true
+	}
 
+	if _, ok := ev.(*tcell.EventKey); ok && p.current != nil {
+		return true
+	}
+
+	return false
 }
