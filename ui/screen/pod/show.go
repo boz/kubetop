@@ -3,13 +3,6 @@ package pod
 import (
 	"fmt"
 
-	"k8s.io/api/core/v1"
-
-	"github.com/boz/kcache/filter"
-	"github.com/boz/kcache/nsname"
-	"github.com/boz/kcache/types/event"
-	"github.com/boz/kcache/types/pod"
-	"github.com/boz/kcache/types/service"
 	"github.com/boz/kubetop/ui/elements"
 	"github.com/boz/kubetop/ui/elements/table"
 	"github.com/boz/kubetop/ui/theme"
@@ -49,21 +42,21 @@ func NewShow(ctx elements.Context, req elements.NSNameRequest) (elements.Screen,
 	return elements.NewScreen(ctx, req, fmt.Sprintf("Pod %v", req.NSName()), layout), nil
 }
 
-func showContainersPanel(ctx elements.Context, ds showDS) views.Widget {
+func showContainersPanel(ctx elements.Context, ds *showDS) views.Widget {
 	ctx = ctx.New("pod/show/containers")
 	content := table.NewWidget(ctx.Env(), pview.ContainersTableColumns(), true)
 	pview.MonitorUnitary(ctx, ds.pods, pview.NewContainersTable(content))
 	return newPanel("Containers", content)
 }
 
-func showServicesPanel(ctx elements.Context, ds showDS) views.Widget {
+func showServicesPanel(ctx elements.Context, ds *showDS) views.Widget {
 	ctx = ctx.New("pod/show/services")
 	content := table.NewWidget(ctx.Env(), sview.TableColumns(), true)
 	sview.Monitor(ctx, ds.services, sview.NewTable(content))
 	return newPanel("Services", content)
 }
 
-func showEventsPanel(ctx elements.Context, ds showDS) views.Widget {
+func showEventsPanel(ctx elements.Context, ds *showDS) views.Widget {
 	ctx = ctx.New("pod/show/events")
 	content := table.NewWidget(ctx.Env(), eview.TableColumns(), true)
 	eview.Monitor(ctx, ds.events, eview.NewTable(content))
@@ -77,58 +70,4 @@ func newPanel(title string, content views.Widget) views.Widget {
 	layout.PushBackWidget(titlew)
 	layout.PushBackWidget(content)
 	return layout
-}
-
-type showDS struct {
-	pods     pod.Publisher
-	services service.Publisher
-	events   event.Publisher
-}
-
-func newShowDS(ctx elements.Context, id nsname.NSName) (showDS, error) {
-	podsBase, err := ctx.Backend().Pods()
-	if err != nil {
-		return showDS{}, err
-	}
-	pods := podsBase.CloneWithFilter(filter.NSName(id))
-	ctx.AlsoClose(pods)
-
-	servicesBase, err := ctx.Backend().Services()
-	if err != nil {
-		return showDS{}, err
-	}
-	services := servicesBase.CloneWithFilter(filter.All())
-	ctx.AlsoClose(services)
-
-	eventsBase, err := ctx.Backend().Events()
-	if err != nil {
-		return showDS{}, err
-	}
-	events := eventsBase.CloneWithFilter(filter.All())
-	ctx.AlsoClose(events)
-
-	pod.NewMonitor(pods,
-		pod.ToUnitary(ctx.Env().Logutil(),
-			pod.BuildUnitaryHandler().
-				OnInitialize(func(obj *v1.Pod) {
-					events.Refilter(
-						event.InvolvedFilter("Pod", obj.GetNamespace(), obj.GetName()))
-					services.Refilter(service.SelectorMatchFilter(obj.GetLabels()))
-				}).
-				OnCreate(func(obj *v1.Pod) {
-					events.Refilter(
-						event.InvolvedFilter("Pod", obj.GetNamespace(), obj.GetName()))
-					services.Refilter(service.SelectorMatchFilter(obj.GetLabels()))
-				}).
-				OnUpdate(func(obj *v1.Pod) {
-					events.Refilter(
-						event.InvolvedFilter("Pod", obj.GetNamespace(), obj.GetName()))
-					services.Refilter(service.SelectorMatchFilter(obj.GetLabels()))
-				}).
-				OnDelete(func(obj *v1.Pod) {
-					events.Refilter(filter.All())
-					services.Refilter(filter.All())
-				}).Create()))
-
-	return showDS{pods, services, events}, nil
 }

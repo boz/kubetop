@@ -27,7 +27,6 @@ func newSummary(ctx elements.Context, id string) (elements.NSNameWidget, error) 
 	pview.MonitorUnitary(ctx, ds.pods, psummary)
 
 	// container summary
-
 	ctable := table.NewWidget(ctx.Env(), pview.ContainersTableColumns(), false)
 	pview.MonitorUnitary(ctx, ds.pods, pview.NewContainersTable(ctable))
 
