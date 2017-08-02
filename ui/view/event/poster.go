@@ -24,7 +24,11 @@ func Poster(poster elements.Poster, delegate event.Handler) event.Handler {
 
 func Monitor(
 	ctx elements.Context, publisher event.Publisher, handler event.Handler) {
-	monitor := event.NewMonitor(publisher, Poster(ctx, handler))
+	monitor, err := event.NewMonitor(publisher, Poster(ctx, handler))
+	if err != nil {
+		ctx.Env().LogErr(err, "event.NewMonitor")
+		return
+	}
 	ctx.AlsoClose(monitor)
 }
 

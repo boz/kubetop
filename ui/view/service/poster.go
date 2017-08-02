@@ -24,7 +24,11 @@ func Poster(poster elements.Poster, delegate service.Handler) service.Handler {
 
 func Monitor(
 	ctx elements.Context, publisher service.Publisher, handler service.Handler) {
-	monitor := service.NewMonitor(publisher, Poster(ctx, handler))
+	monitor, err := service.NewMonitor(publisher, Poster(ctx, handler))
+	if err != nil {
+		ctx.Env().LogErr(err, "service.NewMonitor")
+		return
+	}
 	ctx.AlsoClose(monitor)
 }
 

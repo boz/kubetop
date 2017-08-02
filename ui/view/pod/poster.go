@@ -24,7 +24,11 @@ func Poster(poster elements.Poster, delegate pod.Handler) pod.Handler {
 
 func Monitor(
 	ctx elements.Context, publisher pod.Publisher, handler pod.Handler) {
-	monitor := pod.NewMonitor(publisher, Poster(ctx, handler))
+	monitor, err := pod.NewMonitor(publisher, Poster(ctx, handler))
+	if err != nil {
+		ctx.Env().LogErr(err, "pod.NewMonitor")
+		return
+	}
 	ctx.AlsoClose(monitor)
 }
 

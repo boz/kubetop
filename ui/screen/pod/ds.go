@@ -18,11 +18,15 @@ func newSummaryDS(ctx elements.Context, id nsname.NSName) (*podSummaryDS, error)
 	pbase, err := ctx.Backend().Pods()
 
 	if err != nil {
-		ctx.Env().LogErr(err, "pod datasource")
+		ctx.Env().LogErr(err, "pod ds")
 		return nil, err
 	}
 
-	pods := pbase.CloneWithFilter(filter.NSName(id))
+	pods, err := pbase.CloneWithFilter(filter.NSName(id))
+	if err != nil {
+		ctx.Env().LogErr(err, "pod ds")
+		return nil, err
+	}
 	ctx.AlsoClose(pods)
 
 	return &podSummaryDS{pods}, nil
@@ -35,10 +39,12 @@ type podIndexDS struct {
 func newIndexDS(ctx elements.Context) (*podIndexDS, error) {
 	pbase, err := ctx.Backend().Pods()
 	if err != nil {
-		ctx.Env().LogErr(err, "pod datasource")
 		return nil, err
 	}
-	pods := pbase.Clone()
+	pods, err := pbase.Clone()
+	if err != nil {
+		return nil, err
+	}
 	ctx.AlsoClose(pods)
 	return &podIndexDS{pods}, nil
 }
@@ -54,24 +60,33 @@ func newShowDS(ctx elements.Context, id nsname.NSName) (*showDS, error) {
 	if err != nil {
 		return nil, err
 	}
-	pods := podsBase.CloneWithFilter(filter.NSName(id))
+	pods, err := podsBase.CloneWithFilter(filter.NSName(id))
+	if err != nil {
+		return nil, err
+	}
 	ctx.AlsoClose(pods)
 
 	servicesBase, err := ctx.Backend().Services()
 	if err != nil {
 		return nil, err
 	}
-	services := servicesBase.CloneWithFilter(filter.All())
+	services, err := servicesBase.CloneWithFilter(filter.All())
+	if err != nil {
+		return nil, err
+	}
 	ctx.AlsoClose(services)
 
 	eventsBase, err := ctx.Backend().Events()
 	if err != nil {
 		return nil, err
 	}
-	events := eventsBase.CloneWithFilter(filter.All())
+	events, err := eventsBase.CloneWithFilter(filter.All())
+	if err != nil {
+		return nil, err
+	}
 	ctx.AlsoClose(events)
 
-	pod.NewMonitor(pods,
+	m, err := pod.NewMonitor(pods,
 		pod.ToUnitary(ctx.Env().Logutil(),
 			pod.BuildUnitaryHandler().
 				OnInitialize(func(obj *v1.Pod) {
@@ -93,6 +108,11 @@ func newShowDS(ctx elements.Context, id nsname.NSName) (*showDS, error) {
 					events.Refilter(filter.All())
 					services.Refilter(filter.All())
 				}).Create()))
+
+	if err != nil {
+		return nil, err
+	}
+	ctx.AlsoClose(m)
 
 	return &showDS{pods, services, events}, nil
 }
