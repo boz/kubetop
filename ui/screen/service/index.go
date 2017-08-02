@@ -2,7 +2,6 @@ package service
 
 import (
 	"github.com/boz/kubetop/ui/elements"
-	"github.com/boz/kubetop/ui/widget"
 	"github.com/gdamore/tcell"
 	"github.com/gdamore/tcell/views"
 )
@@ -19,7 +18,7 @@ func NewIndex(ctx elements.Context, req elements.Request) (elements.Screen, erro
 	if err != nil {
 		return nil, err
 	}
-	content := widget.NewServiceTable(ctx, db)
+	content := newIndexTable(ctx, db)
 	index := &indexScreen{content, ctx}
 	content.Watch(index)
 

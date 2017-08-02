@@ -4,7 +4,6 @@ import (
 	"github.com/boz/kubetop/ui/elements"
 	"github.com/boz/kubetop/ui/elements/table"
 	"github.com/boz/kubetop/ui/screen/requests"
-	"github.com/boz/kubetop/ui/widget"
 	"github.com/gdamore/tcell"
 	"github.com/gdamore/tcell/views"
 )
@@ -20,12 +19,12 @@ type indexScreen struct {
 func NewIndex(ctx elements.Context, req elements.Request) (elements.Screen, error) {
 	ctx = ctx.New("pod/index")
 
-	pods, err := ctx.Backend().Pods()
+	ds, err := newIndexDS(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	table := widget.NewPodTable(ctx, pods)
+	table := newIndexTable(ctx, ds.pods)
 
 	layout := elements.NewVPanes(true)
 	layout.PushBackWidget(table)
@@ -84,7 +83,11 @@ func (w *indexScreen) Size() (int, int) {
 
 func (w *indexScreen) showSummary(id string) {
 	w.removeSummary()
-	summary, _ := widget.NewPodSummary(w.ctx, id)
+	summary, err := newSummary(w.ctx, id)
+	if err != nil {
+		w.ctx.Env().LogErr(err, "error opening summary")
+		return
+	}
 	summary.Watch(w)
 	w.summary = summary
 	w.layout.PushFrontWidget(w.summary)

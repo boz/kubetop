@@ -1,19 +1,15 @@
-package widget
+package event
 
 import (
 	"github.com/boz/kcache/types/event"
 	"github.com/boz/kubetop/ui/elements"
 	"github.com/boz/kubetop/ui/elements/table"
-	uiutil "github.com/boz/kubetop/ui/util"
 	eview "github.com/boz/kubetop/ui/view/event"
 )
 
-func NewEventTable(ctx elements.Context, ds event.Publisher) elements.Widget {
+func newIndexTable(ctx elements.Context, ds event.Publisher) elements.Widget {
 	ctx = ctx.New("event/table")
 	content := table.NewWidget(ctx.Env(), eview.TableColumns(), true)
-
-	ctx.AlsoClose(event.NewMonitor(ds,
-		uiutil.EventsPoster(ctx, eview.NewTable(content))))
-
+	eview.Monitor(ctx, ds, eview.NewTable(content))
 	return elements.NewWidget(ctx, content)
 }

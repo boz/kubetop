@@ -2,7 +2,6 @@ package event
 
 import (
 	"github.com/boz/kubetop/ui/elements"
-	"github.com/boz/kubetop/ui/widget"
 	"github.com/gdamore/tcell"
 	"github.com/gdamore/tcell/views"
 )
@@ -20,7 +19,7 @@ func NewIndex(ctx elements.Context, req elements.Request) (elements.Screen, erro
 		return nil, err
 	}
 
-	content := widget.NewEventTable(ctx, db)
+	content := newIndexTable(ctx, db)
 	index := &indexScreen{content, ctx}
 	content.Watch(index)
 

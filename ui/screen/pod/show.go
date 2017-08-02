@@ -13,7 +13,6 @@ import (
 	"github.com/boz/kubetop/ui/elements"
 	"github.com/boz/kubetop/ui/elements/table"
 	"github.com/boz/kubetop/ui/theme"
-	uiutil "github.com/boz/kubetop/ui/util"
 	eview "github.com/boz/kubetop/ui/view/event"
 	pview "github.com/boz/kubetop/ui/view/pod"
 	sview "github.com/boz/kubetop/ui/view/service"
@@ -52,28 +51,22 @@ func NewShow(ctx elements.Context, req elements.NSNameRequest) (elements.Screen,
 
 func showContainersPanel(ctx elements.Context, ds showDS) views.Widget {
 	ctx = ctx.New("pod/show/containers")
-	ctable := table.NewWidget(ctx.Env(), pview.ContainersTableColumns(), true)
-	pod.NewMonitor(ds.pods,
-		uiutil.PodsPoster(ctx,
-			pod.ToUnitary(ctx.Env().Logutil(), pview.NewContainersTable(ctable))))
-	return newPanel("Containers", ctable)
+	content := table.NewWidget(ctx.Env(), pview.ContainersTableColumns(), true)
+	pview.MonitorUnitary(ctx, ds.pods, pview.NewContainersTable(content))
+	return newPanel("Containers", content)
 }
 
 func showServicesPanel(ctx elements.Context, ds showDS) views.Widget {
 	ctx = ctx.New("pod/show/services")
 	content := table.NewWidget(ctx.Env(), sview.TableColumns(), true)
-	service.NewMonitor(ds.services,
-		uiutil.ServicesPoster(ctx,
-			sview.NewTable(content)))
+	sview.Monitor(ctx, ds.services, sview.NewTable(content))
 	return newPanel("Services", content)
 }
 
 func showEventsPanel(ctx elements.Context, ds showDS) views.Widget {
 	ctx = ctx.New("pod/show/events")
 	content := table.NewWidget(ctx.Env(), eview.TableColumns(), true)
-	event.NewMonitor(ds.events,
-		uiutil.EventsPoster(ctx,
-			eview.NewTable(content)))
+	eview.Monitor(ctx, ds.events, eview.NewTable(content))
 	return newPanel("Events", content)
 }
 
