@@ -126,6 +126,7 @@ func (w *widget) SetRows(rows []Row) {
 	}
 
 	for _, row := range rows {
+		row.SetTheme(w.theme)
 		row.Term().Unwatch(w)
 		row.Definition().Unwatch(w)
 	}

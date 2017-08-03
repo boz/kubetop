@@ -40,7 +40,7 @@ var (
 	}
 
 	apbase = Base.
-		Foreground(tcell.ColorWhite)
+		Foreground(tcell.ColorWhiteSmoke)
 	ThemeActive = Theme{
 		Base: apbase,
 		Title: Base.
@@ -61,77 +61,77 @@ var (
 			},
 			TD: LabelTheme{
 				Normal:  apbase,
-				Success: apbase.Foreground(tcell.ColorSpringGreen).Bold(true),
-				Warn:    apbase.Foreground(tcell.ColorGold).Bold(true),
-				Error:   apbase.Foreground(tcell.ColorCrimson).Bold(true),
+				Success: apbase.Foreground(tcell.ColorSpringGreen),
+				Warn:    apbase.Foreground(tcell.ColorGold),
+				Error:   apbase.Foreground(tcell.ColorCrimson),
 			},
 			TDSelected: LabelTheme{
 				Normal:  apbase.Reverse(true),
-				Success: apbase.Foreground(tcell.ColorSpringGreen).Bold(true).Reverse(true),
-				Warn:    apbase.Foreground(tcell.ColorGold).Bold(true).Reverse(true),
-				Error:   apbase.Foreground(tcell.ColorCrimson).Bold(true).Reverse(true),
+				Success: apbase.Foreground(tcell.ColorSpringGreen).Reverse(true),
+				Warn:    apbase.Foreground(tcell.ColorGold).Reverse(true),
+				Error:   apbase.Foreground(tcell.ColorCrimson).Reverse(true),
 			},
 		},
 		Deflist: DeflistTheme{
 			Term: LabelTheme{
 				Normal:  apbase.Bold(true),
-				Success: apbase.Bold(true),
-				Warn:    apbase.Bold(true),
-				Error:   apbase.Bold(true),
+				Success: apbase.Foreground(tcell.ColorSpringGreen).Bold(true),
+				Warn:    apbase.Foreground(tcell.ColorGold).Bold(true),
+				Error:   apbase.Foreground(tcell.ColorCrimson).Bold(true),
 			},
 			Definition: LabelTheme{
 				Normal:  apbase,
-				Success: apbase,
-				Warn:    apbase,
-				Error:   apbase,
+				Success: apbase.Foreground(tcell.ColorSpringGreen),
+				Warn:    apbase.Foreground(tcell.ColorGold),
+				Error:   apbase.Foreground(tcell.ColorCrimson),
 			},
 		},
 	}
 
-	ipbase        = Base
+	ipbase        = Base.Foreground(tcell.ColorDarkSlateGrey)
 	ThemeInactive = Theme{
 		Base: ipbase,
 		Title: ipbase.
-			Background(tcell.ColorDarkCyan).
+			Background(tcell.ColorDimGrey).
 			Foreground(tcell.ColorAntiqueWhite),
 		Label: LabelTheme{
 			Normal:  ipbase,
-			Success: ipbase,
-			Warn:    ipbase,
-			Error:   ipbase,
+			Success: ipbase.Foreground(tcell.ColorDarkOliveGreen),
+			Warn:    ipbase.Foreground(tcell.ColorSandyBrown),
+			Error:   ipbase.Foreground(tcell.ColorLightCoral),
 		},
 		Table: TableTheme{
 			TH: LabelTheme{
 				Normal:  ipbase.Bold(true),
-				Success: ipbase.Bold(true),
-				Warn:    ipbase.Bold(true),
-				Error:   ipbase.Bold(true),
+				Success: ipbase.Foreground(tcell.ColorDarkOliveGreen).Bold(true),
+				Warn:    ipbase.Foreground(tcell.ColorSandyBrown).Bold(true),
+				Error:   ipbase.Foreground(tcell.ColorLightCoral).Bold(true),
 			},
 			TD: LabelTheme{
 				Normal:  ipbase,
-				Success: ipbase,
-				Warn:    ipbase,
-				Error:   ipbase,
+				Success: ipbase.Foreground(tcell.ColorDarkOliveGreen),
+				Warn:    ipbase.Foreground(tcell.ColorSandyBrown),
+				Error:   ipbase.Foreground(tcell.ColorLightCoral),
 			},
 			TDSelected: LabelTheme{
 				Normal:  ipbase.Reverse(true),
-				Success: ipbase.Reverse(true),
-				Warn:    ipbase.Reverse(true),
-				Error:   ipbase.Reverse(true),
+				Success: ipbase.Foreground(tcell.ColorDarkOliveGreen).Reverse(true),
+				Warn:    ipbase.Foreground(tcell.ColorSandyBrown).Reverse(true),
+				Error:   ipbase.Foreground(tcell.ColorLightCoral).Reverse(true),
 			},
 		},
 		Deflist: DeflistTheme{
 			Term: LabelTheme{
 				Normal:  ipbase.Bold(true),
-				Success: ipbase.Bold(true),
-				Warn:    ipbase.Bold(true),
-				Error:   ipbase.Bold(true),
+				Success: ipbase.Foreground(tcell.ColorDarkOliveGreen).Bold(true),
+				Warn:    ipbase.Foreground(tcell.ColorSandyBrown).Bold(true),
+				Error:   ipbase.Foreground(tcell.ColorLightCoral).Bold(true),
 			},
 			Definition: LabelTheme{
 				Normal:  ipbase,
-				Success: ipbase,
-				Warn:    ipbase,
-				Error:   ipbase,
+				Success: ipbase.Foreground(tcell.ColorDarkOliveGreen),
+				Warn:    ipbase.Foreground(tcell.ColorSandyBrown),
+				Error:   ipbase.Foreground(tcell.ColorLightCoral),
 			},
 		},
 	}

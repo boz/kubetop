@@ -10,6 +10,7 @@ import (
 )
 
 func NewIndex(ctx elements.Context, req elements.Request) (elements.Screen, error) {
+	ctx = ctx.New("theme/index")
 
 	layout := elements.NewVPanes(ctx.Env(), true)
 
