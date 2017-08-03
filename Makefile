@@ -1,14 +1,20 @@
-IMG_LDFLAGS := -w -linkmode external -extldflags "-static"
 
 DOCKER_IMAGE ?= kubetop
 DOCKER_REPO  ?= abozanich/$(DOCKER_IMAGE)
 DOCKER_TAG   ?= latest
 
+IMG_LDFLAGS := -w -linkmode external -extldflags "-static"
+
 build:
 	go build
 
+ifeq ($(shell uname -s),Darwin)
+build-linux:
+	GOOS=linux GOARCH=amd64 go build -o kubetop-linux
+else
 build-linux:
 	CC=$$(which musl-gcc) go build --ldflags '$(IMG_LDFLAGS)' -o kubetop-linux
+endif
 
 test:
 	govendor test +local
