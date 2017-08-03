@@ -36,7 +36,3 @@ func (w *section) SetTheme(th theme.Theme) {
 	w.title.SetStyle(th.Title)
 	w.panes.SetTheme(th)
 }
-
-func (w *section) Theme() theme.Theme {
-	return w.theme
-}

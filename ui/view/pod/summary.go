@@ -32,10 +32,6 @@ func (w *summary) SetTheme(th theme.Theme) {
 	w.leftdl.SetTheme(th)
 }
 
-func (w *summary) Theme() theme.Theme {
-	return w.theme
-}
-
 func (w *summary) Draw() {
 	w.leftdl.Draw()
 }

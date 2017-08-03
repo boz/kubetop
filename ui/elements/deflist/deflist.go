@@ -57,10 +57,6 @@ func (r *row) SetTheme(th theme.Theme) {
 	r.theme = th
 }
 
-func (r *row) Theme() theme.Theme {
-	return r.theme
-}
-
 type widget struct {
 	view   views.View
 	rows   []Row
@@ -112,10 +108,6 @@ func (w *widget) SetTheme(th theme.Theme) {
 	for _, row := range w.rows {
 		row.SetTheme(th)
 	}
-}
-
-func (w *widget) Theme() theme.Theme {
-	return w.theme
 }
 
 func (w *widget) SetView(view views.View) {

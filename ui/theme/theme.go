@@ -9,6 +9,10 @@ const (
 	LabelError   LabelVariant = "error"
 )
 
+type Themeable interface {
+	SetTheme(Theme)
+}
+
 var (
 	LabelVariants = []LabelVariant{
 		LabelNormal,

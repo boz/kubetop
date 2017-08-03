@@ -23,10 +23,6 @@ func (w *aligner) SetTheme(th theme.Theme) {
 	}
 }
 
-func (w *aligner) Theme() theme.Theme {
-	return w.theme
-}
-
 func (w *aligner) Draw() {
 	w.content.Draw()
 }

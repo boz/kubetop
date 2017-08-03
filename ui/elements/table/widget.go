@@ -26,7 +26,7 @@ type Widget struct {
 	hport *views.ViewPort
 	rport *views.ViewPort
 	views.WidgetWatchers
-	theme.ThemeableWidget
+	theme theme.Theme
 
 	env util.Env
 }
@@ -39,6 +39,10 @@ func NewWidget(env util.Env, cols []TH, expand bool) *Widget {
 		expand: expand,
 		env:    env,
 	}
+}
+
+func (tw *Widget) SetTheme(th theme.Theme) {
+	tw.theme = th
 }
 
 func (tw *Widget) ResetRows(rows []TR) {
@@ -62,8 +66,8 @@ func (tw *Widget) RemoveRow(id string) {
 }
 
 func (tw *Widget) Draw() {
-	tw.hport.Fill(' ', tw.Theme().Base)
-	tw.rport.Fill(' ', tw.Theme().Base)
+	tw.hport.Fill(' ', tw.theme.Base)
+	tw.rport.Fill(' ', tw.theme.Base)
 	tw.drawHeader()
 	tw.model.each(func(roff int, row TR) {
 		tw.drawRow(roff, row)
@@ -184,7 +188,7 @@ func (tw *Widget) drawHeader() {
 	view := tw.hport
 	for i, col := range cols {
 		width := tw.colsz[i]
-		cview := newView(view, xoff, yoff, width, 1, tw.Theme().Table.TH)
+		cview := newView(view, xoff, yoff, width, 1, tw.theme.Table.TH)
 		col.Draw(cview)
 		xoff += width
 	}
@@ -195,9 +199,9 @@ func (tw *Widget) drawRow(yoff int, row TR) {
 	cols := row.Columns()
 	view := tw.rport
 
-	lth := tw.Theme().Table.TD
+	lth := tw.theme.Table.TD
 	if tw.model.isActive(row.ID()) {
-		lth = tw.Theme().Table.TDSelected
+		lth = tw.theme.Table.TDSelected
 	}
 
 	for i, col := range cols {

@@ -62,10 +62,6 @@ func (p *panes) SetTheme(th theme.Theme) {
 	}
 }
 
-func (p *panes) Theme() theme.Theme {
-	return p.theme
-}
-
 func (p *panes) Widgets() []views.Widget {
 	children := make([]views.Widget, 0, len(p.children))
 	for _, c := range p.children {

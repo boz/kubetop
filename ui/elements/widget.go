@@ -40,10 +40,6 @@ func (w *widget) SetTheme(th theme.Theme) {
 	}
 }
 
-func (w *widget) Theme() theme.Theme {
-	return w.theme
-}
-
 func (w *widget) Draw() {
 	w.content.Draw()
 }
