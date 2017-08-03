@@ -7,7 +7,7 @@ import (
 )
 
 type Section interface {
-	SelectableWidget
+	Themeable
 }
 
 func NewSection(env util.Env, title string, content views.Widget) Section {

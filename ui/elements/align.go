@@ -1,17 +1,30 @@
 package elements
 
 import (
+	"github.com/boz/kubetop/ui/theme"
 	"github.com/gdamore/tcell"
 	"github.com/gdamore/tcell/views"
 )
 
-func AlignRight(content views.Widget) views.Widget {
+func AlignRight(content views.Widget) Themeable {
 	return &aligner{content: content}
 }
 
 type aligner struct {
 	content views.Widget
 	view    views.View
+	theme   theme.Theme
+}
+
+func (w *aligner) SetTheme(th theme.Theme) {
+	w.theme = th
+	if c, ok := w.content.(Themeable); ok {
+		c.SetTheme(th)
+	}
+}
+
+func (w *aligner) Theme() theme.Theme {
+	return w.theme
 }
 
 func (w *aligner) Draw() {

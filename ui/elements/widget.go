@@ -13,6 +13,11 @@ type Widget interface {
 	Close()
 }
 
+type Themeable interface {
+	views.Widget
+	theme.Themeable
+}
+
 type NSNameWidget interface {
 	Widget
 	ID() nsname.NSName

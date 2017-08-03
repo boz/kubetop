@@ -7,28 +7,28 @@ import (
 	"github.com/gdamore/tcell/views"
 )
 
-type SelectableWidget interface {
+type Styleable interface {
 	views.Widget
-	theme.Themeable
+	SetStyle(tcell.Style)
 }
 
 type Sections interface {
 	views.Widget
 
-	Widgets() []SelectableWidget
+	Widgets() []Themeable
 
-	Append(SelectableWidget)
-	Prepend(SelectableWidget)
-	Remove(SelectableWidget)
-	InsertBefore(SelectableWidget, SelectableWidget)
-	InsertAfter(SelectableWidget, SelectableWidget)
+	Append(Themeable)
+	Prepend(Themeable)
+	Remove(Themeable)
+	InsertBefore(Themeable, Themeable)
+	InsertAfter(Themeable, Themeable)
 
-	Selected() SelectableWidget
+	Selected() Themeable
 }
 
 type sections struct {
 	panes
-	selected SelectableWidget
+	selected Themeable
 }
 
 func NewVSections(env util.Env, expand bool) Sections {
@@ -45,42 +45,42 @@ func NewSections(env util.Env, o views.Orientation, expand bool) Sections {
 	}
 }
 
-func (p *sections) Selected() SelectableWidget {
+func (p *sections) Selected() Themeable {
 	return p.selected
 }
 
-func (p *sections) Widgets() []SelectableWidget {
-	children := make([]SelectableWidget, 0, len(p.children))
+func (p *sections) Widgets() []Themeable {
+	children := make([]Themeable, 0, len(p.children))
 	for _, c := range p.children {
-		children = append(children, c.widget.(SelectableWidget))
+		children = append(children, c.widget.(Themeable))
 	}
 	return children
 }
 
-func (p *sections) Append(w SelectableWidget) {
+func (p *sections) Append(w Themeable) {
 	p.panes.Append(w)
 	p.afterAdd(w)
 }
 
-func (p *sections) Prepend(w SelectableWidget) {
+func (p *sections) Prepend(w Themeable) {
 	p.panes.Prepend(w)
 	p.afterAdd(w)
 }
 
-func (p *sections) Remove(w SelectableWidget) {
+func (p *sections) Remove(w Themeable) {
 	if p.selected == nil || p.selected != w {
 		p.panes.Remove(w)
 		return
 	}
 	for idx, c := range p.children {
-		if p.selected != c.widget.(SelectableWidget) {
+		if p.selected != c.widget.(Themeable) {
 			continue
 		}
 		if idx >= len(p.children)-1 {
 			continue
 		}
 
-		wnext := p.children[idx+1].widget.(SelectableWidget)
+		wnext := p.children[idx+1].widget.(Themeable)
 
 		if wnext == p.selected {
 			continue
@@ -93,11 +93,11 @@ func (p *sections) Remove(w SelectableWidget) {
 	p.panes.Remove(w)
 }
 
-func (p *sections) InsertBefore(mark SelectableWidget, w SelectableWidget) {
+func (p *sections) InsertBefore(mark Themeable, w Themeable) {
 	p.panes.InsertBefore(mark, w)
 }
 
-func (p *sections) InsertAfter(mark SelectableWidget, w SelectableWidget) {
+func (p *sections) InsertAfter(mark Themeable, w Themeable) {
 	p.panes.InsertAfter(mark, w)
 }
 
@@ -145,7 +145,7 @@ func (p *sections) HandleEvent(ev tcell.Event) bool {
 	return false
 }
 
-func (p *sections) afterAdd(w SelectableWidget) {
+func (p *sections) afterAdd(w Themeable) {
 	if p.selected == nil && len(p.children) == 1 {
 		p.selectIndex(0)
 	}
@@ -183,6 +183,6 @@ func (p *sections) unselect() {
 }
 
 func (p *sections) selectIndex(idx int) {
-	p.selected = p.children[idx].widget.(SelectableWidget)
+	p.selected = p.children[idx].widget.(Themeable)
 	p.selected.SetTheme(theme.ThemeActive)
 }

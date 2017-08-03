@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/boz/kcache/types/pod"
+	"github.com/boz/kubetop/ui/elements"
 	"github.com/boz/kubetop/ui/elements/deflist"
 	"github.com/boz/kubetop/ui/theme"
 	"github.com/boz/kubetop/ui/util"
@@ -14,7 +15,7 @@ import (
 
 type Summary interface {
 	pod.UnitaryHandler
-	views.Widget
+	elements.Themeable
 }
 
 func NewSummary() Summary {
@@ -23,7 +24,16 @@ func NewSummary() Summary {
 
 type summary struct {
 	leftdl deflist.Widget
-	theme.ThemeableWidget
+	theme  theme.Theme
+}
+
+func (w *summary) SetTheme(th theme.Theme) {
+	w.theme = th
+	w.leftdl.SetTheme(th)
+}
+
+func (w *summary) Theme() theme.Theme {
+	return w.theme
 }
 
 func (w *summary) Draw() {
@@ -86,47 +96,11 @@ func (w *summary) drawObject(obj *v1.Pod) {
 	}
 
 	rows := []deflist.Row{
-		deflist.NewSimpleRow("Name", obj.GetName(), w.Theme().Deflist),
-		deflist.NewSimpleRow("Namespace", obj.GetNamespace(), w.Theme().Deflist),
-		deflist.NewSimpleRow("Node", obj.Spec.NodeName, w.Theme().Deflist),
-		deflist.NewSimpleRow("Owners", strings.Join(owners, ","), w.Theme().Deflist),
+		deflist.NewSimpleRow("Name", obj.GetName(), theme.LabelNormal),
+		deflist.NewSimpleRow("Namespace", obj.GetNamespace(), theme.LabelNormal),
+		deflist.NewSimpleRow("Node", obj.Spec.NodeName, theme.LabelNormal),
+		deflist.NewSimpleRow("Owners", strings.Join(owners, ","), theme.LabelNormal),
 	}
 
 	w.leftdl.SetRows(rows)
-
-	// obj.Status.StartTime
-
-	/*
-		text += "\n"
-
-		nready := 0
-		for _, cs := range obj.Status.ContainerStatuses {
-			if cs.Ready {
-				nready++
-			}
-
-		}
-
-		text += fmt.Sprintf("containers ( %v/%v ready ):\n", nready, len(obj.Status.ContainerStatuses))
-
-		text += "  name ready restarts state\n"
-
-		for _, cs := range obj.Status.ContainerStatuses {
-			text += fmt.Sprintf("  %v: %v %v ", cs.Name, cs.Ready, cs.RestartCount)
-
-			switch {
-			case cs.State.Waiting != nil:
-				text += "W: " + cs.State.Waiting.Reason
-			case cs.State.Running != nil:
-				text += "R: " + cs.State.Running.StartedAt.String()
-			case cs.State.Terminated != nil:
-				text += "T: " + cs.State.Terminated.FinishedAt.String()
-			default:
-				text += "W: <unknown>"
-			}
-			text += "\n"
-		}
-
-		w.SetText(text)
-	*/
 }

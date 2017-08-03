@@ -7,8 +7,8 @@ import (
 )
 
 type indexScreen struct {
-	content elements.Widget
-	ctx     elements.Context
+	layout elements.Sections
+	ctx    elements.Context
 }
 
 func NewIndex(ctx elements.Context, req elements.Request) (elements.Screen, error) {
@@ -19,19 +19,24 @@ func NewIndex(ctx elements.Context, req elements.Request) (elements.Screen, erro
 		return nil, err
 	}
 
-	content := newIndexTable(ctx, db)
-	index := &indexScreen{content, ctx}
-	content.Watch(index)
+	layout := elements.NewVSections(ctx.Env(), true)
+	table := newIndexTable(ctx, db)
+	layout.Append(table)
+
+	index := &indexScreen{layout, ctx}
+
+	layout.Watch(index)
+	table.Watch(index)
 
 	return elements.NewScreen(ctx, req, "Nodes", index), nil
 }
 
 func (w *indexScreen) Draw() {
-	w.content.Draw()
+	w.layout.Draw()
 }
 
 func (w *indexScreen) Resize() {
-	w.content.Resize()
+	w.layout.Resize()
 }
 
 func (w *indexScreen) HandleEvent(ev tcell.Event) bool {
@@ -40,21 +45,21 @@ func (w *indexScreen) HandleEvent(ev tcell.Event) bool {
 		w.Resize()
 		return true
 	}
-	return w.content.HandleEvent(ev)
+	return w.layout.HandleEvent(ev)
 }
 
 func (w *indexScreen) SetView(view views.View) {
-	w.content.SetView(view)
+	w.layout.SetView(view)
 }
 
 func (w *indexScreen) Size() (int, int) {
-	return w.content.Size()
+	return w.layout.Size()
 }
 
 func (w *indexScreen) Watch(handler tcell.EventHandler) {
-	w.content.Watch(handler)
+	w.layout.Watch(handler)
 }
 
 func (w *indexScreen) Unwatch(handler tcell.EventHandler) {
-	w.content.Unwatch(handler)
+	w.layout.Unwatch(handler)
 }

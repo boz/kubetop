@@ -176,7 +176,7 @@ func (w *mainWidget) helpWidget() views.Widget {
 	rows := make([]deflist.Row, 0, len(kbdNav))
 
 	for _, row := range kbdNav {
-		roww := deflist.NewSimpleRow(row.key, row.label, theme.ThemeActive.Deflist)
+		roww := deflist.NewSimpleRow(row.key, row.label, theme.LabelNormal)
 		rows = append(rows, roww)
 	}
 	return deflist.NewWidget(rows)

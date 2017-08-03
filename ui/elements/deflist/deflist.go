@@ -1,6 +1,7 @@
 package deflist
 
 import (
+	"github.com/boz/kubetop/ui/elements"
 	"github.com/boz/kubetop/ui/theme"
 	"github.com/gdamore/tcell"
 	"github.com/gdamore/tcell/views"
@@ -10,35 +11,36 @@ const padsize = 1
 
 type Widget interface {
 	views.Widget
+	theme.Themeable
 	SetRows([]Row)
 }
 
 type Row interface {
 	Term() views.Widget
 	Definition() views.Widget
+	SetTheme(theme.Theme)
 }
 
 type row struct {
-	term       views.Widget
-	definition views.Widget
+	term       elements.Styleable
+	definition elements.Styleable
+	variant    theme.LabelVariant
+	theme      theme.Theme
 }
 
-func NewSimpleRow(termtxt, deftxt string, theme theme.DeflistTheme) Row {
+func NewSimpleRow(termtxt, deftxt string, lv theme.LabelVariant) Row {
 	termw := views.NewText()
 	termw.SetAlignment(views.HAlignLeft)
 	termw.SetText(termtxt)
-	termw.SetStyle(theme.Term.Normal)
 
 	defw := views.NewText()
 	defw.SetAlignment(views.HAlignLeft)
 	defw.SetText(deftxt)
-	termw.SetStyle(theme.Definition.Normal)
-
-	return NewRow(termw, defw)
+	return NewRow(termw, defw, lv)
 }
 
-func NewRow(term, definition views.Widget) Row {
-	return &row{term, definition}
+func NewRow(term, definition elements.Styleable, lv theme.LabelVariant) Row {
+	return &row{term: term, definition: definition, variant: lv}
 }
 
 func (r *row) Term() views.Widget {
@@ -49,11 +51,22 @@ func (r *row) Definition() views.Widget {
 	return r.definition
 }
 
+func (r *row) SetTheme(th theme.Theme) {
+	r.term.SetStyle(th.Deflist.Term.Get(r.variant))
+	r.definition.SetStyle(th.Deflist.Definition.Get(r.variant))
+	r.theme = th
+}
+
+func (r *row) Theme() theme.Theme {
+	return r.theme
+}
+
 type widget struct {
 	view   views.View
 	rows   []Row
 	width  int
 	height int
+	theme  theme.Theme
 	views.WidgetWatchers
 }
 
@@ -92,6 +105,17 @@ func (w *widget) HandleEvent(ev tcell.Event) bool {
 		}
 	}
 	return false
+}
+
+func (w *widget) SetTheme(th theme.Theme) {
+	w.theme = th
+	for _, row := range w.rows {
+		row.SetTheme(th)
+	}
+}
+
+func (w *widget) Theme() theme.Theme {
+	return w.theme
 }
 
 func (w *widget) SetView(view views.View) {
