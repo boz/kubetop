@@ -50,6 +50,13 @@ func NewEnv(out *os.File, level string) (Env, error) {
 	return &env{log, out}, nil
 }
 
+func TestEnv() Env {
+	log := logrus.New()
+	log.Level = logrus.DebugLevel
+	log.Out = os.Stderr
+	return &env{log, os.Stderr}
+}
+
 type env struct {
 	log logrus.FieldLogger
 	out *os.File

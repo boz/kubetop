@@ -2,6 +2,7 @@ package elements
 
 import (
 	"github.com/boz/kubetop/ui/theme"
+	"github.com/boz/kubetop/util"
 	"github.com/gdamore/tcell"
 	"github.com/gdamore/tcell/views"
 )
@@ -11,7 +12,7 @@ type SelectableWidget interface {
 	theme.Themeable
 }
 
-type Panels interface {
+type Sections interface {
 	views.Widget
 
 	Widgets() []SelectableWidget
@@ -25,30 +26,30 @@ type Panels interface {
 	Selected() SelectableWidget
 }
 
-type panels struct {
+type sections struct {
 	panes
 	selected SelectableWidget
 }
 
-func NewVPanels(expand bool) Panels {
-	return NewPanels(views.Vertical, expand)
+func NewVSections(env util.Env, expand bool) Sections {
+	return NewSections(env, views.Vertical, expand)
 }
 
-func NewHPanels(expand bool) Panels {
-	return NewPanels(views.Horizontal, expand)
+func NewHSections(env util.Env, expand bool) Sections {
+	return NewSections(env, views.Horizontal, expand)
 }
 
-func NewPanels(o views.Orientation, expand bool) Panels {
-	return &panels{
-		panes: panes{orientation: o, expand: expand},
+func NewSections(env util.Env, o views.Orientation, expand bool) Sections {
+	return &sections{
+		panes: panes{orientation: o, expand: expand, env: env},
 	}
 }
 
-func (p *panels) Selected() SelectableWidget {
+func (p *sections) Selected() SelectableWidget {
 	return p.selected
 }
 
-func (p *panels) Widgets() []SelectableWidget {
+func (p *sections) Widgets() []SelectableWidget {
 	children := make([]SelectableWidget, 0, len(p.children))
 	for _, c := range p.children {
 		children = append(children, c.widget.(SelectableWidget))
@@ -56,17 +57,17 @@ func (p *panels) Widgets() []SelectableWidget {
 	return children
 }
 
-func (p *panels) Append(w SelectableWidget) {
+func (p *sections) Append(w SelectableWidget) {
 	p.panes.Append(w)
 	p.afterAdd(w)
 }
 
-func (p *panels) Prepend(w SelectableWidget) {
+func (p *sections) Prepend(w SelectableWidget) {
 	p.panes.Prepend(w)
 	p.afterAdd(w)
 }
 
-func (p *panels) Remove(w SelectableWidget) {
+func (p *sections) Remove(w SelectableWidget) {
 	if p.selected == nil || p.selected != w {
 		p.panes.Remove(w)
 		return
@@ -92,15 +93,15 @@ func (p *panels) Remove(w SelectableWidget) {
 	p.panes.Remove(w)
 }
 
-func (p *panels) InsertBefore(mark SelectableWidget, w SelectableWidget) {
+func (p *sections) InsertBefore(mark SelectableWidget, w SelectableWidget) {
 	p.panes.InsertBefore(mark, w)
 }
 
-func (p *panels) InsertAfter(mark SelectableWidget, w SelectableWidget) {
+func (p *sections) InsertAfter(mark SelectableWidget, w SelectableWidget) {
 	p.panes.InsertAfter(mark, w)
 }
 
-func (p *panels) HandleEvent(ev tcell.Event) bool {
+func (p *sections) HandleEvent(ev tcell.Event) bool {
 
 	switch ev.(type) {
 	case *views.EventWidgetContent:
@@ -144,13 +145,16 @@ func (p *panels) HandleEvent(ev tcell.Event) bool {
 	return false
 }
 
-func (p *panels) afterAdd(w SelectableWidget) {
+func (p *sections) afterAdd(w SelectableWidget) {
 	if p.selected == nil && len(p.children) == 1 {
 		p.selectIndex(0)
 	}
+	if p.selected != w {
+		w.SetTheme(theme.ThemeInactive)
+	}
 }
 
-func (p *panels) selectNext() {
+func (p *sections) selectNext() {
 
 	if p.selected == nil {
 		if len(p.children) > 0 {
@@ -170,7 +174,7 @@ func (p *panels) selectNext() {
 	}
 }
 
-func (p *panels) unselect() {
+func (p *sections) unselect() {
 	if p.selected == nil {
 		return
 	}
@@ -178,7 +182,7 @@ func (p *panels) unselect() {
 	p.selected = nil
 }
 
-func (p *panels) selectIndex(idx int) {
+func (p *sections) selectIndex(idx int) {
 	p.selected = p.children[idx].widget.(SelectableWidget)
 	p.selected.SetTheme(theme.ThemeActive)
 }

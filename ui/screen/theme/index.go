@@ -11,7 +11,7 @@ import (
 
 func NewIndex(ctx elements.Context, req elements.Request) (elements.Screen, error) {
 
-	layout := elements.NewVPanes(true)
+	layout := elements.NewVPanes(ctx.Env(), true)
 
 	layout.Append(newIndexBar("app header"))
 	layout.Append(newFieldBar("bar", theme.AppHeader.Bar))

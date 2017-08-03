@@ -5,7 +5,6 @@ import (
 
 	"github.com/boz/kubetop/ui/elements"
 	"github.com/boz/kubetop/ui/elements/table"
-	"github.com/boz/kubetop/ui/theme"
 	eview "github.com/boz/kubetop/ui/view/event"
 	pview "github.com/boz/kubetop/ui/view/pod"
 	sview "github.com/boz/kubetop/ui/view/service"
@@ -28,46 +27,37 @@ func NewShow(ctx elements.Context, req elements.NSNameRequest) (elements.Screen,
 		return nil, err
 	}
 
-	layout := elements.NewVPanels(true)
+	layout := elements.NewVSections(ctx.Env(), true)
 
-	containerw := showContainersPanel(ctx, ds)
+	containerw := showContainersSection(ctx, ds)
 	layout.Append(containerw)
 
-	servicesw := showServicesPanel(ctx, ds)
+	servicesw := showServicesSection(ctx, ds)
 	layout.Append(servicesw)
 
-	eventsw := showEventsPanel(ctx, ds)
+	eventsw := showEventsSection(ctx, ds)
 	layout.Append(eventsw)
 
 	return elements.NewScreen(ctx, req, fmt.Sprintf("Pod %v", req.NSName()), layout), nil
 }
 
-func showContainersPanel(ctx elements.Context, ds *showDS) elements.SelectableWidget {
+func showContainersSection(ctx elements.Context, ds *showDS) elements.Section {
 	ctx = ctx.New("pod/show/containers")
 	content := table.NewWidget(ctx.Env(), pview.ContainersTableColumns(), true)
 	pview.MonitorUnitary(ctx, ds.pods, pview.NewContainersTable(content))
-	return newPanel("Containers", content)
+	return elements.NewSection(ctx.Env(), "Containers", content)
 }
 
-func showServicesPanel(ctx elements.Context, ds *showDS) elements.SelectableWidget {
+func showServicesSection(ctx elements.Context, ds *showDS) elements.Section {
 	ctx = ctx.New("pod/show/services")
 	content := table.NewWidget(ctx.Env(), sview.TableColumns(), true)
 	sview.Monitor(ctx, ds.services, sview.NewTable(content))
-	return newPanel("Services", content)
+	return elements.NewSection(ctx.Env(), "Services", content)
 }
 
-func showEventsPanel(ctx elements.Context, ds *showDS) elements.SelectableWidget {
+func showEventsSection(ctx elements.Context, ds *showDS) elements.Section {
 	ctx = ctx.New("pod/show/events")
 	content := table.NewWidget(ctx.Env(), eview.TableColumns(), true)
 	eview.Monitor(ctx, ds.events, eview.NewTable(content))
-	return newPanel("Events", content)
-}
-
-func newPanel(title string, content views.Widget) elements.SelectableWidget {
-	titlew := views.NewTextBar()
-	titlew.SetCenter(title, theme.Base)
-	layout := elements.NewVPanes(false)
-	layout.Append(titlew)
-	layout.Append(content)
-	return layout
+	return elements.NewSection(ctx.Env(), "Events", content)
 }

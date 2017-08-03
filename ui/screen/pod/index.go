@@ -9,8 +9,7 @@ import (
 )
 
 type indexScreen struct {
-	layout  elements.Panels
-	table   elements.Widget
+	layout  elements.Sections
 	summary elements.NSNameWidget
 	ctx     elements.Context
 	views.WidgetWatchers
@@ -26,12 +25,11 @@ func NewIndex(ctx elements.Context, req elements.Request) (elements.Screen, erro
 
 	table := newIndexTable(ctx, ds.pods)
 
-	layout := elements.NewVPanels(true)
+	layout := elements.NewVSections(ctx.Env(), true)
 	layout.Append(table)
 
 	index := &indexScreen{
 		layout: layout,
-		table:  table,
 		ctx:    ctx,
 	}
 
@@ -70,7 +68,7 @@ func (w *indexScreen) HandleEvent(ev tcell.Event) bool {
 			}
 		}
 	}
-	return w.table.HandleEvent(ev)
+	return w.layout.HandleEvent(ev)
 }
 
 func (w *indexScreen) SetView(view views.View) {

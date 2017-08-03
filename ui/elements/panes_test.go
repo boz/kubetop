@@ -4,17 +4,19 @@ import (
 	"testing"
 
 	"github.com/boz/kubetop/ui/elements"
+	"github.com/boz/kubetop/util"
 	"github.com/gdamore/tcell/views"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestPanesAppend(t *testing.T) {
+	env := util.TestEnv()
 	w1 := views.NewSpacer()
 	w2 := views.NewSpacer()
 	w3 := views.NewSpacer()
 
 	{
-		p := elements.NewVPanes(true)
+		p := elements.NewVPanes(env, true)
 
 		p.Append(w1)
 		p.Append(w2)
@@ -25,12 +27,13 @@ func TestPanesAppend(t *testing.T) {
 }
 
 func TestPanesPrepend(t *testing.T) {
+	env := util.TestEnv()
 	w1 := views.NewSpacer()
 	w2 := views.NewSpacer()
 	w3 := views.NewSpacer()
 
 	{
-		p := elements.NewVPanes(true)
+		p := elements.NewVPanes(env, true)
 
 		p.Prepend(w1)
 		p.Prepend(w2)
@@ -41,12 +44,13 @@ func TestPanesPrepend(t *testing.T) {
 }
 
 func TestPanesRemove(t *testing.T) {
+	env := util.TestEnv()
 	w1 := views.NewSpacer()
 	w2 := views.NewSpacer()
 	w3 := views.NewSpacer()
 
 	{
-		p := elements.NewVPanes(true)
+		p := elements.NewVPanes(env, true)
 		p.Append(w1)
 		p.Append(w2)
 		p.Append(w3)
@@ -64,7 +68,7 @@ func TestPanesRemove(t *testing.T) {
 	}
 
 	{
-		p := elements.NewVPanes(true)
+		p := elements.NewVPanes(env, true)
 		p.Append(w1)
 		p.Append(w2)
 		p.Append(w3)
@@ -74,7 +78,7 @@ func TestPanesRemove(t *testing.T) {
 	}
 
 	{
-		p := elements.NewVPanes(true)
+		p := elements.NewVPanes(env, true)
 		p.Append(w1)
 		p.Append(w2)
 		p.Append(w3)
@@ -85,19 +89,20 @@ func TestPanesRemove(t *testing.T) {
 }
 
 func TestPanesInsertBefore(t *testing.T) {
+	env := util.TestEnv()
 	w1 := views.NewSpacer()
 	w2 := views.NewSpacer()
 	w3 := views.NewSpacer()
 
 	{
-		p := elements.NewVPanes(true)
+		p := elements.NewVPanes(env, true)
 		p.InsertBefore(w1, w1)
 
 		assert.Empty(t, p.Widgets())
 	}
 
 	{
-		p := elements.NewVPanes(true)
+		p := elements.NewVPanes(env, true)
 		p.Append(w1)
 
 		p.InsertBefore(w3, w2)
@@ -105,7 +110,7 @@ func TestPanesInsertBefore(t *testing.T) {
 	}
 
 	{
-		p := elements.NewVPanes(true)
+		p := elements.NewVPanes(env, true)
 		p.Append(w1)
 		p.Append(w3)
 
@@ -114,7 +119,7 @@ func TestPanesInsertBefore(t *testing.T) {
 	}
 
 	{
-		p := elements.NewVPanes(true)
+		p := elements.NewVPanes(env, true)
 		p.Append(w1)
 		p.Append(w3)
 
@@ -124,18 +129,19 @@ func TestPanesInsertBefore(t *testing.T) {
 }
 
 func TestPanesInsertAfter(t *testing.T) {
+	env := util.TestEnv()
 	w1 := views.NewSpacer()
 	w2 := views.NewSpacer()
 	w3 := views.NewSpacer()
 
 	{
-		p := elements.NewVPanes(true)
+		p := elements.NewVPanes(env, true)
 		p.InsertAfter(w1, w1)
 		assert.Empty(t, p.Widgets())
 	}
 
 	{
-		p := elements.NewVPanes(true)
+		p := elements.NewVPanes(env, true)
 		p.Append(w1)
 
 		p.InsertAfter(w3, w2)
@@ -143,7 +149,7 @@ func TestPanesInsertAfter(t *testing.T) {
 	}
 
 	{
-		p := elements.NewVPanes(true)
+		p := elements.NewVPanes(env, true)
 		p.Append(w1)
 		p.Append(w3)
 
@@ -152,7 +158,7 @@ func TestPanesInsertAfter(t *testing.T) {
 	}
 
 	{
-		p := elements.NewVPanes(true)
+		p := elements.NewVPanes(env, true)
 		p.Append(w1)
 		p.Append(w3)
 

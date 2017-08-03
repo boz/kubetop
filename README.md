@@ -36,6 +36,12 @@ Use `kubectl`'s default context:
 ./kubetop
 ```
 
+Write debug logs to `kubetop.log`:
+
+```sh
+./kubetop -v debug -l kubetop.log
+```
+
 Run as a kubernetes job:
 
 ```sh

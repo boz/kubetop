@@ -2,6 +2,7 @@ package elements
 
 import (
 	"github.com/boz/kubetop/ui/theme"
+	"github.com/boz/kubetop/util"
 	"github.com/gdamore/tcell"
 	"github.com/gdamore/tcell/views"
 )
@@ -36,19 +37,20 @@ type panes struct {
 
 	view  views.View
 	theme theme.Theme
+	env   util.Env
 	views.WidgetWatchers
 }
 
-func NewVPanes(expand bool) Panes {
-	return NewPanes(views.Vertical, expand)
+func NewVPanes(env util.Env, expand bool) Panes {
+	return NewPanes(env, views.Vertical, expand)
 }
 
-func NewHPanes(expand bool) Panes {
-	return NewPanes(views.Horizontal, expand)
+func NewHPanes(env util.Env, expand bool) Panes {
+	return NewPanes(env, views.Horizontal, expand)
 }
 
-func NewPanes(o views.Orientation, expand bool) Panes {
-	return &panes{orientation: o, expand: expand}
+func NewPanes(env util.Env, o views.Orientation, expand bool) Panes {
+	return &panes{orientation: o, expand: expand, env: env}
 }
 
 func (p *panes) SetTheme(th theme.Theme) {

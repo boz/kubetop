@@ -30,7 +30,7 @@ func newSummary(ctx elements.Context, id string) (elements.NSNameWidget, error) 
 	ctable := table.NewWidget(ctx.Env(), pview.ContainersTableColumns(), false)
 	pview.MonitorUnitary(ctx, ds.pods, pview.NewContainersTable(ctable))
 
-	layout := elements.NewHPanes(true)
+	layout := elements.NewHPanes(ctx.Env(), true)
 	layout.Append(psummary)
 	layout.Append(elements.AlignRight(ctable))
 
