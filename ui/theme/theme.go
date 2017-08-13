@@ -25,113 +25,108 @@ var (
 
 	AppHeader = AppHeaderTheme{
 		Bar: Base.
-			Background(tcell.ColorTeal).
-			Foreground(tcell.ColorGray),
+			Background(tcell.Color23).
+			Foreground(tcell.ColorWhite),
 		Action: Base.
-			Background(tcell.ColorTeal).
+			Background(tcell.Color23).
 			Foreground(tcell.ColorRed),
 	}
 
 	Popup = PopupTheme{
-		Normal:  Base.Foreground(tcell.ColorSeashell).Bold(true),
-		Success: Base.Foreground(tcell.ColorSpringGreen).Bold(true),
-		Warn:    Base.Foreground(tcell.ColorGold).Bold(true),
-		Error:   Base.Foreground(tcell.ColorCrimson).Bold(true),
+		Normal:  Base.Foreground(tcell.Color23).Bold(true),
+		Success: Base.Foreground(tcell.Color42).Bold(true),
+		Warn:    Base.Foreground(tcell.Color220).Bold(true),
+		Error:   Base.Foreground(tcell.Color166).Bold(true),
 	}
 
-	apbase = Base.
-		Foreground(tcell.ColorWhiteSmoke)
+	apbase      = Base
 	ThemeActive = Theme{
-		Base: apbase,
-		Title: Base.
-			Background(tcell.ColorAquaMarine).
-			Foreground(tcell.ColorBlack).Bold(true),
+		Base:  apbase,
+		Title: Base.Background(tcell.Color21).Bold(true),
 		Label: LabelTheme{
-			Normal:  apbase.Foreground(tcell.ColorSeashell).Bold(true),
-			Success: apbase.Foreground(tcell.ColorSpringGreen).Bold(true),
-			Warn:    apbase.Foreground(tcell.ColorGold).Bold(true),
-			Error:   apbase.Foreground(tcell.ColorCrimson).Bold(true),
+			Normal:  apbase.Foreground(tcell.Color255).Bold(true),
+			Success: apbase.Foreground(tcell.Color42).Bold(true),
+			Warn:    apbase.Foreground(tcell.Color220).Bold(true),
+			Error:   apbase.Foreground(tcell.Color196).Bold(true),
 		},
 		Table: TableTheme{
 			TH: LabelTheme{
 				Normal:  apbase.Bold(true),
-				Success: apbase.Foreground(tcell.ColorSpringGreen).Bold(true),
-				Warn:    apbase.Foreground(tcell.ColorGold).Bold(true),
-				Error:   apbase.Foreground(tcell.ColorCrimson).Bold(true),
+				Success: apbase.Foreground(tcell.Color42).Bold(true),
+				Warn:    apbase.Foreground(tcell.Color220).Bold(true),
+				Error:   apbase.Foreground(tcell.Color196).Bold(true),
 			},
 			TD: LabelTheme{
 				Normal:  apbase,
-				Success: apbase.Foreground(tcell.ColorSpringGreen),
-				Warn:    apbase.Foreground(tcell.ColorGold),
-				Error:   apbase.Foreground(tcell.ColorCrimson),
+				Success: apbase.Foreground(tcell.Color42),
+				Warn:    apbase.Foreground(tcell.Color220),
+				Error:   apbase.Foreground(tcell.Color196),
 			},
 			TDSelected: LabelTheme{
-				Normal:  apbase.Reverse(true),
-				Success: apbase.Foreground(tcell.ColorSpringGreen).Reverse(true),
-				Warn:    apbase.Foreground(tcell.ColorGold).Reverse(true),
-				Error:   apbase.Foreground(tcell.ColorCrimson).Reverse(true),
+				Normal:  apbase.Background(tcell.Color241).Bold(true),
+				Success: apbase.Foreground(tcell.Color42).Background(tcell.Color241).Bold(true),
+				Warn:    apbase.Foreground(tcell.Color220).Background(tcell.Color241).Bold(true),
+				Error:   apbase.Foreground(tcell.Color196).Background(tcell.Color241).Bold(true),
 			},
 		},
 		Deflist: DeflistTheme{
 			Term: LabelTheme{
 				Normal:  apbase.Bold(true),
-				Success: apbase.Foreground(tcell.ColorSpringGreen).Bold(true),
-				Warn:    apbase.Foreground(tcell.ColorGold).Bold(true),
-				Error:   apbase.Foreground(tcell.ColorCrimson).Bold(true),
+				Success: apbase.Foreground(tcell.Color42).Bold(true),
+				Warn:    apbase.Foreground(tcell.Color220).Bold(true),
+				Error:   apbase.Foreground(tcell.Color196).Bold(true),
 			},
 			Definition: LabelTheme{
 				Normal:  apbase,
-				Success: apbase.Foreground(tcell.ColorSpringGreen),
-				Warn:    apbase.Foreground(tcell.ColorGold),
-				Error:   apbase.Foreground(tcell.ColorCrimson),
+				Success: apbase.Foreground(tcell.Color42),
+				Warn:    apbase.Foreground(tcell.Color220),
+				Error:   apbase.Foreground(tcell.Color196),
 			},
 		},
 	}
 
-	ipbase        = Base.Foreground(tcell.ColorDarkSlateGrey)
+	ipbase        = Base.Foreground(tcell.Color242)
 	ThemeInactive = Theme{
-		Base: ipbase,
-		Title: ipbase.
-			Background(tcell.ColorDimGrey).
-			Foreground(tcell.ColorAntiqueWhite),
+		Base:  ipbase,
+		Title: ipbase.Background(tcell.Color18).Bold(true),
 		Label: LabelTheme{
 			Normal:  ipbase,
-			Success: ipbase.Foreground(tcell.ColorDarkOliveGreen),
-			Warn:    ipbase.Foreground(tcell.ColorSandyBrown),
-			Error:   ipbase.Foreground(tcell.ColorLightCoral),
+			Success: ipbase.Foreground(tcell.Color34),
+			Warn:    ipbase.Foreground(tcell.Color221),
+			Error:   ipbase.Foreground(tcell.Color166),
 		},
 		Table: TableTheme{
 			TH: LabelTheme{
 				Normal:  ipbase.Bold(true),
-				Success: ipbase.Foreground(tcell.ColorDarkOliveGreen).Bold(true),
-				Warn:    ipbase.Foreground(tcell.ColorSandyBrown).Bold(true),
-				Error:   ipbase.Foreground(tcell.ColorLightCoral).Bold(true),
+				Success: ipbase.Foreground(tcell.Color34).Bold(true),
+				Warn:    ipbase.Foreground(tcell.Color221).Bold(true),
+				Error:   ipbase.Foreground(tcell.Color166).Bold(true),
 			},
 			TD: LabelTheme{
 				Normal:  ipbase,
-				Success: ipbase.Foreground(tcell.ColorDarkOliveGreen),
-				Warn:    ipbase.Foreground(tcell.ColorSandyBrown),
-				Error:   ipbase.Foreground(tcell.ColorLightCoral),
+				Success: ipbase.Foreground(tcell.Color34),
+				Warn:    ipbase.Foreground(tcell.Color221),
+				Error:   ipbase.Foreground(tcell.Color166),
 			},
 			TDSelected: LabelTheme{
-				Normal:  ipbase.Reverse(true),
-				Success: ipbase.Foreground(tcell.ColorDarkOliveGreen).Reverse(true),
-				Warn:    ipbase.Foreground(tcell.ColorSandyBrown).Reverse(true),
-				Error:   ipbase.Foreground(tcell.ColorLightCoral).Reverse(true),
+				Normal:  ipbase.Background(tcell.Color235).Bold(true),
+				Success: ipbase.Foreground(tcell.Color34).Background(tcell.Color235).Bold(true),
+				Warn:    ipbase.Foreground(tcell.Color221).Background(tcell.Color235).Bold(true),
+				Error:   ipbase.Foreground(tcell.Color166).Background(tcell.Color235).Bold(true),
 			},
 		},
 		Deflist: DeflistTheme{
 			Term: LabelTheme{
 				Normal:  ipbase.Bold(true),
-				Success: ipbase.Foreground(tcell.ColorDarkOliveGreen).Bold(true),
-				Warn:    ipbase.Foreground(tcell.ColorSandyBrown).Bold(true),
-				Error:   ipbase.Foreground(tcell.ColorLightCoral).Bold(true),
+				Success: ipbase.Foreground(tcell.Color34).Bold(true),
+				Warn:    ipbase.Foreground(tcell.Color221).Bold(true),
+				Error:   ipbase.Foreground(tcell.Color166).Bold(true),
 			},
 			Definition: LabelTheme{
 				Normal:  ipbase,
-				Success: ipbase.Foreground(tcell.ColorDarkOliveGreen),
-				Warn:    ipbase.Foreground(tcell.ColorSandyBrown),
-				Error:   ipbase.Foreground(tcell.ColorLightCoral),
+				Success: ipbase.Foreground(tcell.Color34),
+				Warn:    ipbase.Foreground(tcell.Color221),
+				Error:   ipbase.Foreground(tcell.Color166),
 			},
 		},
 	}
