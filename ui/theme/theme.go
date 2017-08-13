@@ -13,6 +13,8 @@ type Themeable interface {
 	SetTheme(Theme)
 }
 
+// :runtime syntax/colortest.vim
+
 var (
 	LabelVariants = []LabelVariant{
 		LabelNormal,

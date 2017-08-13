@@ -117,21 +117,13 @@ func (p *sections) HandleEvent(ev tcell.Event) bool {
 	}
 
 	if ev, ok := ev.(*tcell.EventKey); ok {
-		if p.selected != nil {
-			switch ev.Key() {
-			case tcell.KeyEsc:
-				p.unselect()
-				return true
-			case tcell.KeyTab:
-				p.selectNext()
-				return true
-			}
-		} else {
-			switch ev.Key() {
-			case tcell.KeyTab:
-				p.selectNext()
-				return true
-			}
+		switch ev.Key() {
+		case tcell.KeyTab, tcell.KeyCtrlJ:
+			p.selectNext()
+			return true
+		case tcell.KeyCtrlK:
+			p.selectPrev()
+			return true
 		}
 		return false
 	}
@@ -168,6 +160,25 @@ func (p *sections) selectNext() {
 	for idx, child := range p.children {
 		if p.selected == child.widget {
 			idx = (idx + 1) % len(p.children)
+			p.selectIndex(idx)
+			return
+		}
+	}
+}
+
+func (p *sections) selectPrev() {
+	if p.selected == nil {
+		if sz := len(p.children); sz > 0 {
+			p.selectIndex(sz - 1)
+		}
+		return
+	}
+
+	p.selected.SetTheme(theme.ThemeInactive)
+
+	for idx, child := range p.children {
+		if p.selected == child.widget {
+			idx = (idx - 1 + len(p.children)) % len(p.children)
 			p.selectIndex(idx)
 			return
 		}
