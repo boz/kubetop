@@ -53,6 +53,9 @@ Build an image locally and test:
 ```sh
 make image-minikube
 kubectl run -it --rm --restart=Never --image=kubetop kubetop
+
+# get better colors
+kubectl run -it --rm --restart=Never --image=kubetop --env="TERM=$TERM" kubetop
 ```
 
 There are kube definitions in [_example](https://github.com/boz/kubetop/tree/master/_example) for dev testing

@@ -38,7 +38,7 @@ func NewShow(ctx elements.Context, req elements.NSNameRequest) (elements.Screen,
 	eventsw := showEventsSection(ctx, ds)
 	layout.Append(eventsw)
 
-	return elements.NewScreen(ctx, req, fmt.Sprintf("Pod %v", req.NSName()), layout), nil
+	return elements.NewScreen(ctx, req, fmt.Sprintf("Pod %v", req.NSName()), layout, nil), nil
 }
 
 func showContainersSection(ctx elements.Context, ds *showDS) elements.Section {

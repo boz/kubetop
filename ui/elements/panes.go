@@ -102,6 +102,7 @@ func (p *panes) SetView(view views.View) {
 	for _, c := range p.children {
 		c.view.SetView(view)
 	}
+	p.Resize()
 }
 
 func (p *panes) Size() (int, int) {

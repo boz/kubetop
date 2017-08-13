@@ -103,6 +103,12 @@ func (p *popup) Draw() {
 		p.view.SetContent(p.xoff+p.width-1, p.yoff+y, boxBorderRight, nil, p.style)
 	}
 
+	for x := 1; x < p.width-1; x++ {
+		for y := 1; y < p.height-1; y++ {
+			p.view.SetContent(p.xoff+x, p.yoff+y, ' ', nil, p.style)
+		}
+	}
+
 	if p.content != nil {
 		p.content.Draw()
 	}

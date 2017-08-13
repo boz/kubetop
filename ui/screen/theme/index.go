@@ -43,7 +43,7 @@ func NewIndex(ctx elements.Context, req elements.Request) (elements.Screen, erro
 
 	layout.Append(colorwheel())
 
-	return elements.NewScreen(ctx, req, "Theme", layout), nil
+	return elements.NewScreen(ctx, req, "Theme", layout, nil), nil
 }
 
 func newIndexBar(name string) views.Widget {

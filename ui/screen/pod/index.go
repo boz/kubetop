@@ -2,6 +2,7 @@ package pod
 
 import (
 	"github.com/boz/kubetop/ui/elements"
+	"github.com/boz/kubetop/ui/elements/help"
 	"github.com/boz/kubetop/ui/elements/table"
 	"github.com/boz/kubetop/ui/screen/requests"
 	"github.com/gdamore/tcell"
@@ -36,7 +37,15 @@ func NewIndex(ctx elements.Context, req elements.Request) (elements.Screen, erro
 	layout.Watch(index)
 	table.Watch(index)
 
-	return elements.NewScreen(ctx, req, "Pods", index), nil
+	hsections := []views.Widget{
+		help.NewSection(ctx.Env(), "Pod List", []help.Key{
+			help.NewKey("ctrl-k", "Kill pod"),
+			help.NewKey("ctrl-l", "View logs"),
+			help.NewKey("enter", "View details"),
+		}),
+	}
+
+	return elements.NewScreen(ctx, req, "Pods", index, hsections), nil
 }
 
 func (w *indexScreen) Draw() {

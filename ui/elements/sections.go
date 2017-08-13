@@ -118,12 +118,16 @@ func (p *sections) HandleEvent(ev tcell.Event) bool {
 
 	if ev, ok := ev.(*tcell.EventKey); ok {
 		switch ev.Key() {
-		case tcell.KeyTab, tcell.KeyCtrlJ:
+		case tcell.KeyTab:
 			p.selectNext()
 			return true
-		case tcell.KeyCtrlK:
-			p.selectPrev()
-			return true
+		case tcell.KeyRune:
+			switch ev.Rune() {
+			case '{':
+				p.selectPrev()
+			case '}':
+				p.selectNext()
+			}
 		}
 		return false
 	}

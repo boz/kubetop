@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/boz/kubetop/ui/elements"
-	"github.com/boz/kubetop/ui/elements/deflist"
+	"github.com/boz/kubetop/ui/elements/help"
 	"github.com/boz/kubetop/ui/screen"
 	"github.com/boz/kubetop/ui/screen/requests"
 	"github.com/boz/kubetop/ui/theme"
@@ -19,7 +19,7 @@ type mainWidget struct {
 
 	navbar *views.SimpleStyledTextBar
 
-	content elements.Widget
+	screen elements.Screen
 
 	popupper elements.Popupper
 
@@ -37,18 +37,6 @@ func newNavBar() *views.SimpleStyledTextBar {
 	return bar
 }
 
-var kbdNav = []struct {
-	key   string
-	label string
-}{
-	{"?", "Help"},
-	{"P", "Pods"},
-	{"S", "Services"},
-	{"N", "Nodes"},
-	{"E", "Events"},
-	{"Q", "Quit"},
-}
-
 func newMainStatus() views.Widget {
 	bar := views.NewSimpleStyledTextBar()
 	bar.SetStyle(theme.AppHeader.Bar)
@@ -56,10 +44,7 @@ func newMainStatus() views.Widget {
 	bar.RegisterLeftStyle('N', theme.AppHeader.Bar)
 	bar.RegisterLeftStyle('A', theme.AppHeader.Action)
 
-	leftNav := ""
-	for _, nav := range kbdNav {
-		leftNav += fmt.Sprintf(" %%N[%%A%v%%N] %v", nav.key, nav.label)
-	}
+	leftNav := " %N[%A?%N] Help"
 	bar.SetLeft(leftNav)
 
 	bar.RegisterRightStyle('N', theme.AppHeader.Bar)
@@ -158,13 +143,29 @@ func (w *mainWidget) HandleNavigationRequest(req elements.Request) {
 }
 
 func (w *mainWidget) setContent(child elements.Screen) {
-	if cur := w.content; cur != nil {
+	if cur := w.screen; cur != nil {
 		cur.Close()
 	}
-	w.content = child
+	w.screen = child
 	w.panel.SetContent(child)
 	w.navbar.SetCenter(child.State().Title())
 	w.Resize()
+}
+
+func (w *mainWidget) helpSections() []views.Widget {
+	return []views.Widget{
+		help.NewSection(w.ctx.Env(), "Navigation", []help.Key{
+			help.NewKey("{/}", "Move up/down section"),
+			help.NewKey("tab", "Move down section"),
+			help.NewKey("j/k", "Move up/down list"),
+			help.NewKey("esc", "Unselect list"),
+			help.NewKey("P", "View Pods"),
+			help.NewKey("S", "View Services"),
+			help.NewKey("N", "View Nodes"),
+			help.NewKey("E", "View Events"),
+			help.NewKey("Q", "Quit"),
+		}),
+	}
 }
 
 func (w *mainWidget) openHelp() {
@@ -173,13 +174,19 @@ func (w *mainWidget) openHelp() {
 }
 
 func (w *mainWidget) helpWidget() views.Widget {
-	rows := make([]deflist.Row, 0, len(kbdNav))
-
-	for _, row := range kbdNav {
-		roww := deflist.NewSimpleRow(row.key, row.label, theme.LabelNormal)
-		rows = append(rows, roww)
+	helpw := elements.NewVPanes(w.ctx.Env(), false)
+	for _, h := range w.helpSections() {
+		helpw.Append(h)
 	}
-	return deflist.NewWidget(rows)
+
+	if screen := w.screen; screen != nil {
+		for _, h := range screen.Help() {
+			helpw.Append(h)
+		}
+	}
+
+	helpw.SetTheme(theme.ThemeActive)
+	return helpw
 }
 
 func (w *mainWidget) SetView(view views.View) {

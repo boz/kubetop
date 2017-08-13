@@ -28,7 +28,7 @@ func NewIndex(ctx elements.Context, req elements.Request) (elements.Screen, erro
 	layout.Watch(index)
 	table.Watch(index)
 
-	return elements.NewScreen(ctx, req, "Events", index), nil
+	return elements.NewScreen(ctx, req, "Events", index, nil), nil
 }
 
 func (w *indexScreen) Draw() {
